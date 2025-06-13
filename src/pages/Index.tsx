@@ -1,16 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../authService';
 
 const Index: React.FC = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem('access_token');
-
-    useEffect(() => {
-        if (!token) {
-            navigate('/login');
-        }
-    }, [token, navigate]);
 
     const handleLogout = async () => {
         await logout();
@@ -19,13 +13,29 @@ const Index: React.FC = () => {
         navigate('/login');
     };
 
-    if (!token) return null;
+    const handleLogin = () => {
+        navigate('/login');
+    };
+    const handleRegister = () => {
+        navigate('/register');
+    };
 
     return (
         <div>
             <h1>Trang chủ</h1>
-            <p>Chào mừng bạn đã đăng nhập!</p>
-            <button onClick={handleLogout}>Đăng xuất</button>
+
+            {token ? (
+                <>
+                    <p>Chào mừng bạn đã đăng nhập!</p>
+                    <button onClick={handleLogout}>Đăng xuất</button>
+                </>
+            ) : (
+                <>
+                    <p>Chào mừng bạn đến với trang chủ!</p>
+                    <button onClick={handleLogin}>Đăng nhập</button>
+                    <button onClick={handleRegister}>Đăng ký</button>
+                </>
+            )}
         </div>
     );
 };
