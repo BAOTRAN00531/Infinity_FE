@@ -5,6 +5,9 @@ import Index from "./pages/Index";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import VerifyConfirmation from "./pages/VerifyConfirmation";
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyOtp from "./pages/VerifyOtp";
+import ResetPassword from "./pages/ResetPassword";
 
 const VerifyEmail: React.FC = () => {
     const location = useLocation();
@@ -42,6 +45,9 @@ const App: React.FC = () => {
                 <Route path="/register" element={<Register />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/verify-confirmation" element={<VerifyConfirmation />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/verify-otp" element={<VerifyOtp />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 {/* Các route khác */}
             </Routes>
         </Router>

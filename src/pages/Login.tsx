@@ -52,7 +52,11 @@ const Login: React.FC = () => {
                 </div>
                 <button type="submit">Đăng nhập</button>
             </form>
-            <p>Chưa có tài khoản? <a href="/register">Đăng ký</a></p>
+            <p>
+                Chưa có tài khoản? <a href="/register">Đăng ký</a>
+                <br />
+                <a href="/forgot-password">Quên mật khẩu?</a>
+            </p>
         </div>
     );
 };
