@@ -22,8 +22,11 @@ const Index: React.FC = () => {
 
     return (
         <div>
-            <h1>Trang chủ</h1>
+          day klaf
 
+            <h1>Trang chủ</h1>
+            <b>Day la test----+++----</b>
+            <b>Day la test----+++----</b>
             {token ? (
                 <>
                     <p>Chào mừng bạn đã đăng nhập!</p>
