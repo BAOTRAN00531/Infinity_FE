@@ -22,8 +22,10 @@ const Index: React.FC = () => {
 
     return (
         <div>
-            <h1>Trang chủ</h1>
-
+          {/*test*/}
+            <h1>Trang chủ123</h1>
+          {/* end - test*/}
+          <h1>Trang chủ1</h1>
             {token ? (
                 <>
                     <p>Chào mừng bạn đã đăng nhập!</p>
