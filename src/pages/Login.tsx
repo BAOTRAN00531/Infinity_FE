@@ -32,25 +32,24 @@ export default function LoginPage() {
         <div className="bg-white dark:bg-gray-900 flex flex-col min-h-screen">
             <Header />
 
-            <div className="flex justify-end p-4">
-                <Link to="/register">
-                    <motion.button
-                        whileHover={{ scale: 1.04 }}
-                        whileTap={{ scale: 0.97 }}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="relative w-[140px] sm:w-[160px] h-[52px] sm:h-[60px] bg-[100%_100%] transition-transform"
-                        style={{
-                            backgroundImage: "url('/3d-button-3.png')",
-                            backgroundSize: "100% 100%",
-                        }}
+            <div className="absolute top-4 right-4 flex gap-3">
+
+
+                <motion.a
+                    href="/register"
+                    initial={{ y: -20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                >
+                    <button
+                        className="relative w-[120px] h-[50px] bg-[100%_100%]"
+                        style={{ backgroundImage: "url('/3d-button-3.png')", backgroundSize: "100% 100%" }}
                     >
-      <span className="absolute inset-0 flex items-center justify-center transform -translate-y-[14%] text-black font-bold text-sm sm:text-base tracking-wide">
-        Register
-      </span>
-                    </motion.button>
-                </Link>
+            <span className="absolute inset-0 flex items-center justify-center transform -translate-y-[14%] text-black font-semibold text-sm">
+              Register
+            </span>
+                    </button>
+                </motion.a>
             </div>
 
 
