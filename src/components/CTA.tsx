@@ -14,10 +14,10 @@ export default function CTA() {
         >
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white">Learn a language with Infinity</h2>
             <Button
-                className="mt-6 w-64 h-16 text-xl font-bold"
+                className="mt-6 w-64 h-16 text-xl font-bold "
                 style={{ backgroundImage: "url('/3d-button.png')", backgroundSize: "100% 100%" }}
             >
-                GET STARTED
+             <div className={"-translate-y-[14%]"}>GET STARTED</div>
             </Button>
             <img
                 src="/infinitylogo2-2.png"
@@ -49,7 +49,7 @@ export default function CTA() {
 //                 GET STARTED
 //             </Button>
 //             <img
-//                 src="/infinitylogo2-2.png"
+//                 src="/1infinitylogo2-2.png"
 //                 alt="Infinity Logo"
 //                 className="mx-auto mt-8 w-48 h-48 object-contain"
 //             />

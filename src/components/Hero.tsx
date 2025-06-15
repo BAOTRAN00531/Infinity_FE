@@ -31,13 +31,14 @@ export default function Hero() {
                         className="mt-6 w-full md:w-[400px] h-14 md:h-16 text-lg md:text-xl font-bold"
                         style={{ backgroundImage: "url('/3d-button-2.png')", backgroundSize: "100% 100%" }}
                     >
-                        Get started
+                        <span className={"-translate-y-[14%]"}>Get started</span>
                     </Button>
                     <Button
                         className="mt-4 w-full md:w-[400px] h-14 md:h-16 text-base md:text-lg"
                         style={{ backgroundImage: "url('/3d-button-3.png')", backgroundSize: "100% 100%" }}
                     >
-                        Let&apos;s go, I already have an account
+                        <span className={"-translate-y-[14%]"}>Let&apos;s go, I already have an account</span>
+
                     </Button>
                 </div>
             </div>
@@ -59,7 +60,7 @@ export default function Hero() {
 //         >
 //             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
 //                 <motion.img
-//                     src="/infinitylogo2-2.png"
+//                     src="/1infinitylogo2-2.png"
 //                     alt="Infinity Logo"
 //                     className="w-[400px] h-[400px] object-contain"
 //                     whileHover={{ scale: 1.05 }}
