@@ -1,76 +1,52 @@
-//them
+// Index.tsx
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
+import Hero from "../components/Hero";
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import Feature from "../components/Feature";
+import InfieFeature from "../components/InfieFeature";
+import CTA from "../components/CTA";
+import Footer from "../components/Footer";
 
-
-import Header from '../components/Header';
-import Hero from '../components/Hero';
-import LanguageSwitcher from '../components/LanguageSwitcher';
-import Feature from '../components/Feature';
-import CTA from '../components/CTA';
-import InfieFeature from '../components/InfieFeature';
-import Footer from '../components/Footer';
-
-
-//end
-
-
-
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { logout } from '../authService';
-
-
-
-
-const Index: React.FC = () => {
+export default function Index() {
     const navigate = useNavigate();
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem("access_token");
 
-    const handleLogout = async () => {
-        await logout();
-        localStorage.removeItem('access_token');
-        document.cookie = 'refresh_token=; Max-Age=0; path=/';
-        navigate('/login');
-    };
-
-    const handleLogin = () => {
-        navigate('/login');
-    };
-    const handleRegister = () => {
-        navigate('/register');
-    };
+    const handleLogin = () => navigate("/login");
+    const handleRegister = () => navigate("/register");
 
     return (
-        <div className="flex flex-col items-center bg-white">
-            <Header />
+        <main className="bg-white dark:bg-gray-900">
+            <Header
+                welcomeMessage={
+                    token ? "Chào mừng bạn đã đăng nhập!" : "Chào mừng bạn đến với trang chủ!"
+                }
+            />
+            {!token && (
+                <div className="max-w-4xl mx-auto py-6 px-6 text-center">
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button
+                            onClick={handleLogin}
+                            className="px-5 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                        >
+                            Đăng nhập
+                        </button>
+                        <button
+                            onClick={handleRegister}
+                            className="px-5 py-2 rounded bg-gray-600 text-white hover:bg-gray-700"
+                        >
+                            Đăng ký
+                        </button>
+                    </div>
+                </div>
+            )}
             <Hero />
             <LanguageSwitcher />
             <Feature />
-
             <InfieFeature />
             <CTA />
             <Footer />
-        </div>
-
-        // <div>
-        //   day klaf
-        //
-        //     <h1>Trang chủ</h1>
-        //     <b>Day la test----+++----</b>
-        //     <b>Day la test----+++----</b>
-        //     {token ? (
-        //         <>
-        //             <p>Chào mừng bạn đã đăng nhập!</p>
-        //             <button onClick={handleLogout}>Đăng xuất</button>
-        //         </>
-        //     ) : (
-        //         <>
-        //             <p>Chào mừng bạn đến với trang chủ!</p>
-        //             <button onClick={handleLogin}>Đăng nhập</button>
-        //             <button onClick={handleRegister}>Đăng ký</button>
-        //         </>
-        //     )}
-        // </div>
+        </main>
     );
-};
-
-export default Index;
+}
