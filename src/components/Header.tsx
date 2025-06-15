@@ -2,6 +2,7 @@
 import React from "react";
 import ThemeToggle from "./ThemeToggle";
 import { useNavigate } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 interface HeaderProps {
     welcomeMessage?: string;
@@ -20,12 +21,15 @@ export default function Header({ welcomeMessage }: HeaderProps) {
     return (
         <header className="w-full p-4 bg-white dark:bg-gray-900 shadow text-xl">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
+                <Link to="/">
                 <div className="flex items-center gap-4">
                     <img src="/infinity-1.png" alt="Logo" className="w-10 h-10" />
                     <span className="text-black dark:text-white tracking-widest">
             INFINITY
           </span>
                 </div>
+                </Link>
+
                 <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
                     <span>Site language: English</span>
                     <img src="/image-2-1.png" alt="Lang" className="w-5 h-5" />
