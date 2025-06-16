@@ -1,15 +1,21 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import {AnimatePresence, motion} from "framer-motion";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import Header from "../components/Header";
 import { Link } from "react-router-dom";
+import { FaEye, FaEyeSlash, FaSpinner } from "../components/lib/icon";
+
+import {login} from "../authService";
 export default function LoginPage() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ username: "", password: "" });
     const [error, setError] = useState("");
+    const [popupType, setPopupType] = useState<'success' | 'error'>('error');
+    const [showPassword, setShowPassword] = useState(false);
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -18,13 +24,29 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            // Gửi request đăng nhập ở đây
-            // const res = await login(formData)
-            // navigate("/")
+            const res = await login(formData);
+
+            // ✅ Lưu user info và token vào localStorage
+            localStorage.setItem("user", JSON.stringify(res.userp));
+            localStorage.setItem("token", res.access_token);
+
+            setError("Đăng nhập thành công.");
+            setPopupType("success");
+
+            setTimeout(() => {
+                navigate("/");
+            }, 1000);
         } catch (err) {
             setError("Đăng nhập thất bại. Vui lòng thử lại.");
+            setPopupType("error");
         }
+
+        setTimeout(() => {
+            setError("");
+        }, 3000);
     };
+
+
 
     return (
 
@@ -32,24 +54,22 @@ export default function LoginPage() {
         <div className="bg-white dark:bg-gray-900 flex flex-col min-h-screen">
             <Header />
 
-            <div className="absolute top-4 right-4 flex gap-3">
-
-
-                <motion.a
-                    href="/register"
+            <div className="relative mt-5">
+                <motion.button
                     initial={{ y: -20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.5, delay: 0.1 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    onClick={() => window.location.href = "/register"}
+                    className="absolute right-4 w-[120px] h-[50px]"
+                    style={{
+                        backgroundImage: "url('/3d-button-3.png')",
+                        backgroundSize: "100% 100%",
+                    }}
                 >
-                    <button
-                        className="relative w-[120px] h-[50px] bg-[100%_100%]"
-                        style={{ backgroundImage: "url('/3d-button-3.png')", backgroundSize: "100% 100%" }}
-                    >
-            <span className="absolute inset-0 flex items-center justify-center transform -translate-y-[14%] text-black font-semibold text-sm">
-              Register
-            </span>
-                    </button>
-                </motion.a>
+    <span className="absolute inset-0 flex items-center justify-center transform -translate-y-[14%] text-black font-semibold text-sm">
+      Register
+    </span>
+                </motion.button>
             </div>
 
 
@@ -59,8 +79,21 @@ export default function LoginPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
-
-
+                {/* POPUP THÔNG BÁO */}
+                <AnimatePresence>
+                    {error && (
+                        <motion.div
+                            initial={{ y: -100, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: -100, opacity: 0 }}
+                            className={`fixed top-4 px-6 py-3 rounded-xl shadow-lg z-50 text-white ${
+                                popupType === 'success' ? 'bg-green-500' : 'bg-red-500'
+                            }`}
+                        >
+                            {error}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
 
                 <h1 className="text-3xl sm:text-4xl font-bold text-center text-black dark:text-white mb-8 tracking-widest">
@@ -69,7 +102,7 @@ export default function LoginPage() {
 
 
 
-                {error && <p className="text-red-500 mb-4">{error}</p>}
+
 
                 <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
                     <Card className="bg-[#e4e1e1] dark:bg-gray-800 rounded-2xl border-none">
@@ -87,9 +120,9 @@ export default function LoginPage() {
                     </Card>
 
                     <Card className="bg-[#e4e1e1] dark:bg-gray-800 rounded-2xl border-none relative">
-                        <CardContent className="p-0 h-12 sm:h-[48px] flex items-center">
+                        <CardContent className="p-0 h-12 sm:h-[48px] flex items-center relative">
                             <Input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
@@ -97,15 +130,27 @@ export default function LoginPage() {
                                 className="w-full h-full bg-transparent border-none px-4 text-sm sm:text-base text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-300"
                                 required
                             />
+
+                            {/* Icon mắt */}
                             <button
                                 type="button"
-                                onClick={() => navigate("/forgot-password")}
-                                className="absolute right-2 sm:right-4 text-xs sm:text-sm text-black dark:text-white"
+                                onClick={() => setShowPassword((prev) => !prev)}
+                                className="absolute right-10 sm:right-12 text-gray-600 dark:text-gray-300"
+                                aria-label="Toggle password visibility"
                             >
-                                Quên ?
+                                {showPassword ? <FaEyeSlash /> : <FaEye />}
                             </button>
                         </CardContent>
                     </Card>
+
+                    {/* Nút Quên mật khẩu? nằm phía dưới */}
+                    <button
+                        type="button"
+                        onClick={() => navigate("/forgot-password")}
+                        className="text-xs sm:text-sm text-right text-black dark:text-white w-full"
+                    >
+                        Quên mật khẩu?
+                    </button>
 
 
                     <div className="text-center px-4">
