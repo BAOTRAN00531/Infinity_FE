@@ -1,21 +1,21 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {AnimatePresence, motion} from "framer-motion";
-import { Button } from "../components/ui/button";
-import { Card, CardContent } from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import Header from "../components/Header";
+import { AnimatePresence, motion } from "framer-motion";
+import { Button } from "@/components/reusable-components/button";
+import { Card, CardContent } from "@/components/reusable-components/card";
+import { Input } from "@/components/reusable-components/input";
+import Header from "../components/layout-components/Header";
 import { Link } from "react-router-dom";
-import { FaEye, FaEyeSlash, FaSpinner } from "../components/lib/icon";
+import { FaEye, FaEyeSlash, FaSpinner } from "@/components/lib/icon";
+import { login } from "@/authService";
+import { jwtDecode } from "jwt-decode"; // Thêm để decode token
 
-import {login} from "../authService";
 export default function LoginPage() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ username: "", password: "" });
     const [error, setError] = useState("");
     const [popupType, setPopupType] = useState<'success' | 'error'>('error');
     const [showPassword, setShowPassword] = useState(false);
-
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,13 +28,22 @@ export default function LoginPage() {
 
             // ✅ Lưu user info và token vào localStorage
             localStorage.setItem("user", JSON.stringify(res.userp));
-            localStorage.setItem("token", res.access_token);
+            localStorage.setItem("access_token", res.access_token); // Đổi key thành "access_token" để đồng bộ với App.tsx
+
+            // Decode token để lấy role
+            const decodedToken: any = jwtDecode(res.access_token);
+            const role = decodedToken.role;
 
             setError("Đăng nhập thành công.");
             setPopupType("success");
 
+            // Chuyển hướng dựa trên vai trò
             setTimeout(() => {
-                navigate("/");
+                if (role === 'ROLE_ADMIN') {
+                    navigate("/admin/dashboard");
+                } else {
+                    navigate("/");
+                }
             }, 1000);
         } catch (err) {
             setError("Đăng nhập thất bại. Vui lòng thử lại.");
@@ -46,31 +55,10 @@ export default function LoginPage() {
         }, 3000);
     };
 
-
-
     return (
-
-
         <div className="bg-white dark:bg-gray-900 flex flex-col min-h-screen">
             <Header />
 
-            <div className="relative mt-5">
-                <motion.button
-                    initial={{ y: -20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    onClick={() => window.location.href = "/register"}
-                    className="absolute right-4 w-[120px] h-[50px]"
-                    style={{
-                        backgroundImage: "url('/3d-button-3.png')",
-                        backgroundSize: "100% 100%",
-                    }}
-                >
-    <span className="absolute inset-0 flex items-center justify-center transform -translate-y-[14%] text-black font-semibold text-sm">
-      Register
-    </span>
-                </motion.button>
-            </div>
 
 
             <motion.div
@@ -95,14 +83,9 @@ export default function LoginPage() {
                     )}
                 </AnimatePresence>
 
-
                 <h1 className="text-3xl sm:text-4xl font-bold text-center text-black dark:text-white mb-8 tracking-widest">
                     LOGIN
                 </h1>
-
-
-
-
 
                 <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
                     <Card className="bg-[#e4e1e1] dark:bg-gray-800 rounded-2xl border-none">
@@ -151,27 +134,23 @@ export default function LoginPage() {
                     >
                         Quên mật khẩu?
                     </button>
-
-
+    {/*button login*/}
                     <div className="text-center px-4">
                         <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }}>
                             <Button
                                 type="submit"
-                                className="w-full sm:w-[600px] max-w-full h-[60px] sm:h-[126px] bg-[100%_100%] relative"
+                                className="w-full sm:w-[600px] max-w-full h-[20px] sm:h-[126px] bg-[100%_100%] relative"
                                 style={{
                                     backgroundImage: "url('/3d-button.png')",
                                     backgroundSize: "100% 100%",
                                 }}
                             >
-                        <span className="absolute inset-0 flex items-center justify-center transform -translate-y-[14%] font-bold text-black text-xl sm:text-5xl tracking-[2.4px]">
-                          Login
-                        </span>
-
+                                <span className="absolute inset-0 flex items-center justify-center transform -translate-y-[14%] font-bold text-black text-xl sm:text-5xl tracking-[2.4px]">
+                                    Login
+                                </span>
                             </Button>
                         </motion.div>
                     </div>
-
-
                 </form>
 
                 <p className="text-center mt-10 text-black dark:text-white text-sm sm:text-base">

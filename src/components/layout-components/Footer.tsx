@@ -1,5 +1,5 @@
 import React from "react";
-import { Separator } from "./ui/separator";
+import { Separator } from "../reusable-components/separator";
 import { motion } from "framer-motion";
 
 export default function Footer() {
