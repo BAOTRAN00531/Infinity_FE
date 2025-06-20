@@ -23,3 +23,12 @@ export interface ResLoginDTO {
 export interface ApiError {
     message: string;
 }
+export interface Language {
+    id: number;
+    name: string;
+    code: string;
+    flag: string;
+    coursesCount?: number;
+    difficulty?: 'Easy' | 'Medium' | 'Hard';
+    popularity?: 'High' | 'Medium' | 'Low';
+}

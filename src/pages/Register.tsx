@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Button } from "../components/ui/button";
-import { Card, CardContent } from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import Header from "../components/Header";
-import { FaEye, FaEyeSlash } from "../components/lib/icon";
-import { register } from "../authService";
+import { Button } from "@/components/reusable-components/button";
+import { Card, CardContent } from "@/components/reusable-components/card";
+import { Input } from "@/components/reusable-components/input";
+import Header from "@/components/layout-components/Header";
+import { FaEye, FaEyeSlash } from "@/components/lib/icon";
+import { register } from "@/authService";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
