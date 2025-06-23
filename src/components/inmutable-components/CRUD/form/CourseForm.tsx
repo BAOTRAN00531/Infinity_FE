@@ -77,8 +77,8 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
   return (
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="name">Course Name</Label>
+          <div className="space-y-2 text-sm font-bold text-gray-700 dark:text-gray-200">
+            <Label htmlFor="name" className="text-sm font-bold text-gray-700 dark:text-gray-200">Course Name</Label>
             <Input_admin
                 id="name"
                 value={formData.name}
@@ -87,8 +87,8 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="language">Language</Label>
+          <div className="space-y-2 ">
+            <Label htmlFor="language" className="text-sm font-bold text-gray-700 dark:text-gray-200">Language</Label>
             <Select
                 value={languageId.toString()}
                 onValueChange={(val) => setLanguageId(parseInt(val))}
@@ -108,7 +108,7 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description" className="text-sm font-bold text-gray-700 dark:text-gray-200">Description</Label>
           <Textarea
               id="description"
               value={formData.description}
@@ -119,7 +119,7 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="level">Level</Label>
+            <Label htmlFor="level" className="text-sm font-bold text-gray-700 dark:text-gray-200">Level</Label>
             <Select
                 value={formData.level}
                 onValueChange={(val: 'Beginner' | 'Intermediate' | 'Advanced') =>
@@ -138,7 +138,7 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="duration">Duration</Label>
+            <Label htmlFor="duration" className="text-sm font-bold text-gray-700 dark:text-gray-200">Duration</Label>
             <Input_admin
                 id="duration"
                 value={formData.duration}
@@ -149,7 +149,7 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
+            <Label htmlFor="status" className="text-sm font-bold text-gray-700 dark:text-gray-200">Status</Label>
             <Select
                 value={formData.status}
                 onValueChange={(val: 'active' | 'inactive') =>
@@ -168,9 +168,27 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
         </div>
 
         <div className="flex justify-end">
-          <Button_admin type="submit" className="rounded-2xl px-6 py-3">
+          <Button_admin
+              type="submit"
+              className="
+    inline-flex items-center justify-center gap-2 whitespace-nowrap
+    text-sm font-medium
+    ring-offset-background
+    transition-colors
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+    disabled:pointer-events-none disabled:opacity-50
+    [&_svg]:pointer-events-none [&_svg]:h-4 [&_svg]:w-4 [&_svg]:shrink-0
+    hover:bg-primary/90
+    h-10 px-4 py-2
+    bg-gradient-to-r from-purple-500 to-pink-500
+    text-white
+    rounded-2xl
+    shadow-md hover:shadow-lg
+  "
+          >
             {initialData ? 'Update Course' : 'Create Course'}
           </Button_admin>
+
         </div>
       </form>
   );

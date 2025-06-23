@@ -46,7 +46,7 @@ const QuestionForm = ({ initialData, onSubmit }: QuestionFormProps) => {
           className="space-y-6"
       >
       <div className="space-y-2">
-        <Label className="text-sm font-bold text-gray-700">Question</Label>
+        <Label className="text-sm font-bold text-gray-700 dark:text-gray-200 ">Question</Label>
         <Textarea
           value={formData.question}
           onChange={(e) => setFormData({ ...formData, question: e.target.value })}
@@ -58,7 +58,7 @@ const QuestionForm = ({ initialData, onSubmit }: QuestionFormProps) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label className="text-sm font-bold text-gray-700">Type</Label>
+          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Type</Label>
           <Select value={formData.type} onValueChange={(value: 'multiple-choice' | 'text-input') => setFormData({ ...formData, type: value })}>
             <SelectTrigger className="rounded-2xl border-2 border-gray-200">
               <SelectValue />
@@ -71,7 +71,7 @@ const QuestionForm = ({ initialData, onSubmit }: QuestionFormProps) => {
         </div>
         
         <div className="space-y-2">
-          <Label className="text-sm font-bold text-gray-700">Part</Label>
+          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Part</Label>
           <Select value={formData.partName} onValueChange={(value: string) => setFormData({ ...formData, partName: value })}>
             <SelectTrigger className="rounded-2xl border-2 border-gray-200">
               <SelectValue />
@@ -86,7 +86,7 @@ const QuestionForm = ({ initialData, onSubmit }: QuestionFormProps) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label className="text-sm font-bold text-gray-700">Difficulty</Label>
+          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Difficulty</Label>
           <Select value={formData.difficulty} onValueChange={(value: 'easy' | 'medium' | 'hard') => setFormData({ ...formData, difficulty: value })}>
             <SelectTrigger className="rounded-2xl border-2 border-gray-200">
               <SelectValue />
@@ -100,7 +100,7 @@ const QuestionForm = ({ initialData, onSubmit }: QuestionFormProps) => {
         </div>
         
         <div className="space-y-2">
-          <Label className="text-sm font-bold text-gray-700">Points</Label>
+          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Points</Label>
           <Input_admin
             type="number"
             value={formData.points}
