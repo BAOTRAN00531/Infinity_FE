@@ -47,23 +47,23 @@ export default function RegisterPage() {
         <div className="bg-white dark:bg-gray-900 flex flex-col min-h-screen">
             <Header />
 
-            <div className="relative mt-5">
-                <motion.button
-                    initial={{ y: -20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    onClick={() => window.location.href = "/login"}
-                    className="absolute right-4 w-[120px] h-[50px]"
-                    style={{
-                        backgroundImage: "url('/3d-button-3.png')",
-                        backgroundSize: "100% 100%",
-                    }}
-                >
-                    <span className="absolute inset-0 flex items-center justify-center transform -translate-y-[14%] text-black font-semibold text-sm">
-                        Login
-                    </span>
-                </motion.button>
-            </div>
+            {/*<div className="relative mt-5">*/}
+            {/*    <motion.button*/}
+            {/*        initial={{ y: -20, opacity: 0 }}*/}
+            {/*        animate={{ y: 0, opacity: 1 }}*/}
+            {/*        transition={{ duration: 0.6, ease: "easeOut" }}*/}
+            {/*        onClick={() => window.location.href = "/login"}*/}
+            {/*        className="absolute right-4 w-[120px] h-[50px]"*/}
+            {/*        style={{*/}
+            {/*            backgroundImage: "url('/3d-button-3.png')",*/}
+            {/*            backgroundSize: "100% 100%",*/}
+            {/*        }}*/}
+            {/*    >*/}
+            {/*        <span className="absolute inset-0 flex items-center justify-center transform -translate-y-[14%] text-black font-semibold text-sm">*/}
+            {/*            Login*/}
+            {/*        </span>*/}
+            {/*    </motion.button>*/}
+            {/*</div>*/}
 
             <motion.div
                 className="flex-1 flex flex-col items-center justify-center px-4 py-8"
@@ -148,7 +148,7 @@ export default function RegisterPage() {
                         <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }}>
                             <Button
                                 type="submit"
-                                className="w-full sm:w-[600px] max-w-full h-[60px] sm:h-[126px] bg-[100%_100%] relative"
+                                className="w-full sm:w-[600px] max-w-full h-[20px] sm:h-[80px] bg-[100%_100%] relative"
                                 style={{
                                     backgroundImage: "url('/3d-button.png')",
                                     backgroundSize: "100% 100%",

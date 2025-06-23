@@ -3,7 +3,7 @@ import * as React from "react"
 import type {
   ToastActionElement,
   ToastProps,
-} from "../../../../Job/visual-react-landing/src/components/ui/toast"
+} from "../components/reusable-components/toast"
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000

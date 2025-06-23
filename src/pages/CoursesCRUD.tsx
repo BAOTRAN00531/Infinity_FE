@@ -130,7 +130,7 @@ const CoursesCRUD = () => {
             </DialogTrigger>
             <DialogContent className="max-w-2xl rounded-3xl">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-black text-gray-800">Create New Course</DialogTitle>
+                <DialogTitle className="text-2xl font-black text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md ">Create New Course</DialogTitle>
               </DialogHeader>
               <CourseForm onSubmit={handleCreate} />
             </DialogContent>
@@ -150,20 +150,20 @@ const CoursesCRUD = () => {
           {filteredCourses.map((course) => (
               <div key={course.id} className="bg-white rounded-3xl p-6 shadow-md">
                 <div className="mb-2">
-                  <h3 className="text-lg font-bold">{course.name}</h3>
+                  <h3 className="text-lg font-bold text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">{course.name}</h3>
                   <p className="text-sm text-gray-500 line-clamp-2">{course.description}</p>
                 </div>
 
                 <div className="text-sm space-y-1 mb-3">
                   <div className="flex justify-between">
                     <span>Language:</span>
-                    <span className="font-semibold">{course.language.name}</span>
+                    <span className="font-semibold text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md ">{course.language.name}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Level:</span>
                     <Badge className={`rounded-full text-xs ${getLevelColor(course.level)}`}>{course.level}</Badge>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">
                     <span>Duration:</span>
                     <span>{course.duration}</span>
                   </div>

@@ -36,3 +36,77 @@
     transform: rotate(360deg);
   }
 }
+
+
+
+
+
+/*admin FROM CRUD*/
+
+:root {
+  /* Light theme */
+  --background: 0 0% 100%;
+  --foreground: 222.2 47.4% 11.2%;
+
+  --primary: 220 90% 56%;             /* Deep admin blue */
+  --primary-foreground: 0 0% 100%;    /* White text on blue */
+
+  --input: 220 14.3% 95%;
+  --ring: 220 90% 55%;
+  --muted-foreground: 215 15% 50%;
+
+  --card: 0 0% 100%;
+  --popover: 0 0% 100%;
+}
+
+.dark {
+  /* Dark theme */
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 20% 98%;
+
+  --primary: 220 100% 66%;            /* Lighter blue for dark mode */
+  --primary-foreground: 0 0% 100%;
+
+  --input: 216 34% 17%;
+  --ring: 240 80% 70%;
+  --muted-foreground: 215 20% 70%;
+
+  --card: 222.2 84% 5.5%;
+  --popover: 222.2 84% 5.5%;
+}
+
+
+/*:root {*/
+/*  --background: 0 0% 100%;            !* white *!*/
+/*  --foreground: 222.2 47.4% 11.2%;    !* almost black *!*/
+
+/*  --input: 220 14.3% 95%;             !* subtle gray *!*/
+/*  --ring: 220 90% 55%;                !* bright blue for focus ring *!*/
+/*  --muted-foreground: 215 15% 50%;*/
+
+/*  --card: 0 0% 100%;*/
+/*  --popover: 0 0% 100%;*/
+/*  --primary: 240 100% 60%;*/
+/*  --primary-foreground: 0 0% 100%;*/
+/*}*/
+
+/*.dark {*/
+/*  --background: 222.2 84% 4.9%;        !* dark gray (not full black) *!*/
+/*  --foreground: 210 20% 98%;           !* near-white *!*/
+
+/*  --input: 216 34% 17%;*/
+/*  --ring: 240 80% 70%;                 !* soft blue ring *!*/
+/*  --muted-foreground: 215 20% 70%;*/
+
+/*  --card: 222.2 84% 5.5%;*/
+/*  --popover: 222.2 84% 5.5%;*/
+/*  --primary: 240 100% 66%;*/
+/*  --primary-foreground: 0 0% 100%;*/
+/*}*/
+
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
