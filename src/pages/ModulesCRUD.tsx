@@ -122,7 +122,7 @@ const ModulesCRUD = () => {
             </DialogTrigger>
             <DialogContent className="max-w-2xl rounded-3xl">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-black text-gray-800">Create New Module</DialogTitle>
+                <DialogTitle className="text-2xl font-black text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">Create New Module</DialogTitle>
               </DialogHeader>
               <ModuleForm onSubmit={handleCreate} />
             </DialogContent>
@@ -162,11 +162,11 @@ const ModulesCRUD = () => {
                 <div className="space-y-3 mb-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-500">Duration:</span>
-                    <span className="text-sm font-bold text-gray-800">{module.duration}</span>
+                    <span className="text-sm font-bold ">{module.duration}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-500">Parts:</span>
-                    <span className="text-sm font-bold text-gray-800">{module.partsCount}</span>
+                    <span className="text-sm font-bold ">{module.partsCount}</span>
                   </div>
                 </div>
 
@@ -174,7 +174,7 @@ const ModulesCRUD = () => {
                   <Badge className={`text-xs font-bold rounded-full ${
                       module.status === 'active'
                           ? 'bg-green-100 text-green-800 border-green-200'
-                          : 'bg-gray-100 text-gray-800 border-gray-200'
+                          : 'bg-gray-100  border-gray-200'
                   }`}>
                     {module.status}
                   </Badge>
@@ -223,7 +223,7 @@ const ModulesCRUD = () => {
         <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
           <DialogContent className="max-w-2xl rounded-3xl">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black text-gray-800">Edit Module</DialogTitle>
+              <DialogTitle className="text-2xl font-black ">Edit Module</DialogTitle>
             </DialogHeader>
             {selectedModule && (
                 <ModuleForm
@@ -237,7 +237,7 @@ const ModulesCRUD = () => {
         <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
           <DialogContent className="max-w-2xl rounded-3xl">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black text-gray-800">Module Details</DialogTitle>
+              <DialogTitle className="text-2xl font-black ">Module Details</DialogTitle>
             </DialogHeader>
             {selectedModule && <ModuleDetails module={selectedModule} />}
           </DialogContent>
@@ -246,7 +246,7 @@ const ModulesCRUD = () => {
         <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
           <DialogContent className="max-w-md rounded-3xl">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black text-gray-800">Delete Module</DialogTitle>
+              <DialogTitle className="text-2xl font-black ">Delete Module</DialogTitle>
             </DialogHeader>
             {selectedModule && (
                 <DeleteConfirmation

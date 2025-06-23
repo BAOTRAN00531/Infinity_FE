@@ -139,7 +139,7 @@ export default function LoginPage() {
                         <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }}>
                             <Button
                                 type="submit"
-                                className="w-full sm:w-[600px] max-w-full h-[20px] sm:h-[126px] bg-[100%_100%] relative"
+                                className="w-full sm:w-[600px] max-w-full h-[20px] sm:h-[80px] bg-[100%_100%] relative"
                                 style={{
                                     backgroundImage: "url('/3d-button.png')",
                                     backgroundSize: "100% 100%",

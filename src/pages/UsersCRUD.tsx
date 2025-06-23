@@ -124,7 +124,7 @@ const UsersCRUD = () => {
           </DialogTrigger>
           <DialogContent className="max-w-2xl rounded-3xl">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black text-gray-800">Create New User</DialogTitle>
+              <DialogTitle className="text-2xl font-black ">Create New User</DialogTitle>
             </DialogHeader>
             <UserForm onSubmit={handleCreate} />
           </DialogContent>
@@ -230,7 +230,7 @@ const UsersCRUD = () => {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="max-w-2xl rounded-3xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-gray-800">Edit User</DialogTitle>
+            <DialogTitle className="text-2xl font-black ">Edit User</DialogTitle>
           </DialogHeader>
           {selectedUser && (
             <UserForm
@@ -244,7 +244,7 @@ const UsersCRUD = () => {
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
         <DialogContent className="max-w-2xl rounded-3xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-gray-800">User Details</DialogTitle>
+            <DialogTitle className="text-2xl font-black ">User Details</DialogTitle>
           </DialogHeader>
           {selectedUser && <UserDetails user={selectedUser} />}
         </DialogContent>
@@ -253,7 +253,7 @@ const UsersCRUD = () => {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent className="max-w-md rounded-3xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-gray-800">Delete User</DialogTitle>
+            <DialogTitle className="text-2xl font-black ">Delete User</DialogTitle>
           </DialogHeader>
           {selectedUser && (
             <DeleteConfirmation

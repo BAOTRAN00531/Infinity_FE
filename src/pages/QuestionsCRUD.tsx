@@ -97,7 +97,7 @@ const QuestionsCRUD = () => {
           </DialogTrigger>
           <DialogContent className="max-w-2xl rounded-3xl">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black text-gray-800">Create New Question</DialogTitle>
+              <DialogTitle className="text-2xl font-bold text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">Create New Question</DialogTitle>
             </DialogHeader>
             <QuestionForm onSubmit={handleCreate} />
           </DialogContent>
@@ -177,7 +177,7 @@ const QuestionsCRUD = () => {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="max-w-2xl rounded-3xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-gray-800">Edit Question</DialogTitle>
+            <DialogTitle className="text-2xl font-black text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">Edit Question</DialogTitle>
           </DialogHeader>
           {selectedQuestion && (
             <QuestionForm
@@ -191,7 +191,7 @@ const QuestionsCRUD = () => {
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
         <DialogContent className="max-w-2xl rounded-3xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-gray-800">Question Details</DialogTitle>
+            <DialogTitle className="text-2xl font-black ">Question Details</DialogTitle>
           </DialogHeader>
           {selectedQuestion && <QuestionDetails question={selectedQuestion} />}
         </DialogContent>
@@ -200,7 +200,7 @@ const QuestionsCRUD = () => {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent className="max-w-md rounded-3xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-gray-800">Delete Question</DialogTitle>
+            <DialogTitle className="text-2xl font-black text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">Delete Question</DialogTitle>
           </DialogHeader>
           {selectedQuestion && (
             <DeleteConfirmation

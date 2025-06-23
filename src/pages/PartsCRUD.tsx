@@ -89,7 +89,7 @@ const PartsCRUD = () => {
           </DialogTrigger>
           <DialogContent className="max-w-2xl rounded-3xl">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black text-gray-800">Create New Part</DialogTitle>
+              <DialogTitle className="text-2xl font-black text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">Create New Part</DialogTitle>
             </DialogHeader>
             <PartForm onSubmit={handleCreate} />
           </DialogContent>

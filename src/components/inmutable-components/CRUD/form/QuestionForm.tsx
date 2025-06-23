@@ -5,6 +5,7 @@ import { Input_admin } from '@/components/reusable-components/input_admin';
 import { Label } from '@/components/reusable-components/label';
 import { Textarea } from '@/components/reusable-components/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/reusable-components/select';
+import { motion } from 'framer-motion';
 
 interface Question {
   id: number;
@@ -37,7 +38,13 @@ const QuestionForm = ({ initialData, onSubmit }: QuestionFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+      <motion.form
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          onSubmit={handleSubmit}
+          className="space-y-6"
+      >
       <div className="space-y-2">
         <Label className="text-sm font-bold text-gray-700">Question</Label>
         <Textarea
@@ -113,7 +120,7 @@ const QuestionForm = ({ initialData, onSubmit }: QuestionFormProps) => {
           {initialData ? 'Update Question' : 'Create Question'}
         </Button_admin>
       </div>
-    </form>
+      </motion.form>
   );
 };
 

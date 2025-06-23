@@ -1,6 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Thêm biến sau Tailwind base */
+
+@import "./App.css";
+
 
 
 body {
