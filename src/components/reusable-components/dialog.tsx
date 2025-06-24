@@ -36,7 +36,7 @@ const DialogContent = React.forwardRef<
             <DialogPrimitive.Content
                 ref={ref}
                 {...props}
-                className="fixed left-1/2 top-1/2 z-50 w-full max-w-xl -translate-x-1/2 -translate-y-1/2 p-0 sm:rounded-lg bg-transparent border-none shadow-none"
+                className="fixed left-1/2 top-1/2 z-50 max-w-xl -translate-x-1/2 -translate-y-1/2 p-0 sm:rounded-lg bg-transparent border-none shadow-none"
             >
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: -10 }}
