@@ -99,7 +99,7 @@ const DialogTitle = React.forwardRef<
         ref={ref}
         className={cn(
             "text-xl font-bold leading-tight",
-            "text-[hsl(var(--foreground))]",
+            "text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md",
             className
         )}
         {...props}

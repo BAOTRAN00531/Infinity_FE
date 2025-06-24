@@ -17,11 +17,14 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-        "flex h-10 w-full items-center justify-between rounded-md border border-input px-3 py-2 text-sm ring-offset-background",
-        "bg-background text-foreground", // ✅ Thêm dòng này
-        "shadow-sm hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-        "disabled:cursor-not-allowed disabled:opacity-50",
-        "[&>span]:line-clamp-1",
+        // layout cơ bản
+        "flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm",
+        // nền trắng + chữ đen ở light mode; nền đen + chữ trắng ở dark mode
+        "bg-white text-black dark:bg-black dark:text-white",
+        // border và shadow
+        "border-gray-300 dark:border-gray-700 shadow-sm",
+        "hover:border-gray-400 dark:hover:border-gray-600",
+        "focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-300 focus:ring-offset-2",
         className
     )}
     {...props}
@@ -77,15 +80,14 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
         ref={ref}
         className={cn(
-            "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border border-[hsl(var(--input))]",
-            "bg-[hsl(var(--popover))] text-[hsl(var(--popover-foreground))] shadow-lg",
-            "transition-all duration-200 ease-out",
+            "relative z-50 max-h-60 min-w-[8rem] overflow-hidden rounded-md border",
+            // nền và text tự đổi
+            "bg-white text-black dark:bg-gray-800 dark:text-white",
+            // animation + shadow
+            "shadow-lg transition-all duration-200 ease-out",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
-            "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-            "data-[state=closed]:scale-95 data-[state=open]:scale-100",
-            "data-[side=bottom]:slide-in-from-top-1",
-            "data-[side=top]:slide-in-from-bottom-1",
             className
+
         )}
         position={position}
         {...props}
@@ -126,11 +128,12 @@ const SelectItem = React.forwardRef<
     <SelectPrimitive.Item
         ref={ref}
         className={cn(
-            "relative flex w-full cursor-default select-none items-center rounded-md py-2 pl-8 pr-2 text-sm",
-            "text-[hsl(var(--foreground))]",
-            "hover:bg-[hsl(var(--input))] focus:bg-accent focus:text-accent-foreground",
-            "transition-colors",
-            "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+            "relative flex w-full select-none items-center rounded-md py-2 pl-8 pr-2 text-sm cursor-default",
+            // text + hover tự đổi
+            "text-black dark:text-white",
+            "hover:bg-gray-100 dark:hover:bg-gray-700",
+            "focus:bg-gray-200 dark:focus:bg-gray-600 focus:text-black dark:focus:text-white",
+            "data-[disabled]:opacity-50 data-[disabled]:pointer-events-none",
             className
         )}
         {...props}

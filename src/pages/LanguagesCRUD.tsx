@@ -36,15 +36,27 @@ const LanguagesCRUD = () => {
   const fetchLanguages = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      if (!token) throw new Error('No token found');
-      const response = await axios.get('http://localhost:8080/api/languages', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setLanguages(response.data);
+      if (!token) throw new Error('No token');
+      const response = await axios.get(
+          'http://localhost:8080/api/languages/with-course-count',
+          { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // map courseCount → coursesCount
+      const langs: Language[] = response.data.map((lang: any) => ({
+        id: lang.id,
+        name: lang.name,
+        code: lang.code,
+        flag: lang.flag,
+        difficulty: lang.difficulty,
+        popularity: lang.popularity,
+        coursesCount: lang.courseCount,
+      }));
+      setLanguages(langs);
     } catch (error) {
       toast.error('Failed to fetch languages');
     }
   };
+
 
   const handleCreate = async (formData: FormData) => {
     try {

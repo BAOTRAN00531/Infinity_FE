@@ -41,7 +41,7 @@ const PartForm = ({ initialData, onSubmit }: PartFormProps) => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label className="text-sm font-bold text-gray-700">Part Title</Label>
+          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Part Title</Label>
           <Input_admin
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -51,7 +51,7 @@ const PartForm = ({ initialData, onSubmit }: PartFormProps) => {
         </div>
         
         <div className="space-y-2">
-          <Label className="text-sm font-bold text-gray-700">Type</Label>
+          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Type</Label>
           <Select value={formData.type} onValueChange={(value: 'video' | 'exercise') => setFormData({ ...formData, type: value })}>
             <SelectTrigger className="rounded-2xl border-2 border-gray-200">
               <SelectValue />
@@ -65,7 +65,7 @@ const PartForm = ({ initialData, onSubmit }: PartFormProps) => {
       </div>
 
       <div className="space-y-2">
-        <Label className="text-sm font-bold text-gray-700">Module</Label>
+        <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Module</Label>
         <Select value={formData.moduleName} onValueChange={(value: string) => setFormData({ ...formData, moduleName: value })}>
           <SelectTrigger className="rounded-2xl border-2 border-gray-200">
             <SelectValue />
@@ -79,7 +79,7 @@ const PartForm = ({ initialData, onSubmit }: PartFormProps) => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-2">
-          <Label className="text-sm font-bold text-gray-700">Order</Label>
+          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Order</Label>
           <Input_admin
             type="number"
             value={formData.order}
@@ -90,7 +90,7 @@ const PartForm = ({ initialData, onSubmit }: PartFormProps) => {
         </div>
         
         <div className="space-y-2">
-          <Label className="text-sm font-bold text-gray-700">Duration</Label>
+          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Duration</Label>
           <Input_admin
             value={formData.duration}
             onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
@@ -101,7 +101,7 @@ const PartForm = ({ initialData, onSubmit }: PartFormProps) => {
         </div>
         
         <div className="space-y-2">
-          <Label className="text-sm font-bold text-gray-700">Status</Label>
+          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Status</Label>
           <Select value={formData.status} onValueChange={(value: 'active' | 'inactive') => setFormData({ ...formData, status: value })}>
             <SelectTrigger className="rounded-2xl border-2 border-gray-200">
               <SelectValue />
