@@ -20,7 +20,7 @@ import DeleteConfirmation from '@/components/inmutable-components/DeleteConfirma
 const PartsCRUD: React.FC = () => {
   const [parts, setParts] = useState<Part[]>([])
   const [modules, setModules] = useState<{ id: number; title: string }[]>([])
-  const [moduleFilter, setModuleFilter] = useState<number>(1)
+  const [moduleFilter, setModuleFilter] = useState<number>(0)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedPart, setSelectedPart] = useState<Part | null>(null)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
@@ -55,9 +55,10 @@ const PartsCRUD: React.FC = () => {
     try {
       const token = localStorage.getItem('access_token')
       if (!token) throw new Error('Chưa đăng nhập')
+      const params = moduleFilter > 0 ? { moduleId: moduleFilter } : {}
       const res = await axios.get<Part[]>(
           'http://localhost:8080/api/lessons',
-          { headers: { Authorization: `Bearer ${token}` }, params: { moduleId: moduleFilter } }
+          { headers: { Authorization: `Bearer ${token}` }, params }
       )
       setParts(res.data)
     } catch (err) {
@@ -66,11 +67,8 @@ const PartsCRUD: React.FC = () => {
     }
   }
 
-  // Fetch parts khi thay đổi moduleFilter
   useEffect(() => {
-    if (moduleFilter) {
-      fetchParts()
-    }
+    fetchParts()
   }, [moduleFilter])
 
   // Create mới lên API
@@ -154,6 +152,7 @@ const PartsCRUD: React.FC = () => {
               onChange={e => setModuleFilter(Number(e.target.value))}
               className="border p-2 rounded"
           >
+            <option value={0}>Tất cả</option>
             {modules.map(m => (
                 <option key={m.id} value={m.id}>{m.title}</option>
             ))}
