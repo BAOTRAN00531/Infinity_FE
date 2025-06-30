@@ -9,7 +9,7 @@ interface Part {
   type: 'video' | 'exercise'
   moduleId: number
   moduleName: string
-  order: number
+  orderIndex: number
   duration: string
   status: 'active' | 'inactive'
 }
@@ -24,7 +24,7 @@ const PartDetails = ({ part }: PartDetailsProps) => {
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6">
           <div className="flex items-center gap-2 mb-2">
           <span className="text-sm font-bold text-green-600 bg-green-200 px-3 py-1 rounded-full">
-            Part #{part.order}
+            Part #{part.orderIndex}
           </span>
             <Badge className="text-xs bg-blue-100 text-blue-800">
               {part.type}
@@ -49,7 +49,7 @@ const PartDetails = ({ part }: PartDetailsProps) => {
               <Hash className="w-5 h-5 text-purple-600" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Order</p>
-                <p className="font-bold text-gray-800">#{part.order}</p>
+                <p className="font-bold text-gray-800">#{part.orderIndex}</p>
               </div>
             </div>
           </div>
