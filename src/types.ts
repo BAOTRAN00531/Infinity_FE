@@ -36,6 +36,11 @@ export interface Language {
     popularity?: 'High' | 'Medium' | 'Low';
 }
 
+
+
+
+
+
 export interface Module {
     id: number;
     name: string;
@@ -171,21 +176,29 @@ export interface MediaDto {
 
 export interface QuestionResponseDto {
     id: number;
-    moduleId: number
+
+    // ✅ moduleId được tính từ Lesson → LearningModule
+    moduleId: number;
+
     questionText: string;
-    courseId?: number;
+    courseId?: number;          // Có thể null → nên để optional
     lessonId: number;
     questionTypeId: number;
+
     difficulty: string;
     points: number;
+
     media?: MediaDto;
+
     options: OptionResponseDto[];
     answers: AnswerResponseDto[];
+
     createdBy?: number;
-    createdAt?: string; // ISO string (e.g. "2025-06-28T12:00:00Z")
+    createdAt?: string;         // ISO string (backend trả kiểu timestamp -> string)
     updatedBy?: number;
     updatedAt?: string;
 }
+
 
 
 

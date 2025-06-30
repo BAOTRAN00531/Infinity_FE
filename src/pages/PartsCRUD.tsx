@@ -76,6 +76,7 @@ const PartsCRUD: React.FC = () => {
     try {
       const token = localStorage.getItem('access_token')
       if (!token) throw new Error('Chưa đăng nhập')
+      console.log('Data gửi lên:', data)
       await axios.post(
           'http://localhost:8080/api/lessons',
           data,
@@ -205,7 +206,7 @@ const PartsCRUD: React.FC = () => {
               >
                 <div className="flex items-center gap-2 mb-2">
               <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                #{part.order}
+                #{part.orderIndex}
               </span>
                   <Badge className="text-xs bg-blue-100 text-blue-800">
                     {part.type}

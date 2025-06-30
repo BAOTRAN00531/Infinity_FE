@@ -24,7 +24,7 @@ export interface Part {
   type: 'video' | 'exercise'
   moduleId: number
   moduleName: string
-  order: number
+  orderIndex: number
   duration: string
   status: 'active' | 'inactive'
 }
@@ -41,7 +41,7 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
     type: initialData?.type || 'video',
     moduleId: initialData?.moduleId || 0,
     moduleName: initialData?.moduleName || '',
-    order: initialData?.order || 1,
+    orderIndex: initialData?.orderIndex || 1,
     duration: initialData?.duration || '',
     status: initialData?.status || 'active',
   })
@@ -90,12 +90,31 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
         type: initialData.type,
         moduleId: initialData.moduleId,
         moduleName: initialData.moduleName,
-        order: initialData.order,
+        orderIndex: initialData.orderIndex,
         duration: initialData.duration,
         status: initialData.status,
       })
     }
   }, [initialData])
+
+  const fetchMaxOrder = async (moduleId: number) => {
+    try {
+      const token = localStorage.getItem('access_token')
+      if (!token) throw new Error('No token')
+      const res = await axios.get<{ maxOrder: number }>(
+          `http://localhost:8080/api/lessons/max-order`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { moduleId },
+          }
+      )
+      return res.data.maxOrder + 1
+    } catch {
+      toast.error('Không lấy được order index')
+      return 1
+    }
+  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -140,16 +159,19 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
           <Label>Module</Label>
           <Select
               value={String(formData.moduleId)}
-              onValueChange={v => {
+              onValueChange={async v => {
                 const m = modules.find(x => x.id === Number(v))
                 if (m) {
+                  const nextOrder = await fetchMaxOrder(m.id)
                   setFormData(fd => ({
                     ...fd,
                     moduleId: m.id,
                     moduleName: m.title,
+                    orderIndex: nextOrder,
                   }))
                 }
               }}
+
           >
             <SelectTrigger>
               <SelectValue placeholder="Select module" />
@@ -170,11 +192,9 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
             <Label>Order</Label>
             <Input_admin
                 type="number"
-                value={formData.order}
-                onChange={e =>
-                    setFormData(fd => ({ ...fd, order: +e.target.value }))
-                }
-                required
+             value={formData.orderIndex}
+             onChange={e => setFormData(fd => ({ ...fd, orderIndex: +e.target.value }))}
+            required
             />
           </div>
           <div className="space-y-2">

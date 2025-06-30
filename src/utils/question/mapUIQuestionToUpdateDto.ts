@@ -3,7 +3,7 @@ import { QuestionCreateDto, UIQuestion } from '../../types';
 export function mapUIQuestionToUpdateDto(q: UIQuestion): QuestionCreateDto {
     return {
         questionText: q.questionText,
-        courseId: q.courseId,
+        // courseId: q.courseId,
         lessonId: q.lessonId,
         questionTypeId: q.questionTypeId,
         difficulty: q.difficulty,
