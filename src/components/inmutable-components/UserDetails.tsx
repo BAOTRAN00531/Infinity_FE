@@ -1,6 +1,6 @@
 
 import React from 'react';
-
+//đay là test của thuy quynh ở trang userdetail
 interface User {
   id: number;
   name: string;
