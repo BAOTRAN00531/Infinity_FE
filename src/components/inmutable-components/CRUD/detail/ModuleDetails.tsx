@@ -5,7 +5,7 @@ import { Clock, Hash, BookOpen, FileText } from 'lucide-react';
 
 interface Module {
   id: number;
-  title: string;
+  name: string;
   description: string;
   courseId: number;
   courseName: string;
@@ -28,7 +28,7 @@ const ModuleDetails = ({ module }: ModuleDetailsProps) => {
             Module #{module.order}
           </span>
         </div>
-        <h3 className="text-2xl font-black text-gray-800 mb-2">{module.title}</h3>
+        <h3 className="text-2xl font-black text-gray-800 mb-2">{module.name}</h3>
         <p className="text-gray-600">{module.description}</p>
       </div>
 
