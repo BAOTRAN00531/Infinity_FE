@@ -194,6 +194,7 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
             <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">
               Order
             </Label>
+
             {/*<Input_admin*/}
             {/*    type="number"*/}
             {/*    value={formData.order}*/}
