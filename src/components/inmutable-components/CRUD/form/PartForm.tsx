@@ -15,7 +15,7 @@ import {
 
 interface Module {
   id: number
-  title: string
+  name: string
 }
 
 export interface Part {
@@ -63,7 +63,7 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
           setFormData(fd => ({
             ...fd,
             moduleId: res.data[0].id,
-            moduleName: res.data[0].title,
+            moduleName: res.data[0].name,
           }))
         } else if (initialData) {
           // khi edit, cập nhật moduleName theo initialData
@@ -71,7 +71,7 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
           if (m) {
             setFormData(fd => ({
               ...fd,
-              moduleName: m.title,
+              moduleName: m.name,
             }))
           }
         }
@@ -166,7 +166,7 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
                   setFormData(fd => ({
                     ...fd,
                     moduleId: m.id,
-                    moduleName: m.title,
+                    moduleName: m.name,
                     orderIndex: nextOrder,
                   }))
                 }
@@ -179,7 +179,7 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
             <SelectContent>
               {modules.map(m => (
                   <SelectItem key={m.id} value={String(m.id)}>
-                    {m.title}
+                    {m.name}
                   </SelectItem>
               ))}
             </SelectContent>

@@ -9,10 +9,11 @@ import ModuleForm from '../components/inmutable-components/CRUD/form/ModuleForm'
 import ModuleDetails from '../components/inmutable-components/CRUD/detail/ModuleDetails';
 import DeleteConfirmation from '../components/inmutable-components/DeleteConfirmation';
 import { toast } from 'react-toastify';
+import { ModuleRequest } from '../components/inmutable-components/CRUD/form/ModuleForm'; // hoặc wherever bạn định nghĩa
 
 interface Module {
   id: number;
-  title: string;
+  name: string;
   description: string;
   courseId: number;
   courseName: string;
@@ -48,40 +49,57 @@ const ModulesCRUD = () => {
   }, []);
 
   const filteredModules = modules.filter(module =>
-      (module.title?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
+      (module.name?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
       (module.courseName?.toLowerCase().includes(searchTerm.toLowerCase()) || '')
   );
 
 
-  const handleCreate = async (moduleData: Omit<Module, 'id'>) => {
+  const handleCreate = async (moduleData: ModuleRequest) => {
     try {
       const token = localStorage.getItem('access_token');
+      if (!token) throw new Error('No token');
+
       const res = await axios.post('http://localhost:8080/api/modules', moduleData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setModules([...modules, res.data]);
+
+      setModules((prev) => [...prev, res.data]);
       setIsCreateOpen(false);
       toast.success('Module created successfully');
     } catch (error) {
+      console.error(error);
       toast.error('Failed to create module');
     }
   };
 
-  const handleUpdate = async (moduleData: Omit<Module, 'id'>) => {
+  const handleUpdate = async (moduleData: ModuleRequest) => {
     if (!selectedModule) return;
+
     try {
       const token = localStorage.getItem('access_token');
-      const res = await axios.put(`http://localhost:8080/api/modules/${selectedModule.id}`, moduleData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setModules(modules.map((m) => (m.id === selectedModule.id ? res.data : m)));
+      if (!token) throw new Error('No token');
+
+      const res = await axios.put(
+          `http://localhost:8080/api/modules/${selectedModule.id}`,
+          moduleData,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+      );
+
+      setModules((prev) =>
+          prev.map((m) => (m.id === selectedModule.id ? res.data : m))
+      );
+
       setIsEditOpen(false);
       setSelectedModule(null);
       toast.success('Module updated successfully');
     } catch (error) {
+      console.error(error);
       toast.error('Failed to update module');
     }
   };
+
 
   const handleDelete = async () => {
     if (!selectedModule) return;
@@ -154,7 +172,7 @@ const ModulesCRUD = () => {
                   </span>
                       <span className="text-xs text-gray-500">{module.courseName}</span>
                     </div>
-                    <h3 className="text-xl font-black text-gray-800 mb-2">{module.title}</h3>
+                    <h3 className="text-xl font-black text-gray-800 mb-2">{module.name}</h3>
                     <p className="text-gray-600 text-sm mb-3 line-clamp-2">{module.description}</p>
                   </div>
                 </div>
@@ -250,7 +268,7 @@ const ModulesCRUD = () => {
             </DialogHeader>
             {selectedModule && (
                 <DeleteConfirmation
-                    userName={selectedModule.title}
+                    userName={selectedModule.name}
                     onConfirm={handleDelete}
                     onCancel={() => setIsDeleteOpen(false)}
                 />
