@@ -191,9 +191,6 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Order */}
           <div className="space-y-2">
-            <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">
-              Order
-            </Label>
 
             {/*<Input_admin*/}
             {/*    type="number"*/}
