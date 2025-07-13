@@ -62,7 +62,7 @@
   const QuestionForm: React.FC<QuestionFormProps> = ({ initialData, onSubmit }) => {
     const [modules, setModules] = useState<{
       name: string;
-      id: number; title: string }[]>([]);
+      id: number; }[]>([]);
     const [lessons, setLessons] = useState<{ id: number; name: string }[]>([]);
 
     const [formData, setFormData] = useState<FormState>({
@@ -386,7 +386,7 @@
                 <SelectContent className="rounded-2xl">
                   {modules.map((m) => (
                       <SelectItem key={m.id} value={m.id.toString()}>
-                        {m.name || m.title}
+                        {m.name }
                       </SelectItem>
                   ))}
                 </SelectContent>

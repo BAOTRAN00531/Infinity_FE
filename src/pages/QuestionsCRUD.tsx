@@ -176,7 +176,7 @@ const QuestionsCRUD = () => {
               onChange={(e) => handleModuleSelect(Number(e.target.value))}
               className="px-4 py-2 border rounded-lg"
           >
-            <option value="" disabled>Chọn Module</option>
+            <option value="" disabled>Chọn Courses</option>
             {modules.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
           </select>
           <select
