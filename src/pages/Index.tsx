@@ -8,6 +8,7 @@ import Feature from "../components/layout-components/Feature";
 import InfieFeature from "../components/layout-components/InfieFeature";
 import CTA from "../components/layout-components/CTA";
 import Footer from "../components/layout-components/Footer";
+import HeroBanners from "@/components/layout-components/HeroBanners";
 
 export default function Index() {
     const navigate = useNavigate();
@@ -18,13 +19,14 @@ export default function Index() {
 
     return (
         <main className="bg-white dark:bg-gray-900">
-            <Header
-
-            />
-
+            <Header/>
             <Hero />
-            <LanguageSwitcher />
+            <div className=" hidden md:block">
+                <LanguageSwitcher />
+            </div>
             <Feature />
+            {/*Banner*/}
+            <HeroBanners />
             <InfieFeature />
             <CTA />
             <Footer />

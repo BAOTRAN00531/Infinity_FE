@@ -1,0 +1,79 @@
+.fancy-button {
+    position: relative;
+    display: inline-block;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    max-width: 300px;
+    text-align: center;
+}
+
+.fancy-button.full-width {
+    width: 100%;
+    max-width: none;
+}
+
+/* Size variants */
+.fancy-button.small {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.75rem;
+}
+
+.fancy-button.medium {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+}
+
+.fancy-button.large {
+    font-size: 1.2rem;
+    padding: 1rem 1.5rem;
+}
+
+/* Primary */
+.fancy-button.primary {
+    border: 2px solid #c8ebeb;
+    background: #d5ffff;
+    color: #000;
+    box-shadow:
+            0 8px 0 rgb(156,227,227),
+            0 12px 0 rgb(101,181,181);
+}
+
+.fancy-button.primary:hover {
+    transform: translateY(-2px);
+    box-shadow:
+            0 10px 0 rgb(156,227,227),
+            0 16px 0 rgb(101,181,181);
+}
+
+.fancy-button.primary:active {
+    transform: translateY(4px);
+    box-shadow:
+            0 2px 0 rgb(156,227,227),
+            0 4px 0 rgb(101,181,181);
+}
+
+/* Secondary */
+.fancy-button.secondary {
+    border: 2px solid #e9f1f1;
+    background: #f5fefe;
+    color: #000;
+    box-shadow:
+            0 8px 0 rgb(245,254,254),
+            0 12px 0 rgb(223,237,237);
+}
+
+.fancy-button.secondary:hover {
+    transform: translateY(-2px);
+    box-shadow:
+            0 10px 0 rgb(245,254,254),
+            0 16px 0 rgb(223,237,237);
+}
+
+.fancy-button.secondary:active {
+    transform: translateY(4px);
+    box-shadow:
+            0 2px 0 rgb(245,254,254),
+            0 4px 0 rgb(223,237,237);
+}
