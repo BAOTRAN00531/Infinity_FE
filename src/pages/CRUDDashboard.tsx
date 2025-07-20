@@ -84,9 +84,9 @@ const CRUDDashboard = () => {
               <TabsContent value="languages" className="m-0">
                 <LanguagesCRUD />
               </TabsContent>
-              {/*<TabsContent value="users" className="m-0">*/}
-              {/*  <UsersCRUD />*/}
-              {/*</TabsContent>*/}
+              <TabsContent value="users" className="m-0">
+                <UsersCRUD />
+              </TabsContent>
             </div>
           </Tabs>
         </div>

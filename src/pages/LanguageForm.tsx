@@ -16,15 +16,15 @@ interface Language {
     popularity: 'High' | 'Medium' | 'Low';
 }
 
-
 const LanguageForm: React.FC<LanguageFormProps> = ({ initialData, onSubmit, onCancel }) => {
     const [code, setCode] = useState(initialData?.code || '');
     const [name, setName] = useState(initialData?.name || '');
     const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>(initialData?.difficulty || 'Medium');
     const [popularity, setPopularity] = useState<'High' | 'Medium' | 'Low'>(initialData?.popularity || 'Medium');
-    const [flagFile, setFlagFile] = useState<File | null>(null);
+    const [flag, setFlag] = useState(initialData?.flag || '');
 
-    const [templates, setTemplates] = useState<{ id: number, name: string, code: string }[]>([]);
+    const [templates, setTemplates] = useState<{ name: string; code: string; flag: string }[]>([]);
+
     useEffect(() => {
         const token = localStorage.getItem('access_token');
         if (!token) {
@@ -41,10 +41,6 @@ const LanguageForm: React.FC<LanguageFormProps> = ({ initialData, onSubmit, onCa
             .catch(() => toast.error('Failed to load templates'));
     }, []);
 
-
-
-
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -53,9 +49,7 @@ const LanguageForm: React.FC<LanguageFormProps> = ({ initialData, onSubmit, onCa
         formData.append('name', name);
         formData.append('difficulty', difficulty);
         formData.append('popularity', popularity);
-        if (flagFile) {
-            formData.append('flag', flagFile);
-        }
+        formData.append('flag', flag); // ✅ flag dạng URL string
 
         onSubmit(formData);
     };
@@ -80,17 +74,24 @@ const LanguageForm: React.FC<LanguageFormProps> = ({ initialData, onSubmit, onCa
                         const selected = templates.find(t => t.name === e.target.value);
                         setName(selected?.name || '');
                         setCode(selected?.code || '');
+                        setFlag(selected?.flag || '');
                     }}
                     required
                     className="w-full p-2 border rounded"
                 >
                     <option value="">-- Select Language --</option>
-                    {templates.map(t => (
-                        <option key={t.id} value={t.name}>{t.name}</option>
+                    {templates.map((t, idx) => (
+                        <option key={idx} value={t.name}>{t.name}</option>
                     ))}
                 </select>
             </div>
 
+            {flag && (
+                <div>
+                    <label className="block mb-1 font-medium">Flag Preview</label>
+                    <img src={flag} alt="flag" className="w-12 h-12 rounded-full border" />
+                </div>
+            )}
 
             <div>
                 <label className="block mb-1 font-medium">Difficulty</label>
@@ -116,16 +117,6 @@ const LanguageForm: React.FC<LanguageFormProps> = ({ initialData, onSubmit, onCa
                     <option value="Medium">Medium</option>
                     <option value="Low">Low</option>
                 </select>
-            </div>
-
-            <div>
-                <label className="block mb-1 font-medium">Flag (image upload)</label>
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setFlagFile(e.target.files?.[0] || null)}
-                    className="w-full p-2 border rounded"
-                />
             </div>
 
             <div className="flex justify-end gap-4 pt-4">
