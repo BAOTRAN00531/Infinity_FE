@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import ThemeToggle from "../ThemeToggle";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import ThemeToggle from "../ThemeToggle";
+import FancyButton from "../button/FancyButton";
 
 interface HeaderProps {
     welcomeMessage?: string;
@@ -21,7 +22,7 @@ export default function Header({ welcomeMessage }: HeaderProps) {
         }
     }, [location]);
 
-    const handleLogout = async () => {
+    const handleLogout = () => {
         localStorage.removeItem("access_token");
         localStorage.removeItem("user");
         document.cookie = "refresh_token=; Max-Age=0; path=/";
@@ -58,8 +59,8 @@ export default function Header({ welcomeMessage }: HeaderProps) {
                             />
                             {userName && (
                                 <span className="text-black dark:text-white font-medium">
-        {userName}
-      </span>
+                  {userName}
+                </span>
                             )}
                             <button
                                 onClick={handleLogout}
@@ -69,40 +70,22 @@ export default function Header({ welcomeMessage }: HeaderProps) {
                             </button>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-4">
-                            <Link to="/login">
-                                <button
-                                    className="w-36 h-12 text-lg font-bold text-black"
-                                    style={{
-                                        backgroundImage: "url('/3d-button-4.png')",
-                                        backgroundSize: "100% 100%",
-                                        backgroundRepeat: "no-repeat",
-                                    }}
-                                >
-                                    <div className="-translate-y-[14%]">Đăng nhập</div>
-                                </button>
-                            </Link>
-
-                            <Link to="/register">
-                                <button
-                                    className="w-36 h-12 text-lg font-bold text-black"
-                                    style={{
-                                        backgroundImage: "url('/3d-button-3.png')",
-                                        backgroundSize: "100% 100%",
-                                        backgroundRepeat: "no-repeat",
-                                    }}
-                                >
-                                    <div className="-translate-y-[14%]">Đăng ký</div>
-                                </button>
-                            </Link>
+                        <div className="flex items-center gap-4 w-[300px]">
+                                <FancyButton
+                                    text="Đăng nhập"
+                                    variant="primary"
+                                    onClick={() => navigate("/login")}
+                                />
+                                <FancyButton
+                                    text="Đăng ký"
+                                    variant="secondary"
+                                    onClick={() => navigate("/register")}
+                                />
                         </div>
                     )}
-
-
-
-
                 </div>
             </div>
+
             {welcomeMessage && (
                 <div className="text-center mt-4 text-green-600 dark:text-green-400 text-base">
                     {welcomeMessage}

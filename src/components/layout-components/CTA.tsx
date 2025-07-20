@@ -2,6 +2,7 @@
 import React from "react";
 import { Button } from "../reusable-components/button";
 import { motion } from "framer-motion";
+import FancyButton from "../button/FancyButton";
 
 export default function CTA() {
     return (
@@ -13,12 +14,14 @@ export default function CTA() {
             viewport={{ once: true }}
         >
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white">Learn a language with Infinity</h2>
-            <Button
-                className="mt-6 w-64 h-16 text-xl font-bold "
-                style={{ backgroundImage: "url('/3d-button.png')", backgroundSize: "100% 100%" }}
-            >
-             <div className={"-translate-y-[14%]"}>GET STARTED</div>
-            </Button>
+            <FancyButton
+                className="mt-6 text-xl font-bold "
+                text="GET STARTED"
+                variant="primary"
+                // onClick={() => navigate("/login")}
+            />
+
+
             <img
                 src="/infinitylogo2-2.png"
                 alt="Infinity Logo"
