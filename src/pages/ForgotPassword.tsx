@@ -35,46 +35,7 @@ const ForgotPassword: React.FC = () => {
     return (
         <div className="bg-white dark:bg-gray-900 flex flex-col min-h-screen relative">
             <Header />
-      {/*      /!* Nút góc phải *!/*/}
-      {/*      <div className="flex justify-end gap-3 mt-5 mr-4">*/}
-      {/*          <motion.a*/}
-      {/*              href="/login"*/}
-      {/*              initial={{ y: -20, opacity: 0 }}*/}
-      {/*              animate={{ y: 0, opacity: 1 }}*/}
-      {/*              transition={{ duration: 0.5 }}*/}
-      {/*          >*/}
-      {/*              <button*/}
-      {/*                  className="relative w-[120px] h-[50px]"*/}
-      {/*                  style={{*/}
-      {/*                      backgroundImage: "url('/3d-button-3.png')",*/}
-      {/*                      backgroundSize: "100% 100%",*/}
-      {/*                  }}*/}
-      {/*              >*/}
-      {/*<span className="absolute inset-0 flex items-center justify-center transform -translate-y-[14%] text-black font-semibold text-sm">*/}
-      {/*  Đăng nhập*/}
-      {/*</span>*/}
-      {/*              </button>*/}
-      {/*          </motion.a>*/}
 
-      {/*          <motion.a*/}
-      {/*              href="/register"*/}
-      {/*              initial={{ y: -20, opacity: 0 }}*/}
-      {/*              animate={{ y: 0, opacity: 1 }}*/}
-      {/*              transition={{ duration: 0.5, delay: 0.1 }}*/}
-      {/*          >*/}
-      {/*              <button*/}
-      {/*                  className="relative w-[120px] h-[50px]"*/}
-      {/*                  style={{*/}
-      {/*                      backgroundImage: "url('/3d-button-3.png')",*/}
-      {/*                      backgroundSize: "100% 100%",*/}
-      {/*                  }}*/}
-      {/*              >*/}
-      {/*<span className="absolute inset-0 flex items-center justify-center transform -translate-y-[14%] text-black font-semibold text-sm">*/}
-      {/*  Đăng ký*/}
-      {/*</span>*/}
-      {/*              </button>*/}
-      {/*          </motion.a>*/}
-      {/*      </div>*/}
             {/* Nội dung */}
             <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
                 <h1 className="text-4xl font-bold mb-10 text-black dark:text-white tracking-widest text-center">

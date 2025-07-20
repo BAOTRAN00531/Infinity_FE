@@ -8,7 +8,8 @@ import Header from "../components/layout-components/Header";
 import { Link } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaSpinner } from "@/components/lib/icon";
 import { login } from "@/authService";
-import { jwtDecode } from "jwt-decode"; // Thêm để decode token
+import { jwtDecode } from "jwt-decode";
+import FancyButton from "@/components/button/FancyButton"; // Thêm để decode token
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -137,18 +138,12 @@ export default function LoginPage() {
     {/*button login*/}
                     <div className="text-center px-4">
                         <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }}>
-                            <Button
+                            <FancyButton
+                                text="Login"
+                                variant="primary"
                                 type="submit"
-                                className="w-full sm:w-[600px] max-w-full h-[20px] sm:h-[80px] bg-[100%_100%] relative"
-                                style={{
-                                    backgroundImage: "url('/3d-button.png')",
-                                    backgroundSize: "100% 100%",
-                                }}
-                            >
-                                <span className="absolute inset-0 flex items-center justify-center transform -translate-y-[14%] font-bold text-black text-xl sm:text-5xl tracking-[2.4px]">
-                                    Login
-                                </span>
-                            </Button>
+                                className="w-full sm:w-[600px] max-w-full h-[50px] relative text-xl sm:text-5xl tracking-[2.4px] font-bold "
+                            />
                         </motion.div>
                     </div>
                 </form>

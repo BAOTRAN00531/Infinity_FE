@@ -71,21 +71,16 @@ export default function Header({ welcomeMessage }: HeaderProps) {
                         </div>
                     ) : (
                         <div className="flex items-center gap-4 w-[300px]">
-                            <Link to="/login">
                                 <FancyButton
                                     text="Đăng nhập"
                                     variant="primary"
                                     onClick={() => navigate("/login")}
                                 />
-                            </Link>
-
-                            <Link to="/register">
                                 <FancyButton
                                     text="Đăng ký"
                                     variant="secondary"
                                     onClick={() => navigate("/register")}
                                 />
-                            </Link>
                         </div>
                     )}
                 </div>

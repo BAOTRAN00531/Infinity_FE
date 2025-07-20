@@ -16,7 +16,6 @@ export default function Index() {
 
     const handleLogin = () => navigate("/login");
     const handleRegister = () => navigate("/register");
-
     return (
         <main className="bg-white dark:bg-gray-900">
             <Header/>

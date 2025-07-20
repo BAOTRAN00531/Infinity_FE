@@ -3,6 +3,7 @@ import React from "react";
 import { Button } from "../reusable-components/button";
 import { motion } from "framer-motion";
 import FancyButton from "@/components/button/FancyButton";
+import { Link } from "react-router-dom";
 
 export default function Hero() {
     return (
@@ -33,11 +34,14 @@ export default function Hero() {
                         <FancyButton
                             text="Get started"
                             variant="primary"
+                            to="/register"
                             className="w-full max-w-[300px] md:max-w-[400px] text-lg md:text-xl font-bold"
                         />
+
                         <FancyButton
                             text="Let's go, I already have an account"
                             variant="secondary"
+                            to="/login"
                             className="w-full max-w-[300px] md:max-w-[400px] text-base md:text-lg"
                         />
                     </div>

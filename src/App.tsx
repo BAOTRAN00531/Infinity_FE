@@ -15,6 +15,9 @@ import LanguageList from './pages/LanguageList';
 import LanguageForm from './pages/LanguageForm';
 import { jwtDecode } from 'jwt-decode';
 
+
+import LoadingIndicator from 'components/loading-page/LoadingIndicator'
+
 const VerifyEmail: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -75,7 +78,9 @@ const App: React.FC = () => {
         }
     }, [navigate, location.pathname]);
     return (
-        <Routes>
+        <div>
+        <LoadingIndicator />
+    <Routes>
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/verify-success" element={<VerifySuccess />} />
             <Route path="/" element={<Index />} />
@@ -123,6 +128,7 @@ const App: React.FC = () => {
                 }
             />
         </Routes>
+            </div>
     );
 };
 
