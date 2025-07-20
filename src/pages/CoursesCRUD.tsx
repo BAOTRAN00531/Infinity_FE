@@ -43,6 +43,7 @@ const CoursesCRUD = () => {
       });
       setCourses(res.data);
     } catch {
+
       toast.error('Failed to fetch courses');
     }
   };
