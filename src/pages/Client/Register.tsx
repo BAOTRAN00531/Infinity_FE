@@ -1,47 +1,69 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
-import { Button } from "@/components/reusable-components/button";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+
+import Header from "@/components/layout-components/Header";
 import { Card, CardContent } from "@/components/reusable-components/card";
 import { Input } from "@/components/reusable-components/input";
-import Header from "@/components/layout-components/Header";
-import { FaEye, FaEyeSlash } from "@/components/lib/icon";
-import { register } from "@/authService";
 import FancyButton from "@/components/button/FancyButton";
+import { FaEye, FaEyeSlash } from "@/components/lib/icon";
+
+import { register } from "@/authService";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
+
     const [formData, setFormData] = useState({ email: "", username: "", password: "" });
-    const [error, setError] = useState("");
-    const [popupType, setPopupType] = useState<'success' | 'error'>('error');
+    const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const validate = () => {
+        const email = formData.email.trim();
+        const username = formData.username.trim();
+        const password = formData.password.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailRegex.test(email)) {
+            toast.error("Email không hợp lệ.");
+            return false;
+        }
+        if (username.length < 3) {
+            toast.error("Tên đăng nhập tối thiểu 3 ký tự.");
+            return false;
+        }
+        if (password.length < 8) {
+            toast.error("Mật khẩu tối thiểu 8 ký tự.");
+            return false;
+        }
+        return true;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!validate()) return;
+
+        setLoading(true);
+
         try {
             const result = await register(formData);
             if (result.status === 200) {
-                setError("Đăng ký thành công. Vui lòng kiểm tra email để xác nhận.");
-                setPopupType("success");
-                setTimeout(() => {
-                    navigate("/verify-confirmation");
-                }, 2000);
+                toast.success("Đăng ký thành công. Vui lòng kiểm tra email để xác nhận.");
+                setFormData({ email: "", username: "", password: "" });
+                setTimeout(() => navigate("/verify-confirmation"), 3000);
             } else {
-                setError("Đăng ký thất bại. Mã trạng thái: " + result.status);
-                setPopupType("error");
+                toast.error("Đăng ký thất bại. Mã trạng thái: " + result.status);
             }
         } catch (err: any) {
-            setError("Đăng ký thất bại. " + (err.response?.data?.message || "Vui lòng thử lại."));
-            setPopupType("error");
+            toast.error("Đăng ký thất bại. " + (err.response?.data?.message || "Vui lòng thử lại."));
+        } finally {
+            setLoading(false);
         }
-
-        setTimeout(() => {
-            setError("");
-        }, 3000);
     };
 
     return (
@@ -54,72 +76,60 @@ export default function RegisterPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
-                <AnimatePresence>
-                    {error && (
-                        <motion.div
-                            initial={{ y: -100, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: -100, opacity: 0 }}
-                            className={`fixed top-4 px-6 py-3 rounded-xl shadow-lg z-50 text-white ${
-                                popupType === 'success' ? 'bg-green-500' : 'bg-red-500'
-                            }`}
-                        >
-                            {error}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
                 <h1 className="text-3xl sm:text-4xl font-bold text-center text-black dark:text-white mb-8 tracking-widest">
                     REGISTER
                 </h1>
 
-                <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
-                    <Card className="bg-[#e4e1e1] dark:bg-gray-800 rounded-2xl border-none">
-                        <CardContent className="p-0 h-12 sm:h-[48px] flex items-center">
+                <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6 mx-auto">
+                    {/* Email */}
+                    <Card className="bg-gray-100 dark:bg-gray-800 rounded-2xl border-none">
+                        <CardContent className="p-0 h-12 flex items-center">
                             <Input
                                 type="email"
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
                                 placeholder="Email"
-                                className="w-full h-full bg-transparent border-none px-4 text-sm sm:text-base text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-300"
+                                className="w-full h-full bg-transparent border-none px-4 text-sm text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-300"
                                 required
                                 autoComplete="email"
                             />
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-[#e4e1e1] dark:bg-gray-800 rounded-2xl border-none">
-                        <CardContent className="p-0 h-12 sm:h-[48px] flex items-center">
+                    {/* Username */}
+                    <Card className="bg-gray-100 dark:bg-gray-800 rounded-2xl border-none">
+                        <CardContent className="p-0 h-12 flex items-center">
                             <Input
                                 type="text"
                                 name="username"
                                 value={formData.username}
                                 onChange={handleChange}
                                 placeholder="Tên đăng nhập"
-                                className="w-full h-full bg-transparent border-none px-4 text-sm sm:text-base text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-300"
+                                className="w-full h-full bg-transparent border-none px-4 text-sm text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-300"
                                 required
                                 autoComplete="username"
                             />
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-[#e4e1e1] dark:bg-gray-800 rounded-2xl border-none relative">
-                        <CardContent className="p-0 h-12 sm:h-[48px] flex items-center relative">
+                    {/* Password */}
+                    <Card className="bg-gray-100 dark:bg-gray-800 rounded-2xl border-none relative">
+                        <CardContent className="p-0 h-12 flex items-center relative">
                             <Input
                                 type={showPassword ? "text" : "password"}
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
-                                placeholder="Mật khẩu"
-                                className="w-full h-full bg-transparent border-none px-4 text-sm sm:text-base text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-300"
+                                placeholder="Mật khẩu (tối thiểu 8 ký tự)"
+                                className="w-full h-full bg-transparent border-none px-4 text-sm text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-300"
                                 required
                                 autoComplete="new-password"
                             />
                             <button
                                 type="button"
-                                onClick={() => setShowPassword((prev) => !prev)}
-                                className="absolute right-10 sm:right-12 text-gray-600 dark:text-gray-300"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-4 text-gray-600 dark:text-gray-300"
                                 aria-label="Toggle password visibility"
                             >
                                 {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -127,35 +137,39 @@ export default function RegisterPage() {
                         </CardContent>
                     </Card>
 
-                    <div className="text-center px-4">
-                        <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }}>
-                            <FancyButton
-                                text="Register"
-                                variant="primary"
-                                type="submit"
-                                className="w-full sm:w-[600px] max-w-full h-[50px] relative text-xl sm:text-5xl tracking-[2.4px] font-bold "
-                            />
-                        </motion.div>
-
-
-                    </div>
+                    {/* Submit */}
+                    <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }}>
+                        <FancyButton
+                            text={loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                        <path d="M12 2a10 10 0 0 1 10 10h-4a6 6 0 0 0-6-6V2z" fill="currentColor" />
+                                    </svg>
+                                    Đang đăng ký...
+                                </span>
+                            ) : "Đăng ký"}
+                            variant="primary"
+                            type="submit"
+                            className="w-full h-[50px] text-lg tracking-wide font-bold"
+                            disabled={loading}
+                            fullWidth
+                        />
+                    </motion.div>
                 </form>
 
-                <p className="text-center mt-10 text-black dark:text-white text-sm sm:text-base">
+                <p className="text-center mt-10 text-black dark:text-white text-sm">
                     Đã có tài khoản?{" "}
-                    <a href="/src/pages/Client/Login" className="text-blue-500 hover:underline">
+                    <a href="/login" className="text-blue-500 hover:underline">
                         Đăng nhập
                     </a>
                 </p>
             </motion.div>
 
-            <footer className="text-center mt-10 px-6 text-black dark:text-white text-sm sm:text-xl pb-10">
-                <p>
-                    By registering on Infinity, you agree to our Policies and Privacy Policy.
-                </p>
-                <p className="mt-4">
-                    This site is protected by reCAPTCHA consortium and is subject to the
-                    Google Privacy Policy and Terms of Service.
+            <footer className="text-center mt-10 px-6 text-black dark:text-white text-xs pb-10">
+                <p>By registering on Infinity, you agree to our Policies and Privacy Policy.</p>
+                <p className="mt-2">
+                    This site is protected by reCAPTCHA and subject to the Google Privacy Policy and Terms of Service.
                 </p>
             </footer>
         </div>

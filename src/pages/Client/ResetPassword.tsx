@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 
 import { FaEye, FaEyeSlash , FaSpinner } from "../../components/lib/icon";
+import FancyButton from "../../components/button/FancyButton";
 
 const ResetPassword: React.FC = () => {
     const [newPassword, setNewPassword] = useState('');
@@ -156,23 +157,14 @@ const ResetPassword: React.FC = () => {
                     </div>
 
                     {/* Nút Submit */}
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                    <FancyButton
                         type="submit"
-                        disabled={loading}
-                        className={`w-full h-[60px] relative rounded-xl transition-opacity ${
-                            loading ? 'opacity-70 cursor-not-allowed' : ''
-                        }`}
-                        style={{
-                            backgroundImage: "url('/3d-button-1.png')",
-                            backgroundSize: '100% 100%',
-                        }}
-                    >
-                        <span className="absolute inset-0 flex items-center justify-center transform -translate-y-[14%] text-black font-bold text-lg tracking-wide">
-                            {loading ? <FaSpinner className="animate-spin text-xl" /> : 'Lưu mật khẩu'}
-                        </span>
-                    </motion.button>
+                        text={loading ? "Đang lưu..." : "Lưu mật khẩu"}
+                        onClick={() => {}}
+                        size="large"
+                        fullWidth
+                        className={loading ? "opacity-70 cursor-not-allowed" : ""}
+                    />
                 </form>
             </motion.div>
         </div>

@@ -5,7 +5,7 @@ import IndexClient from './pages/IndexClient';
 import Register from './pages/Client/Register';
 import Login from './pages/Client/Login';
 import VerifyConfirmation from './pages/Client/VerifyConfirmation';
-import ForgotPassword from './pages/Admin/ForgotPassword';
+import ForgotPassword from './pages/Client/ForgotPassword';
 import VerifyOtp from './pages/Client/VerifyOtp';
 import ResetPassword from './pages/Client/ResetPassword';
 import AdminDashboard from './pages/Admin/AdminDashboard';
@@ -14,35 +14,12 @@ import ProtectedRoute from './utils/ProtectedRoute';
 import LanguageList from './pages/Admin/LanguageList';
 import LanguageForm from './pages/Admin/LanguageForm';
 import { jwtDecode } from 'jwt-decode';
-
-
+import { toast } from 'react-toastify';
+import VerifyEmail from './pages/Client/VerifyEmail';
+import 'react-toastify/dist/ReactToastify.css';
 import LoadingIndicator from 'components/loading-page/LoadingIndicator'
+import { ToastContainer } from "react-toastify";
 
-const VerifyEmail: React.FC = () => {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const searchParams = new URLSearchParams(location.search);
-    const token = searchParams.get('token');
-
-    useEffect(() => {
-        if (token) {
-            fetch(`http://localhost:8080/auth/verify-email?token=${token}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-            })
-                .then((response) => {
-                    if (response.status === 303) {
-                        navigate('/verify-success');
-                    } else {
-                        response.json().then((data) => alert(data.message));
-                    }
-                })
-                .catch((error) => alert('Lỗi khi xác thực: ' + error.message));
-        }
-    }, [token, navigate]);
-
-    return <div>Đang xử lý xác thực...</div>;
-};
 
 const App: React.FC = () => {
     const navigate = useNavigate();
@@ -81,6 +58,7 @@ const App: React.FC = () => {
         <div>
         <LoadingIndicator />
     <Routes>
+
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/verify-success" element={<VerifySuccess />} />
             <Route path="/" element={<IndexClient />} />
@@ -109,14 +87,19 @@ const App: React.FC = () => {
                                 <LanguageForm
                                     onSubmit={(formData) => {
                                         const token = localStorage.getItem('access_token');
-                                        if (!token) return alert('Missing token');
+                                        if (!token) {
+                                            toast.error('Missing token');
+                                            return;
+                                        }
                                         fetch('http://localhost:8080/api/languages', {
                                             method: 'POST',
                                             headers: { Authorization: `Bearer ${token}` },
                                             body: formData,
                                         }).then(() => {
-                                            alert('Created!');
-                                            window.location.href = '/languages';
+                                            toast.success('Created!');
+                                            setTimeout(() => {
+                                                window.location.href = '/languages';
+                                            }, 1500);
                                         });
                                     }}
                                     onCancel={() => window.location.href = '/languages'} // ✅ Thêm dòng này
@@ -128,6 +111,20 @@ const App: React.FC = () => {
                 }
             />
         </Routes>
+            <ToastContainer
+                position="top-right"
+                autoClose={2000}    // 👈 toàn app toast sẽ mặc định 2s
+                limit={3}           // 👈 giới hạn tối đa 3 toast hiện cùng lúc (khuyên dùng)
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+            />
+
             </div>
     );
 };
