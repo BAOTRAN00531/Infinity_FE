@@ -1,8 +1,8 @@
 // src/components/QuestionsList.tsx
 import React, { useEffect, useState } from 'react';
 import { getQuestionsByLesson } from '@/api/adminQuestionApi';
-import { QuestionResponseDto } from '../types';
-import { Card, CardContent } from '../components/reusable-components/card';
+import { QuestionResponseDto } from '../../types';
+import { Card, CardContent } from '../../components/reusable-components/card';
 
 interface Props {
     lessonId: number;

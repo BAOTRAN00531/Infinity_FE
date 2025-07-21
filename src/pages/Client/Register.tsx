@@ -4,16 +4,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/reusable-components/button";
 import { Card, CardContent } from "@/components/reusable-components/card";
 import { Input } from "@/components/reusable-components/input";
-import Header from "../components/layout-components/Header";
-import { Link } from "react-router-dom";
-import { FaEye, FaEyeSlash, FaSpinner } from "@/components/lib/icon";
-import { login } from "@/authService";
-import { jwtDecode } from "jwt-decode";
-import FancyButton from "@/components/button/FancyButton"; // Thêm để decode token
+import Header from "@/components/layout-components/Header";
+import { FaEye, FaEyeSlash } from "@/components/lib/icon";
+import { register } from "@/authService";
+import FancyButton from "@/components/button/FancyButton";
 
-export default function LoginPage() {
+export default function RegisterPage() {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({ username: "", password: "" });
+    const [formData, setFormData] = useState({ email: "", username: "", password: "" });
     const [error, setError] = useState("");
     const [popupType, setPopupType] = useState<'success' | 'error'>('error');
     const [showPassword, setShowPassword] = useState(false);
@@ -25,29 +23,19 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await login(formData);
-
-            // ✅ Lưu user info và token vào localStorage
-            localStorage.setItem("user", JSON.stringify(res.userp));
-            localStorage.setItem("access_token", res.access_token); // Đổi key thành "access_token" để đồng bộ với App.tsx
-
-            // Decode token để lấy role
-            const decodedToken: any = jwtDecode(res.access_token);
-            const role = decodedToken.role;
-
-            setError("Đăng nhập thành công.");
-            setPopupType("success");
-
-            // Chuyển hướng dựa trên vai trò
-            setTimeout(() => {
-                if (role === 'ROLE_ADMIN') {
-                    navigate("/admin/dashboard");
-                } else {
-                    navigate("/");
-                }
-            }, 1000);
-        } catch (err) {
-            setError("Đăng nhập thất bại. Vui lòng thử lại.");
+            const result = await register(formData);
+            if (result.status === 200) {
+                setError("Đăng ký thành công. Vui lòng kiểm tra email để xác nhận.");
+                setPopupType("success");
+                setTimeout(() => {
+                    navigate("/verify-confirmation");
+                }, 2000);
+            } else {
+                setError("Đăng ký thất bại. Mã trạng thái: " + result.status);
+                setPopupType("error");
+            }
+        } catch (err: any) {
+            setError("Đăng ký thất bại. " + (err.response?.data?.message || "Vui lòng thử lại."));
             setPopupType("error");
         }
 
@@ -60,15 +48,12 @@ export default function LoginPage() {
         <div className="bg-white dark:bg-gray-900 flex flex-col min-h-screen">
             <Header />
 
-
-
             <motion.div
                 className="flex-1 flex flex-col items-center justify-center px-4 py-8"
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
-                {/* POPUP THÔNG BÁO */}
                 <AnimatePresence>
                     {error && (
                         <motion.div
@@ -85,10 +70,25 @@ export default function LoginPage() {
                 </AnimatePresence>
 
                 <h1 className="text-3xl sm:text-4xl font-bold text-center text-black dark:text-white mb-8 tracking-widest">
-                    LOGIN
+                    REGISTER
                 </h1>
 
                 <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
+                    <Card className="bg-[#e4e1e1] dark:bg-gray-800 rounded-2xl border-none">
+                        <CardContent className="p-0 h-12 sm:h-[48px] flex items-center">
+                            <Input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                placeholder="Email"
+                                className="w-full h-full bg-transparent border-none px-4 text-sm sm:text-base text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-300"
+                                required
+                                autoComplete="email"
+                            />
+                        </CardContent>
+                    </Card>
+
                     <Card className="bg-[#e4e1e1] dark:bg-gray-800 rounded-2xl border-none">
                         <CardContent className="p-0 h-12 sm:h-[48px] flex items-center">
                             <Input
@@ -96,9 +96,10 @@ export default function LoginPage() {
                                 name="username"
                                 value={formData.username}
                                 onChange={handleChange}
-                                placeholder="Email hoặc tên đăng nhập"
+                                placeholder="Tên đăng nhập"
                                 className="w-full h-full bg-transparent border-none px-4 text-sm sm:text-base text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-300"
                                 required
+                                autoComplete="username"
                             />
                         </CardContent>
                     </Card>
@@ -113,9 +114,8 @@ export default function LoginPage() {
                                 placeholder="Mật khẩu"
                                 className="w-full h-full bg-transparent border-none px-4 text-sm sm:text-base text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-300"
                                 required
+                                autoComplete="new-password"
                             />
-
-                            {/* Icon mắt */}
                             <button
                                 type="button"
                                 onClick={() => setShowPassword((prev) => !prev)}
@@ -127,31 +127,24 @@ export default function LoginPage() {
                         </CardContent>
                     </Card>
 
-                    {/* Nút Quên mật khẩu? nằm phía dưới */}
-                    <button
-                        type="button"
-                        onClick={() => navigate("/forgot-password")}
-                        className="text-xs sm:text-sm text-right text-black dark:text-white w-full"
-                    >
-                        Quên mật khẩu?
-                    </button>
-    {/*button login*/}
                     <div className="text-center px-4">
                         <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }}>
                             <FancyButton
-                                text="Login"
+                                text="Register"
                                 variant="primary"
                                 type="submit"
                                 className="w-full sm:w-[600px] max-w-full h-[50px] relative text-xl sm:text-5xl tracking-[2.4px] font-bold "
                             />
                         </motion.div>
+
+
                     </div>
                 </form>
 
                 <p className="text-center mt-10 text-black dark:text-white text-sm sm:text-base">
-                    Chưa có tài khoản?{" "}
-                    <a href="/register" className="text-blue-500 hover:underline">
-                        Đăng ký
+                    Đã có tài khoản?{" "}
+                    <a href="/src/pages/Client/Login" className="text-blue-500 hover:underline">
+                        Đăng nhập
                     </a>
                 </p>
             </motion.div>

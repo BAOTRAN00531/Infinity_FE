@@ -1,4 +1,4 @@
-// Index.tsx
+// IndexClient.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/layout-components/Header";
@@ -10,7 +10,7 @@ import CTA from "../components/layout-components/CTA";
 import Footer from "../components/layout-components/Footer";
 import HeroBanners from "@/components/layout-components/HeroBanners";
 
-export default function Index() {
+export default function IndexClient() {
     const navigate = useNavigate();
     const token = localStorage.getItem("access_token");
 

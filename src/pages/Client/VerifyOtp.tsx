@@ -2,7 +2,7 @@ import React, {useRef, useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence  } from 'framer-motion';
 
-import { FaEnvelope, FaSpinner } from "../components/lib/icon";
+import { FaEnvelope, FaSpinner } from "../../components/lib/icon";
 
 const VerifyOtp: React.FC = () => {
     const [otp, setOtp] = useState<string[]>(Array(6).fill(''));

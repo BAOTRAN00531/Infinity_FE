@@ -5,7 +5,7 @@ const VerifyConfirmation: React.FC = () => {
         <div>
             <h2>Xác nhận Email</h2>
             <p>Hãy kiểm tra email của bạn để hoàn tất đăng ký. Kiểm tra cả thư rác nếu cần.</p>
-            <p><a href="/login">Quay lại đăng nhập</a></p>
+            <p><a href="/src/pages/Client/Login">Quay lại đăng nhập</a></p>
         </div>
     );
 };

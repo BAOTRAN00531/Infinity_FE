@@ -29,7 +29,7 @@ import {
   mapUIQuestionToUpdateDto,
   mapQuestionResponseToUIQuestion,
 } from '@/utils';
-import QuestionsList from "@/pages/QuestionsList";
+import QuestionsList from "@/pages/Admin/QuestionsList";
 import { toast } from 'react-toastify';
 
 export const QUESTION_TYPE_DESCRIPTION_TO_ID: Record<string, number> = Object.entries(QUESTION_TYPE_MAP)
