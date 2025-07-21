@@ -12,7 +12,6 @@ const LinkedinIcon = FaLinkedin as React.FC<React.SVGProps<SVGSVGElement>>;
 const LANGUAGE_CODES = [
   "العربية","বাংলা","Čeština","Deutsch","Ελληνικά","English","Español","Français","हिंदी","Magyar","Bahasa Indonesia","Italiano","日本語","한국어","Nederlands","Polski","Português","Română","Русский","svenska","தமிழ்","తెలుగు","ภาษาไทย","Tagalog","Türkçe","Українською","Tiếng Việt","中文"
 ];
-
 export default function Footer() {
   const [courses, setCourses] = useState<string[]>([]);
   const [modules, setModules] = useState<string[]>([]);
