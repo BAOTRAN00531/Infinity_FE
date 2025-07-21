@@ -66,7 +66,7 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const token = localStorage.getItem('access_token')
+        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
         if (!token) throw new Error('No token')
         const res = await axios.get<Course[]>(
             'http://localhost:8080/api/courses',

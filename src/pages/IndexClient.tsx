@@ -12,7 +12,7 @@ import HeroBanners from "@/components/layout-components/HeroBanners";
 
 export default function IndexClient() {
     const navigate = useNavigate();
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
 
     const handleLogin = () => navigate("/login");
     const handleRegister = () => navigate("/register");

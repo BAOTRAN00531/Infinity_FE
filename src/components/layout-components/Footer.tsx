@@ -18,11 +18,13 @@ export default function Footer() {
   const [languages, setLanguages] = useState<any[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
+  const getToken = () => localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+
   useEffect(() => {
     // Fetch courses
     const fetchCourses = async () => {
       try {
-        const token = localStorage.getItem("access_token");
+        const token = getToken();
         const res = await axios.get("http://localhost:8080/api/courses", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -32,7 +34,7 @@ export default function Footer() {
     // Fetch modules
     const fetchModules = async () => {
       try {
-        const token = localStorage.getItem("access_token");
+        const token = getToken();
         const res = await axios.get("http://localhost:8080/api/modules", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -42,7 +44,7 @@ export default function Footer() {
     // Fetch languages
     const fetchLanguages = async () => {
       try {
-        const token = localStorage.getItem("access_token");
+        const token = getToken();
         const res = await axios.get("http://localhost:8080/api/language-templates", {
           headers: { Authorization: `Bearer ${token}` },
         });

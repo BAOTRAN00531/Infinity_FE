@@ -18,7 +18,8 @@ import { toast } from 'react-toastify';
 import VerifyEmail from './pages/Client/VerifyEmail';
 import 'react-toastify/dist/ReactToastify.css';
 import LoadingIndicator from 'components/loading-page/LoadingIndicator'
-import { ToastContainer } from "react-toastify";
+import OAuth2RedirectHandler from "@/components/auth/OAuth2RedirectHandler";
+
 
 
 const App: React.FC = () => {
@@ -58,6 +59,7 @@ const App: React.FC = () => {
         <div>
         <LoadingIndicator />
     <Routes>
+        <Route path="/oauth2/success" element={<OAuth2RedirectHandler />} />
 
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/verify-success" element={<VerifySuccess />} />
@@ -111,19 +113,7 @@ const App: React.FC = () => {
                 }
             />
         </Routes>
-            <ToastContainer
-                position="top-right"
-                autoClose={2000}    // 👈 toàn app toast sẽ mặc định 2s
-                limit={3}           // 👈 giới hạn tối đa 3 toast hiện cùng lúc (khuyên dùng)
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-            />
+
 
             </div>
     );

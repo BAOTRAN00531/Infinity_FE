@@ -50,7 +50,7 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
   useEffect(() => {
     const fetchModules = async () => {
       try {
-        const token = localStorage.getItem('access_token')
+        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
         if (!token) throw new Error('No token')
         const res = await axios.get<Module[]>(
             'http://localhost:8080/api/modules',
@@ -99,7 +99,7 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
 
   const fetchMaxOrder = async (moduleId: number) => {
     try {
-      const token = localStorage.getItem('access_token')
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       if (!token) throw new Error('No token')
       const res = await axios.get<{ maxOrder: number }>(
           `http://localhost:8080/api/lessons/max-order`,
