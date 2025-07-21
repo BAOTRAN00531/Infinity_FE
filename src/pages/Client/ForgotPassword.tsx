@@ -5,6 +5,7 @@ import { FaEnvelope, FaSpinner } from "@/components/lib/icon";
 
 
 import Header from "../../components/layout-components/Header";
+import FancyButton from "../../components/button/FancyButton";
 
 const ForgotPassword: React.FC = () => {
     const [email, setEmail] = useState("");
@@ -68,27 +69,14 @@ const ForgotPassword: React.FC = () => {
                     </div>
 
                     {/* Submit Button */}
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                    <FancyButton
                         type="submit"
-                        disabled={loading}
-                        className={`w-full h-[60px] relative rounded-xl transition-opacity ${
-                            loading ? 'opacity-70 cursor-not-allowed' : ''
-                        }`}
-                        style={{
-                            backgroundImage: "url('/3d-button-1.png')",
-                            backgroundSize: "100% 100%",
-                        }}
-                    >
-    <span className="absolute inset-0 flex items-center justify-center transform -translate-y-[14%] text-black font-bold text-lg tracking-wide">
-      {loading ? (
-          <FaSpinner className="animate-spin text-xl" />
-      ) : (
-          "Gửi mã OTP"
-      )}
-    </span>
-                    </motion.button>
+                        text={loading ? "Đang gửi..." : "Gửi mã OTP"}
+                        onClick={() => {}}
+                        size="large"
+                        fullWidth
+                        className={loading ? "opacity-70 cursor-not-allowed" : ""}
+                    />
                 </motion.form>
 
                 {message && (

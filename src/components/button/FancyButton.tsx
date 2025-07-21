@@ -1,9 +1,9 @@
-import React from "react";
+import React, {ReactNode} from "react";
 import { Link } from "react-router-dom"; // hoặc next/link nếu bạn dùng Next.js
 import "./FancyButton.css";
 
 interface FancyButtonProps {
-    text: string;
+    text: ReactNode;
     onClick?: () => void;
     variant?: "primary" | "secondary";
     size?: "small" | "medium" | "large";
@@ -12,7 +12,8 @@ interface FancyButtonProps {
     type?: "button" | "submit" | "reset";
     to?: string; // 👉 Thêm: chuyển hướng nội bộ
     href?: string; // 👉 Thêm: chuyển hướng ngoài
-    target?: string; // 👉 cho external link
+    target?: string;
+    disabled?: boolean;// 👉 cho external link
 }
 
 const FancyButton: React.FC<FancyButtonProps> = ({
