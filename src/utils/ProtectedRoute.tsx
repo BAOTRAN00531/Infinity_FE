@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, children }) => {
     const navigate = useNavigate();
     const location = useLocation();
-    const token: string | null = localStorage.getItem('access_token');
+    const token: string | null = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
 
     if (!token) {
         return <Navigate to="/login" replace />;

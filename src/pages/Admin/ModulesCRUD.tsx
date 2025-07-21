@@ -35,7 +35,7 @@ const ModulesCRUD = () => {
   useEffect(() => {
     const fetchModules = async () => {
       try {
-        const token = localStorage.getItem('access_token');
+        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
         const res = await axios.get('http://localhost:8080/api/modules', {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -56,7 +56,7 @@ const ModulesCRUD = () => {
 
   const handleCreate = async (moduleData: ModuleRequest) => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       if (!token) throw new Error('No token');
 
       const res = await axios.post('http://localhost:8080/api/modules', moduleData, {
@@ -76,7 +76,7 @@ const ModulesCRUD = () => {
     if (!selectedModule) return;
 
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       if (!token) throw new Error('No token');
 
       const res = await axios.put(
@@ -104,7 +104,7 @@ const ModulesCRUD = () => {
   const handleDelete = async () => {
     if (!selectedModule) return;
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       await axios.delete(`http://localhost:8080/api/modules/${selectedModule.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });

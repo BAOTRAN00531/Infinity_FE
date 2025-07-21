@@ -14,7 +14,7 @@ const LanguageList: React.FC = () => {
 
     const fetchLanguages = async () => {
         try {
-            const token = localStorage.getItem('access_token');
+            const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
             if (!token) throw new Error('No token found');
             const response = await axios.get('http://localhost:8080/api/languages', {
                 headers: { Authorization: `Bearer ${token}` },
@@ -26,7 +26,7 @@ const LanguageList: React.FC = () => {
     };
 
     const isAdmin = () => {
-        const token = localStorage.getItem('access_token');
+        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
         if (token) {
             try {
                 const decodedToken: any = jwtDecode(token);

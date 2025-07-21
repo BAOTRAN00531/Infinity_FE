@@ -57,10 +57,23 @@ export default function LoginPage() {
     };
 
     const handleGoogleLogin = () => {
-        toast.info("Chức năng đăng nhập bằng Google chưa được triển khai.");
-        // Tích hợp Google OAuth2 ở đây
-        // Ví dụ: window.location.href = "URL_GOOGLE_OAUTH"
+        const backendUrl = process.env.REACT_APP_BACKEND_URL;
+        if (!backendUrl) {
+            alert("❌ Backend URL không được cấu hình. Kiểm tra file .env.");
+            return;
+        }
+
+        window.location.href = `${backendUrl}/oauth2/authorization/google`;
     };
+
+
+
+
+    // const handleFacebookLogin = () => {
+    //     window.location.href = `${BACKEND_URL}/oauth2/authorization/facebook`;
+    // };
+    //
+
 
     return (
         <div className="bg-white dark:bg-gray-900 flex flex-col min-h-screen">
@@ -155,15 +168,16 @@ export default function LoginPage() {
                     </motion.div>
 
                     {/* Google Login */}
-                    <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }}>
+                    <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }} className="mt-4">
                         <button
                             type="button"
                             onClick={handleGoogleLogin}
-                            className="w-full mt-3 h-[50px] flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg"
+                            className="w-full h-[50px] flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg"
                         >
                             <FaGoogle />
                             Đăng nhập với Google
                         </button>
+
 
 
                     </motion.div>
@@ -171,7 +185,7 @@ export default function LoginPage() {
                     <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }}>
                         <button
                             type="button"
-                            onClick={() => toast.info("Chức năng đăng nhập bằng Facebook chưa được triển khai.")}
+                            // onClick={handleFacebookLogin}
                             className="w-full mt-3 h-[50px] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg"
                         >
                             <FaFacebook />
