@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { FaEnvelope, FaSpinner } from "@/components/lib/icon";
 
 
-import Header from "../components/layout-components/Header";
+import Header from "../../components/layout-components/Header";
 
 const ForgotPassword: React.FC = () => {
     const [email, setEmail] = useState("");

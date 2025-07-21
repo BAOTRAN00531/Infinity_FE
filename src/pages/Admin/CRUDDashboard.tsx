@@ -2,14 +2,14 @@ import * as React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/reusable-components/tabs';
 import { BookOpen, Layers, FileText, HelpCircle, Globe, Users, LayoutDashboard } from 'lucide-react';
 import OverviewDashboard from './OverviewDashboard'; // Cùng thư mục pages
-import CoursesCRUD from '@/pages/CoursesCRUD'; // Cùng thư mục pages
-import ModulesCRUD from '@/pages/ModulesCRUD';
-import PartsCRUD from '@/pages/PartsCRUD';
-import QuestionsCRUD from '@/pages/QuestionsCRUD';
-import LanguagesCRUD from '@/pages/LanguagesCRUD';
-import UsersCRUD from '@/pages/UsersCRUD';
+import CoursesCRUD from '@/pages/Admin/CoursesCRUD'; // Cùng thư mục pages
+import ModulesCRUD from '@/pages/Admin/ModulesCRUD';
+import PartsCRUD from '@/pages/Admin/PartsCRUD';
+import QuestionsCRUD from '@/pages/Admin/QuestionsCRUD';
+import LanguagesCRUD from '@/pages/Admin/LanguagesCRUD';
+import UsersCRUD from '@/pages/Admin/UsersCRUD';
 import {useState} from "react";
-import Header from "../components/layout-components/Header";
+import Header from "../../components/layout-components/Header";
 
 
 const CRUDDashboard = () => {

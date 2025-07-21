@@ -4,7 +4,7 @@ import { Button_admin } from '@/components/reusable-components/button_admin';
 import { Input_admin } from '@/components/reusable-components/input_admin';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/reusable-components/dialog';
 import { Badge } from '@/components/reusable-components/badge';
-import LanguageForm from '@/pages/LanguageForm';
+import LanguageForm from '@/pages/Admin/LanguageForm';
 import LanguageDetails from '@/components/inmutable-components/CRUD/detail/LanguageDetails';
 import DeleteConfirmation from '@/components/inmutable-components/DeleteConfirmation';
 import axios from 'axios';

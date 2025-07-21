@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 
-import { FaEye, FaEyeSlash , FaSpinner } from "../components/lib/icon";
+import { FaEye, FaEyeSlash , FaSpinner } from "../../components/lib/icon";
 
 const ResetPassword: React.FC = () => {
     const [newPassword, setNewPassword] = useState('');

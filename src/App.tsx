@@ -1,18 +1,18 @@
 import React, { useEffect } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import VerifySuccess from './pages/VerifySuccess';
-import Index from './pages/Index';
-import Register from './pages/Register';
-import Login from './pages/Login';
-import VerifyConfirmation from './pages/VerifyConfirmation';
-import ForgotPassword from './pages/ForgotPassword';
-import VerifyOtp from './pages/VerifyOtp';
-import ResetPassword from './pages/ResetPassword';
-import AdminDashboard from './pages/AdminDashboard';
-import UserDashboard from './pages/UserDashboard';
+import VerifySuccess from './pages/Client/VerifySuccess';
+import IndexClient from './pages/IndexClient';
+import Register from './pages/Client/Register';
+import Login from './pages/Client/Login';
+import VerifyConfirmation from './pages/Client/VerifyConfirmation';
+import ForgotPassword from './pages/Admin/ForgotPassword';
+import VerifyOtp from './pages/Client/VerifyOtp';
+import ResetPassword from './pages/Client/ResetPassword';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import UserDashboard from './pages/Admin/UserDashboard';
 import ProtectedRoute from './utils/ProtectedRoute';
-import LanguageList from './pages/LanguageList';
-import LanguageForm from './pages/LanguageForm';
+import LanguageList from './pages/Admin/LanguageList';
+import LanguageForm from './pages/Admin/LanguageForm';
 import { jwtDecode } from 'jwt-decode';
 
 
@@ -83,7 +83,7 @@ const App: React.FC = () => {
     <Routes>
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/verify-success" element={<VerifySuccess />} />
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<IndexClient />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/verify-confirmation" element={<VerifyConfirmation />} />

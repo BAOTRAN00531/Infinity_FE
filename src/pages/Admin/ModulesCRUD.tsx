@@ -5,11 +5,11 @@ import { Button_admin } from '@/components/reusable-components/button_admin';
 import { Input_admin } from '@/components/reusable-components/input_admin';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/reusable-components/dialog';
 import { Badge } from '@/components/reusable-components/badge';
-import ModuleForm from '../components/inmutable-components/CRUD/form/ModuleForm';
-import ModuleDetails from '../components/inmutable-components/CRUD/detail/ModuleDetails';
-import DeleteConfirmation from '../components/inmutable-components/DeleteConfirmation';
+import ModuleForm from '../../components/inmutable-components/CRUD/form/ModuleForm';
+import ModuleDetails from '../../components/inmutable-components/CRUD/detail/ModuleDetails';
+import DeleteConfirmation from '../../components/inmutable-components/DeleteConfirmation';
 import { toast } from 'react-toastify';
-import { ModuleRequest } from '../components/inmutable-components/CRUD/form/ModuleForm'; // hoặc wherever bạn định nghĩa
+import { ModuleRequest } from '../../components/inmutable-components/CRUD/form/ModuleForm'; // hoặc wherever bạn định nghĩa
 
 interface Module {
   id: number;
