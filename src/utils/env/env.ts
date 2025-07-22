@@ -24,5 +24,5 @@ export function getEnv(key: string): string | undefined {
 export const BACKEND_URL: string =
     getEnv("VITE_BACKEND_URL") ||
     getEnv("REACT_APP_BACKEND_URL") || (() => {
-        throw new Error("❌ BACKEND_URL is not defined in .env");
+        throw new Error("❌ BACKEND_URL is not defined in .env.local");
     })();

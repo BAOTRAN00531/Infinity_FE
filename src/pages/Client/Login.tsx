@@ -59,7 +59,7 @@ export default function LoginPage() {
     const handleGoogleLogin = () => {
         const backendUrl = process.env.REACT_APP_BACKEND_URL;
         if (!backendUrl) {
-            alert("❌ Backend URL không được cấu hình. Kiểm tra file .env.");
+            alert("❌ Backend URL không được cấu hình. Kiểm tra file .env.local.");
             return;
         }
 
@@ -69,10 +69,15 @@ export default function LoginPage() {
 
 
 
-    // const handleFacebookLogin = () => {
-    //     window.location.href = `${BACKEND_URL}/oauth2/authorization/facebook`;
-    // };
-    //
+    const handleFacebookLogin = () => {
+        const backendUrl = process.env.REACT_APP_BACKEND_URL;
+        if (!backendUrl) {
+            alert("❌ Backend URL không được cấu hình. Kiểm tra file .env.local.");
+            return;
+        }
+        window.location.href = `${backendUrl}/oauth2/authorization/facebook`;
+    };
+
 
 
     return (
@@ -185,7 +190,7 @@ export default function LoginPage() {
                     <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }}>
                         <button
                             type="button"
-                            // onClick={handleFacebookLogin}
+                            onClick={handleFacebookLogin}
                             className="w-full mt-3 h-[50px] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg"
                         >
                             <FaFacebook />
