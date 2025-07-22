@@ -62,12 +62,8 @@ export default function LoginPage() {
             alert("❌ Backend URL không được cấu hình. Kiểm tra file .env.local.");
             return;
         }
-
         window.location.href = `${backendUrl}/oauth2/authorization/google`;
     };
-
-
-
 
     const handleFacebookLogin = () => {
         const backendUrl = process.env.REACT_APP_BACKEND_URL;
