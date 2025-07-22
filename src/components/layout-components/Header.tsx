@@ -50,6 +50,7 @@ export default function Header({ welcomeMessage }: HeaderProps) {
         }
     }, [location, navigate]);
 
+
     const handleLogout = () => {
         localStorage.removeItem("access_token");
         localStorage.removeItem("user");

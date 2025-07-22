@@ -9,9 +9,9 @@ const OAuth2RedirectHandler: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
+
     useEffect(() => {
         const params = new URLSearchParams(location.search);
-
         const token = params.get("token");
         const name = params.get("name");
         const avatar = params.get("avatar");
