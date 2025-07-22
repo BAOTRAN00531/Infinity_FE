@@ -13,10 +13,14 @@ const OAuth2RedirectHandler: React.FC = () => {
         const params = new URLSearchParams(location.search);
 
         const token = params.get("token");
+        const name = params.get("name");
+        const avatar = params.get("avatar");
         const error = params.get("error");
 
         if (token) {
             localStorage.setItem("access_token", token);
+            if (name) localStorage.setItem("name", decodeURIComponent(name));
+            if (avatar) localStorage.setItem("avatar", decodeURIComponent(avatar));
 
             toast.success("🎉 Đăng nhập thành công!");
 
@@ -27,7 +31,6 @@ const OAuth2RedirectHandler: React.FC = () => {
             setTimeout(() => navigate("/login"), 2000);
         }
     }, [location, navigate]);
-
 
     return (
         <div className="flex flex-col items-center justify-center h-screen">

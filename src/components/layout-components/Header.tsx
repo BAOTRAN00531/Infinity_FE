@@ -13,23 +13,52 @@ export default function Header({ welcomeMessage }: HeaderProps) {
 
     const [userName, setUserName] = useState<string | null>(null);
     const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+    const [avatar, setAvatar] = useState<string | null>(null);
+
 
     useEffect(() => {
         const userData = localStorage.getItem("user") || sessionStorage.getItem("user");
+        const nameFromGoogle = localStorage.getItem("name") || sessionStorage.getItem("name");
+        const avatarFromGoogle = localStorage.getItem("avatar") || sessionStorage.getItem("avatar");
+
         if (userData) {
             const parsed = JSON.parse(userData);
             setUserName(parsed.name || null);
+            setAvatar(null);
+        } else if (nameFromGoogle) {
+            setUserName(decodeURIComponent(nameFromGoogle));
+            setAvatar(decodeURIComponent(avatarFromGoogle || ""));
         }
     }, [location]);
+
 
     const handleLogout = () => {
         localStorage.removeItem("access_token");
         localStorage.removeItem("user");
+        localStorage.removeItem("name");
+        localStorage.removeItem("avatar");
         sessionStorage.removeItem("access_token");
         sessionStorage.removeItem("user");
+        sessionStorage.removeItem("name");
+        sessionStorage.removeItem("avatar");
         document.cookie = "refresh_token=; Max-Age=0; path=/";
-        navigate("/login");
+
+        // gọi API logout nếu có
+        fetch("/api/logout", {
+            method: "POST",
+            credentials: "include",
+        }).catch(() => {});
+
+        // Nếu là login bằng Google → logout Google
+        const isGoogleLogin = !!localStorage.getItem("name") && !!localStorage.getItem("avatar");
+        if (isGoogleLogin) {
+            // xoá session google
+            window.location.href = "https://accounts.google.com/Logout";
+        } else {
+            navigate("/login");
+        }
     };
+
 
     return (
         <header className="w-full p-4 bg-white dark:bg-gray-900 shadow text-xl">
@@ -57,10 +86,11 @@ export default function Header({ welcomeMessage }: HeaderProps) {
                     {token ? (
                         <div className="flex items-center gap-2 ml-auto">
                             <img
-                                src="/avatar.png"
+                                src={avatar || "/avatar.png"}
                                 alt="Avatar"
                                 className="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600"
                             />
+
                             {userName && (
                                 <span className="text-black dark:text-white font-medium whitespace-nowrap">
                                     Xin chào, {userName}
