@@ -74,8 +74,6 @@ export default function LoginPage() {
         window.location.href = `${backendUrl}/oauth2/authorization/facebook`;
     };
 
-
-
     return (
         <div className="bg-white dark:bg-gray-900 flex flex-col min-h-screen">
             <Header />

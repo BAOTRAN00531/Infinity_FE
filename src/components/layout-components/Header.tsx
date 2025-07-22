@@ -30,7 +30,15 @@ export default function Header({ welcomeMessage }: HeaderProps) {
             const parsed = JSON.parse(userData);
             setUserName(parsed.name || null);
             setAvatar(null);
-            setIsAdmin(parsed.role === "admin");
+
+            const admin =
+                parsed.role === "admin" || parsed.role === "ROLE_ADMIN";
+            setIsAdmin(admin);
+
+            // 👇 nếu admin và đang ở `/` → chuyển tới `/admin/dashboard`
+            if (admin && location.pathname === "/") {
+                navigate("/admin/dashboard");
+            }
         } else if (nameFromGoogle) {
             setUserName(decodeURIComponent(nameFromGoogle));
             setAvatar(decodeURIComponent(avatarFromGoogle || ""));
@@ -40,7 +48,8 @@ export default function Header({ welcomeMessage }: HeaderProps) {
             setAvatar(null);
             setIsAdmin(false);
         }
-    }, [location]);
+    }, [location, navigate]);
+
 
     const handleLogout = () => {
         localStorage.removeItem("access_token");
@@ -59,7 +68,6 @@ export default function Header({ welcomeMessage }: HeaderProps) {
             credentials: "include",
         }).catch(() => {});
 
-        // Nếu là login bằng Google → logout Google
         const isGoogleLogin =
             !!localStorage.getItem("name") && !!localStorage.getItem("avatar");
         if (isGoogleLogin) {
@@ -80,16 +88,16 @@ export default function Header({ welcomeMessage }: HeaderProps) {
                             className="w-10 h-10"
                         />
                         <span className="text-black dark:text-white tracking-widest">
-                            INFINITY
-                        </span>
+              INFINITY
+            </span>
                     </div>
                 </Link>
 
                 <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-sm text-gray-600 dark:text-gray-300 w-full md:w-auto mt-4 md:mt-0">
                     <div className="flex items-center gap-2">
-                        <span className="hidden sm:inline">
-                            Site language: English
-                        </span>
+            <span className="hidden sm:inline">
+              Site language: English
+            </span>
                         <img
                             src="/image-2-1.png"
                             alt="Lang"
@@ -108,8 +116,8 @@ export default function Header({ welcomeMessage }: HeaderProps) {
 
                             {userName && (
                                 <span className="text-black dark:text-white font-medium whitespace-nowrap">
-                                    Xin chào, {userName}
-                                </span>
+                  Xin chào, {userName}
+                </span>
                             )}
 
                             {isAdmin && (
