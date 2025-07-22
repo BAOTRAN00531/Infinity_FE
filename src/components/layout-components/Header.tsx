@@ -12,25 +12,35 @@ export default function Header({ welcomeMessage }: HeaderProps) {
     const location = useLocation();
 
     const [userName, setUserName] = useState<string | null>(null);
-    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
     const [avatar, setAvatar] = useState<string | null>(null);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
+    const token =
+        localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
 
     useEffect(() => {
-        const userData = localStorage.getItem("user") || sessionStorage.getItem("user");
-        const nameFromGoogle = localStorage.getItem("name") || sessionStorage.getItem("name");
-        const avatarFromGoogle = localStorage.getItem("avatar") || sessionStorage.getItem("avatar");
+        const userData =
+            localStorage.getItem("user") || sessionStorage.getItem("user");
+        const nameFromGoogle =
+            localStorage.getItem("name") || sessionStorage.getItem("name");
+        const avatarFromGoogle =
+            localStorage.getItem("avatar") || sessionStorage.getItem("avatar");
 
         if (userData) {
             const parsed = JSON.parse(userData);
             setUserName(parsed.name || null);
             setAvatar(null);
+            setIsAdmin(parsed.role === "admin");
         } else if (nameFromGoogle) {
             setUserName(decodeURIComponent(nameFromGoogle));
             setAvatar(decodeURIComponent(avatarFromGoogle || ""));
+            setIsAdmin(false);
+        } else {
+            setUserName(null);
+            setAvatar(null);
+            setIsAdmin(false);
         }
     }, [location]);
-
 
     const handleLogout = () => {
         localStorage.removeItem("access_token");
@@ -50,22 +60,25 @@ export default function Header({ welcomeMessage }: HeaderProps) {
         }).catch(() => {});
 
         // Nếu là login bằng Google → logout Google
-        const isGoogleLogin = !!localStorage.getItem("name") && !!localStorage.getItem("avatar");
+        const isGoogleLogin =
+            !!localStorage.getItem("name") && !!localStorage.getItem("avatar");
         if (isGoogleLogin) {
-            // xoá session google
             window.location.href = "https://accounts.google.com/Logout";
         } else {
             navigate("/login");
         }
     };
 
-
     return (
         <header className="w-full p-4 bg-white dark:bg-gray-900 shadow text-xl">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
                 <Link to="/">
                     <div className="flex items-center gap-4">
-                        <img src="/infinity-1.png" alt="Logo" className="w-10 h-10" />
+                        <img
+                            src="/infinity-1.png"
+                            alt="Logo"
+                            className="w-10 h-10"
+                        />
                         <span className="text-black dark:text-white tracking-widest">
                             INFINITY
                         </span>
@@ -74,7 +87,9 @@ export default function Header({ welcomeMessage }: HeaderProps) {
 
                 <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-sm text-gray-600 dark:text-gray-300 w-full md:w-auto mt-4 md:mt-0">
                     <div className="flex items-center gap-2">
-                        <span className="hidden sm:inline">Site language: English</span>
+                        <span className="hidden sm:inline">
+                            Site language: English
+                        </span>
                         <img
                             src="/image-2-1.png"
                             alt="Lang"
@@ -96,6 +111,16 @@ export default function Header({ welcomeMessage }: HeaderProps) {
                                     Xin chào, {userName}
                                 </span>
                             )}
+
+                            {isAdmin && (
+                                <button
+                                    onClick={() => navigate("/admin")}
+                                    className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600"
+                                >
+                                    Admin
+                                </button>
+                            )}
+
                             <button
                                 onClick={handleLogout}
                                 className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600"
