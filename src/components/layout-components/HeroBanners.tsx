@@ -44,7 +44,7 @@ export default function HeroBanners() {
                     Buy Now
                 </button>
                 <img
-                    src="/home/banner2-image.png"
+                    src="/home/cathello.gif"
                     alt="Banner 2 Ad"
                     className="w-[300px] md:w-[400px] mt-12"
                 />

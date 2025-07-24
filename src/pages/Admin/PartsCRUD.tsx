@@ -32,7 +32,7 @@ const PartsCRUD: React.FC = () => {
   useEffect(() => {
     const fetchModules = async () => {
       try {
-        const token = localStorage.getItem('access_token')
+        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
         if (!token) throw new Error('Chưa đăng nhập')
         const res = await axios.get<{ id: number; name: string }[]>(
             'http://localhost:8080/api/modules',
@@ -53,7 +53,7 @@ const PartsCRUD: React.FC = () => {
   // Hàm fetch lại parts
   const fetchParts = async () => {
     try {
-      const token = localStorage.getItem('access_token')
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       if (!token) throw new Error('Chưa đăng nhập')
       const params = moduleFilter > 0 ? { moduleId: moduleFilter } : {}
       const res = await axios.get<Part[]>(
@@ -74,7 +74,7 @@ const PartsCRUD: React.FC = () => {
   // Create mới lên API
   const handleCreate = async (data: Omit<Part, 'id'>) => {
     try {
-      const token = localStorage.getItem('access_token')
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       if (!token) throw new Error('Chưa đăng nhập')
       console.log('Data gửi lên:', data)
       await axios.post(
@@ -95,7 +95,7 @@ const PartsCRUD: React.FC = () => {
   const handleUpdate = async (data: Omit<Part, 'id'>) => {
     if (!selectedPart) return
     try {
-      const token = localStorage.getItem('access_token')
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       if (!token) throw new Error('Chưa đăng nhập')
       await axios.put(
           `http://localhost:8080/api/lessons/${selectedPart.id}`,
@@ -116,7 +116,7 @@ const PartsCRUD: React.FC = () => {
   const handleDelete = async () => {
     if (!selectedPart) return
     try {
-      const token = localStorage.getItem('access_token')
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       if (!token) throw new Error('Chưa đăng nhập')
       await axios.delete(
           `http://localhost:8080/api/lessons/${selectedPart.id}`,

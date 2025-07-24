@@ -81,15 +81,21 @@
     useEffect(() => {
       const fetchQuestionTypes = async () => {
         try {
-          const token = localStorage.getItem('access_token');
+          const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
           const res = await fetch('http://localhost:8080/api/question-types', {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           });
           const data = await res.json();
+          if (!Array.isArray(data)) {
+            setQuestionTypes([]);
+            toast.error('Dữ liệu question types không hợp lệ!');
+            return;
+          }
           setQuestionTypes(data);
         } catch (err) {
+          setQuestionTypes([]);
           toast.error('Không thể tải question types');
         }
       };
@@ -159,7 +165,7 @@
     useEffect(() => {
       const fetchModules = async () => {
         try {
-          const token = localStorage.getItem('access_token');
+          const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
           if (!token) throw new Error('Bạn chưa đăng nhập');
           const res = await axios.get('http://localhost:8080/api/modules', {
             headers: {
@@ -179,7 +185,7 @@
     useEffect(() => {
       const fetchLessons = async () => {
         try {
-          const token = localStorage.getItem('access_token');
+          const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
           if (!token || !formData.moduleId) return;
           const res = await axios.get('http://localhost:8080/api/lessons', {
             headers: {

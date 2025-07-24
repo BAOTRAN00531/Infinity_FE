@@ -26,13 +26,15 @@ const LanguageForm: React.FC<LanguageFormProps> = ({ initialData, onSubmit, onCa
     const [templates, setTemplates] = useState<{ name: string; code: string; flag: string }[]>([]);
 
     useEffect(() => {
-        const token = localStorage.getItem('access_token');
+        const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+
         if (!token) {
             toast.error('Missing token. Please login.');
             return;
         }
 
         axios.get('http://localhost:8080/api/language-templates', {
+            withCredentials: true,
             headers: {
                 Authorization: `Bearer ${token}`
             }

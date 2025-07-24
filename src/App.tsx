@@ -19,24 +19,30 @@ import VerifyEmail from './pages/Client/VerifyEmail';
 import 'react-toastify/dist/ReactToastify.css';
 import LoadingIndicator from 'components/loading-page/LoadingIndicator'
 import OAuth2RedirectHandler from "@/components/auth/OAuth2RedirectHandler";
+import PurchasePage from "@/components/payment/PurchasePage";
+import InvoicePage from "@/components/payment/InvoicePage";
 
 
-
+// ✅ Logic trong App.tsx (bổ sung allowedPaths)
 const App: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
-        const token = localStorage.getItem('access_token');
+        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+        const isSession = !localStorage.getItem('access_token') && sessionStorage.getItem('access_token');
         if (token) {
             try {
                 const decodedToken: any = jwtDecode(token);
                 const role = decodedToken.role;
 
-                // Kiểm tra vai trò và điều hướng ngay cả khi không ở '/'
+                if (isSession) {
+                    toast.success('🎉 Đăng nhập thành công!');
+                }
+
                 if (role === 'ROLE_ADMIN') {
                     navigate('/admin/dashboard');
-                } else if (role !== 'ROLE_ADMIN' && location.pathname !== '/') {
+                } else if (role !== 'ROLE_ADMIN' && location.pathname === '/admin/dashboard') {
                     navigate('/');
                 }
             } catch (error) {
@@ -44,17 +50,20 @@ const App: React.FC = () => {
                 localStorage.removeItem('access_token');
                 navigate('/');
             }
-        } else if (
-            location.pathname !== '/' &&
-            location.pathname !== '/login' &&
-            location.pathname !== '/register' &&
-            location.pathname !== '/forgot-password' &&
-            location.pathname !== '/verify-otp' && // Đã thêm
-            location.pathname !== '/reset-password' // Đã thêm
-        ) {
-            navigate('/');
+        } else {
+            const allowedPaths = [
+                '/', '/login', '/register', '/forgot-password',
+                '/verify-otp', '/reset-password',
+                '/buy', '/payment-success', '/verify-email'
+            ];
+
+            if (!allowedPaths.includes(location.pathname)) {
+                navigate('/');
+            }
         }
     }, [navigate, location.pathname]);
+
+
     return (
         <div>
         <LoadingIndicator />
@@ -71,6 +80,11 @@ const App: React.FC = () => {
             <Route path="/verify-otp" element={<VerifyOtp />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/user/dashboard" element={<UserDashboard />} />
+
+        <Route path="/buy" element={<PurchasePage />} />
+        <Route path="/payment-success" element={<InvoicePage />} />
+
+
             <Route
                 path="/admin/dashboard"
                 element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}
