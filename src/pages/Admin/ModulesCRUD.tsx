@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Edit, Trash2, Eye, Layers } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Layers, ArrowUpDown } from 'lucide-react';
 import { Button_admin } from '@/components/reusable-components/button_admin';
 import { Input_admin } from '@/components/reusable-components/input_admin';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/reusable-components/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/reusable-components/select';
 import { Badge } from '@/components/reusable-components/badge';
 import ModuleForm from '../../components/inmutable-components/CRUD/form/ModuleForm';
 import ModuleDetails from '../../components/inmutable-components/CRUD/detail/ModuleDetails';
@@ -26,6 +27,7 @@ interface Module {
 const ModulesCRUD = () => {
   const [modules, setModules] = useState<Module[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('title-asc');
   const [selectedModule, setSelectedModule] = useState<Module | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -48,10 +50,34 @@ const ModulesCRUD = () => {
     fetchModules();
   }, []);
 
-  const filteredModules = modules.filter(module =>
+  const filteredModules = modules
+  .filter(module =>
       (module.name?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
       (module.courseName?.toLowerCase().includes(searchTerm.toLowerCase()) || '')
-  );
+  )
+  .sort((a, b) => {
+    switch (sortBy) {
+      case 'title-asc':
+        return a.name.localeCompare(b.name);
+      case 'title-desc':
+        return b.name.localeCompare(a.name);
+      case 'status-asc':
+        return a.status.localeCompare(b.status);
+      case 'status-desc':
+        return b.status.localeCompare(a.status);
+      case 'parts-asc':
+        return a.partsCount - b.partsCount;
+      case 'parts-desc':
+        return b.partsCount - a.partsCount;
+      case 'duration-asc':
+        return parseInt(a.duration) - parseInt(b.duration);
+      case 'duration-desc':
+        return parseInt(b.duration) - parseInt(a.duration);
+      default:
+        return 0;
+    }
+  })
+  ;
 
 
   const handleCreate = async (moduleData: ModuleRequest) => {
@@ -148,13 +174,29 @@ const ModulesCRUD = () => {
         </div>
 
         {/* Search */}
-        <div className="mb-6">
+        <div className="mb-6 flex flex-col sm:flex-row gap-4">
           <Input_admin
               placeholder="Search modules by title or course..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-md rounded-2xl border-2 border-gray-200 focus:border-blue-400 focus:ring-blue-400"
           />
+          <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-[280px] rounded-2xl border-2 border-gray-200 focus:border-blue-400">
+            <ArrowUpDown className="w-4 h-4 mr-2" />
+            <SelectValue placeholder="Sort by..." />
+          </SelectTrigger>
+          <SelectContent className="rounded-2xl">
+            <SelectItem value="title-asc">Title: A-Z</SelectItem>
+            <SelectItem value="title-desc">Title: Z-A</SelectItem>
+            <SelectItem value="status-asc">Status: Active First</SelectItem>
+            <SelectItem value="status-desc">Status: Inactive First</SelectItem>
+            <SelectItem value="parts-asc">Parts: Low to High</SelectItem>
+            <SelectItem value="parts-desc">Parts: High to Low</SelectItem>
+            <SelectItem value="duration-asc">Duration: Short to Long</SelectItem>
+            <SelectItem value="duration-desc">Duration: Long to Short</SelectItem>
+          </SelectContent>
+        </Select>
         </div>
 
         {/* Modules Grid */}
@@ -178,10 +220,10 @@ const ModulesCRUD = () => {
                 </div>
 
                 <div className="space-y-3 mb-4">
-                  <div className="flex items-center justify-between">
+                  {/* <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-500">Duration:</span>
                     <span className="text-sm font-bold ">{module.duration}</span>
-                  </div>
+                  </div> */}
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-500">Parts:</span>
                     <span className="text-sm font-bold ">{module.partsCount}</span>

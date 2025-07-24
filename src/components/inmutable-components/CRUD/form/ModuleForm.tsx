@@ -17,6 +17,7 @@ import {
 interface Course {
   id: number
   name: string
+  status?: 'active' | 'inactive'; // Thêm status vào interface để filter
 }
 
 /** Kiểu dữ liệu form truyền lên BE (mapping sang DTO) */
@@ -160,7 +161,7 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
               </SelectTrigger>
 
               <SelectContent className="rounded-2xl">
-                {courses.map(course => (
+                {courses.filter(course => course.status === 'active').map(course => (
                     <SelectItem key={course.id} value={course.id.toString()}>
                       {course.name}
                     </SelectItem>
@@ -191,22 +192,9 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Order */}
           <div className="space-y-2">
-
-            {/*<Input_admin*/}
-            {/*    type="number"*/}
-            {/*    value={formData.order}*/}
-            {/*    onChange={e =>*/}
-            {/*        setFormData({*/}
-            {/*          ...formData,*/}
-            {/*          order: parseInt(e.target.value, 10) || 1,*/}
-            {/*        })*/}
-            {/*    }*/}
-            {/*    className="rounded-2xl border-2 border-gray-200 focus:border-blue-400"*/}
-            {/*    required*/}
-            {/*/>*/}
           </div>
           {/* Duration */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">
               Duration
             </Label>
@@ -219,7 +207,7 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
                 className="rounded-2xl border-2 border-gray-200 focus:border-blue-400"
                 required
             />
-          </div>
+          </div> */}
           {/* Status */}
           <div className="space-y-2">
             <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">

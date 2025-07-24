@@ -45,6 +45,20 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
     duration: initialData?.duration || '',
     status: initialData?.status || 'active' as const,
   });
+  const [durationValue, setDurationValue] = useState(() => {
+    if (initialData?.duration) {
+      const match = initialData.duration.match(/(\d+)/);
+      return match ? match[1] : '';
+    }
+    return '';
+  });
+  const [durationUnit, setDurationUnit] = useState(() => {
+    if (initialData?.duration) {
+      const match = initialData.duration.match(/(ngày|tuần|tháng|năm)/);
+      return match ? match[1] : 'tuần';
+    }
+    return 'tuần';
+  });
 
   useEffect(() => {
     const fetchLanguages = async () => {
@@ -71,6 +85,7 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
     onSubmit({
       ...formData,
       language: selectedLanguage,
+      duration: durationValue && durationUnit ? `${durationValue} ${durationUnit}` : '',
     });
   };
 
@@ -107,7 +122,7 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 text-sm font-bold text-gray-700 dark:text-gray-200">
           <Label htmlFor="description" className="text-sm font-bold text-gray-700 dark:text-gray-200">Description</Label>
           <Textarea
               id="description"
@@ -137,16 +152,35 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
             </Select>
           </div>
 
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="duration" className="text-sm font-bold text-gray-700 dark:text-gray-200">Duration</Label>
-            <Input_admin
-                id="duration"
-                value={formData.duration}
-                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                placeholder="e.g. 8 weeks"
+            <div className="flex gap-2">
+              <Input_admin
+                id="duration-value"
+                type="number"
+                min={1}
+                value={durationValue}
+                onChange={e => setDurationValue(e.target.value)}
+                placeholder="Số lượng"
                 required
-            />
-          </div>
+                className="w-24"
+              />
+              <Select
+                value={durationUnit}
+                onValueChange={val => setDurationUnit(val)}
+              >
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Chọn đơn vị" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ngày">Ngày</SelectItem>
+                  <SelectItem value="tuần">Tuần</SelectItem>
+                  <SelectItem value="tháng">Tháng</SelectItem>
+                  <SelectItem value="năm">Năm</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div> */}
 
           <div className="space-y-2">
             <Label htmlFor="status" className="text-sm font-bold text-gray-700 dark:text-gray-200">Status</Label>
