@@ -13,7 +13,9 @@ export interface UserLogin {
     id: number;
     email: string;
     name: string;
+    role?: string; // cần có để Header hoạt động đúng
 }
+
 
 export interface ResLoginDTO {
     access_token: string;

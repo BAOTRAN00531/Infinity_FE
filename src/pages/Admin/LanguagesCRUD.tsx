@@ -35,14 +35,19 @@ const LanguagesCRUD = () => {
 
   const fetchLanguages = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      if (!token) throw new Error('No token');
+      const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+      if (!token) throw new Error("Token not found");
+
       const response = await axios.get(
-          'http://localhost:8080/api/languages/with-course-count',
-          { headers: { Authorization: `Bearer ${token}` } }
+          "http://localhost:8080/api/languages/with-course-count",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
       );
-      // map courseCount → coursesCount
-      const langs: Language[] = response.data.map((lang: any) => ({
+
+      const langs = response.data.map((lang: any) => ({
         id: lang.id,
         name: lang.name,
         code: lang.code,
@@ -51,16 +56,19 @@ const LanguagesCRUD = () => {
         popularity: lang.popularity,
         coursesCount: lang.courseCount,
       }));
+
       setLanguages(langs);
-    } catch (error) {
-      toast.error('Failed to fetch languages');
+    } catch (error: any) {
+      console.error(error);
+      toast.error("Failed to fetch languages");
     }
   };
 
 
+
   const handleCreate = async (formData: FormData) => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       if (!token) throw new Error('No token');
       await axios.post('http://localhost:8080/api/languages', formData, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },

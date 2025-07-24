@@ -4,11 +4,17 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/reusable-components/card";
 import { Input } from "@/components/reusable-components/input";
 import Header from "@/components/layout-components/Header";
-import { FaEye, FaEyeSlash, FaGoogle, FaFacebook  } from "@/components/lib/icon";
+import { FaEye, FaEyeSlash, FaGoogle, FaFacebook } from "@/components/lib/icon";
 import { login } from "@/authService";
 import { jwtDecode } from "jwt-decode";
 import FancyButton from "@/components/button/FancyButton";
 import { toast } from "react-toastify";
+import { UserLogin } from "@/types"; // Đảm bảo đúng đường dẫn
+
+interface LoginResponse {
+    access_token: string;
+    userp: UserLogin;
+}
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -27,28 +33,43 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const res = await login(formData);
+            const res: LoginResponse = await login(formData);
+            const decodedToken: any = jwtDecode(res.access_token);
+            const role: string = decodedToken.role;
+
+            // Ghi role vào user để Header có thể đọc đúng
+            const userWithRole: UserLogin = {
+                ...res.userp,
+                role,
+            };
 
             if (rememberMe) {
-                localStorage.setItem("user", JSON.stringify(res.userp));
+                localStorage.setItem("user", JSON.stringify(userWithRole));
                 localStorage.setItem("access_token", res.access_token);
+                // Đồng bộ sessionStorage
+                sessionStorage.setItem("user", JSON.stringify(userWithRole));
+                sessionStorage.setItem("access_token", res.access_token);
             } else {
-                sessionStorage.setItem("user", JSON.stringify(res.userp));
+                sessionStorage.setItem("user", JSON.stringify(userWithRole));
                 sessionStorage.setItem("access_token", res.access_token);
             }
 
-            const decodedToken: any = jwtDecode(res.access_token);
-            const role = decodedToken.role;
-
             toast.success("Đăng nhập thành công!");
 
-            setTimeout(() => {
-                if (role === 'ROLE_ADMIN') {
-                    navigate("/admin/dashboard");
+            console.log("Token:", res.access_token);
+            console.log("Decoded role:", role);
+            console.log("User:", userWithRole);
+
+            // Điều hướng luôn, không dùng setTimeout
+            if (role === "ROLE_ADMIN") {
+                if (!rememberMe) {
+                    window.location.href = "http://localhost:3000/admin/dashboard";
                 } else {
-                    navigate("/");
+                    navigate("/admin/dashboard");
                 }
-            }, 1500);
+            } else {
+                navigate("/");
+            }
         } catch (err: any) {
             toast.error("Đăng nhập thất bại. Vui lòng thử lại.");
         } finally {
@@ -149,15 +170,32 @@ export default function LoginPage() {
                     {/* Submit */}
                     <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }}>
                         <FancyButton
-                            text={loading ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
-                                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                        <path d="M12 2a10 10 0 0 1 10 10h-4a6 6 0 0 0-6-6V2z" fill="currentColor" />
-                                    </svg>
-                                    Đang đăng nhập...
-                                </span>
-                            ) : "Đăng nhập"}
+                            text={
+                                loading ? (
+                                    <span className="flex items-center justify-center gap-2">
+                    <svg
+                        className="animate-spin h-4 w-4 text-white"
+                        viewBox="0 0 24 24"
+                    >
+                      <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                      />
+                      <path
+                          d="M12 2a10 10 0 0 1 10 10h-4a6 6 0 0 0-6-6V2z"
+                          fill="currentColor"
+                      />
+                    </svg>
+                    Đang đăng nhập...
+                  </span>
+                                ) : (
+                                    "Đăng nhập"
+                                )
+                            }
                             variant="primary"
                             type="submit"
                             className="w-full h-[50px] text-lg tracking-wide font-bold"
@@ -167,7 +205,11 @@ export default function LoginPage() {
                     </motion.div>
 
                     {/* Google Login */}
-                    <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }} className="mt-4">
+                    <motion.div
+                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.03 }}
+                        className="mt-4"
+                    >
                         <button
                             type="button"
                             onClick={handleGoogleLogin}
@@ -176,11 +218,9 @@ export default function LoginPage() {
                             <FaGoogle />
                             Đăng nhập với Google
                         </button>
-
-
-
                     </motion.div>
 
+                    {/* Facebook Login */}
                     <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.03 }}>
                         <button
                             type="button"
@@ -190,10 +230,7 @@ export default function LoginPage() {
                             <FaFacebook />
                             Đăng nhập với Facebook
                         </button>
-
-
                     </motion.div>
-
                 </form>
 
                 <p className="text-center mt-10 text-black dark:text-white text-sm">
@@ -205,9 +242,13 @@ export default function LoginPage() {
             </motion.div>
 
             <footer className="text-center mt-10 px-6 text-black dark:text-white text-xs pb-10">
-                <p>By logging in to Infinity, you agree to our Policies and Privacy Policy.</p>
+                <p>
+                    By logging in to Infinity, you agree to our Policies and Privacy
+                    Policy.
+                </p>
                 <p className="mt-2">
-                    This site is protected by reCAPTCHA and subject to the Google Privacy Policy and Terms of Service.
+                    This site is protected by reCAPTCHA and subject to the Google Privacy
+                    Policy and Terms of Service.
                 </p>
             </footer>
         </div>

@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, BookOpen, ArrowUpDown } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, BookOpen } from 'lucide-react';
 import { Button_admin } from '@/components/reusable-components/button_admin';
 import { Input_admin } from '@/components/reusable-components/input_admin';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/reusable-components/dialog';
 import { Badge } from '@/components/reusable-components/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/reusable-components/select';
 import CourseForm from '@/components/inmutable-components/CRUD/form/CourseForm';
 import CourseDetails from '@/components/inmutable-components/CRUD/detail/CourseDetails';
 import DeleteConfirmation from '@/components/inmutable-components/DeleteConfirmation';
@@ -26,7 +25,6 @@ interface Course {
 const CoursesCRUD = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('title-asc');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -50,44 +48,15 @@ const CoursesCRUD = () => {
     }
   };
 
-  const filteredAndSortedCourses = courses
-    .filter(course =>
-      (course.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (course.language?.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (course.level?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'title-asc':
-          return a.name.localeCompare(b.name);
-        case 'title-desc':
-          return b.name.localeCompare(a.name);
-        case 'status-asc':
-          return (a.status || '').localeCompare(b.status || '');
-        case 'status-desc':
-          return (b.status || '').localeCompare(a.status || '');
-        case 'modules-asc':
-          return (a.modulesCount || 0) - (b.modulesCount || 0);
-        case 'modules-desc':
-          return (b.modulesCount || 0) - (a.modulesCount || 0);
-        case 'duration-asc': {
-          const aDur = parseInt((a.duration?.match(/\d+/) || ['0'])[0]);
-          const bDur = parseInt((b.duration?.match(/\d+/) || ['0'])[0]);
-          return aDur - bDur;
-        }
-        case 'duration-desc': {
-          const aDur = parseInt((a.duration?.match(/\d+/) || ['0'])[0]);
-          const bDur = parseInt((b.duration?.match(/\d+/) || ['0'])[0]);
-          return bDur - aDur;
-        }
-        default:
-          return 0;
-      }
-    });
+  const filteredCourses = courses.filter(course =>
+      course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.language.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.level.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleCreate = async (courseData: Omit<Course, 'id' | 'createdAt' | 'modulesCount'>) => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       await axios.post('http://localhost:8080/api/courses', courseData, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -102,7 +71,7 @@ const CoursesCRUD = () => {
   const handleUpdate = async (courseData: Omit<Course, 'id' | 'createdAt' | 'modulesCount'>) => {
     if (!selectedCourse) return;
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       await axios.put(`http://localhost:8080/api/courses/${selectedCourse.id}`, courseData, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -118,7 +87,7 @@ const CoursesCRUD = () => {
   const handleDelete = async () => {
     if (!selectedCourse) return;
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       await axios.delete(`http://localhost:8080/api/courses/${selectedCourse.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -169,33 +138,17 @@ const CoursesCRUD = () => {
           </Dialog>
         </div>
 
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        <Input_admin
+        <div className="mb-6">
+          <Input_admin
               placeholder="Search by title, language or level..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-md rounded-2xl"
           />
-            <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[280px] rounded-2xl border-2 border-gray-200 focus:border-purple-400">
-            <ArrowUpDown className="w-4 h-4 mr-2" />
-            <SelectValue placeholder="Sort by..." />
-          </SelectTrigger>
-          <SelectContent className="rounded-2xl">
-            <SelectItem value="title-asc">Title: A-Z</SelectItem>
-            <SelectItem value="title-desc">Title: Z-A</SelectItem>
-            <SelectItem value="status-asc">Status: Active First</SelectItem>
-            <SelectItem value="status-desc">Status: Inactive First</SelectItem>
-            <SelectItem value="modules-asc">Modules: Low to High</SelectItem>
-            <SelectItem value="modules-desc">Modules: High to Low</SelectItem>
-            <SelectItem value="duration-asc">Duration: Short to Long</SelectItem>
-            <SelectItem value="duration-desc">Duration: Long to Short</SelectItem>
-          </SelectContent>
-        </Select>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAndSortedCourses.map((course) => (
+          {filteredCourses.map((course) => (
               <div key={course.id} className="bg-white rounded-3xl p-6 shadow-md">
                 <div className="mb-2">
                   <h3 className="text-lg font-bold text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">{course.name}</h3>
@@ -211,10 +164,10 @@ const CoursesCRUD = () => {
                     <span>Level:</span>
                     <Badge className={`rounded-full text-xs ${getLevelColor(course.level)}`}>{course.level}</Badge>
                   </div>
-                  {/* <div className="flex justify-between text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">
+                  <div className="flex justify-between text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">
                     <span>Duration:</span>
                     <span>{course.duration}</span>
-                  </div> */}
+                  </div>
                   <div className="flex justify-between">
                     <span>Modules:</span>
                     <span>{course.modulesCount}</span>

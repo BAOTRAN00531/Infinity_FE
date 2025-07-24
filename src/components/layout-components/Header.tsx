@@ -29,16 +29,10 @@ export default function Header({ welcomeMessage }: HeaderProps) {
         if (userData) {
             const parsed = JSON.parse(userData);
             setUserName(parsed.name || null);
-            setAvatar(null);
+            setAvatar(parsed.avatar || null); // Ưu tiên avatar từ user nếu có
 
-            const admin =
-                parsed.role === "admin" || parsed.role === "ROLE_ADMIN";
+            const admin = parsed.role === "ROLE_ADMIN";
             setIsAdmin(admin);
-
-            // 👇 nếu admin và đang ở `/` → chuyển tới `/admin/dashboard`
-            if (admin && location.pathname === "/") {
-                navigate("/admin/dashboard");
-            }
         } else if (nameFromGoogle) {
             setUserName(decodeURIComponent(nameFromGoogle));
             setAvatar(decodeURIComponent(avatarFromGoogle || ""));
@@ -49,6 +43,7 @@ export default function Header({ welcomeMessage }: HeaderProps) {
             setIsAdmin(false);
         }
     }, [location, navigate]);
+
 
 
     const handleLogout = () => {
@@ -120,14 +115,14 @@ export default function Header({ welcomeMessage }: HeaderProps) {
                 </span>
                             )}
 
-                            {isAdmin && (
-                                <button
-                                    onClick={() => navigate("/admin")}
-                                    className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600"
-                                >
-                                    Admin
-                                </button>
-                            )}
+                            {/*{isAdmin && (*/}
+                            {/*    <button*/}
+                            {/*        onClick={() => navigate("/admin")}*/}
+                            {/*        className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600"*/}
+                            {/*    >*/}
+                            {/*        Admin*/}
+                            {/*    </button>*/}
+                            {/*)}*/}
 
                             <button
                                 onClick={handleLogout}
