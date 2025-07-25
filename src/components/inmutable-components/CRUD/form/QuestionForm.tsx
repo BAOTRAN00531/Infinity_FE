@@ -24,6 +24,9 @@
 
   import { UIQuestion } from '@/types';
   import {mapQuestionDtoToUIQuestion} from "@/utils"; // ✅ Thêm nếu thiếu
+  import WordSuggestion from '@/components/inmutable-components/WordSuggestion'; // Đảm bảo đúng đường dẫn
+  import { BookOpen } from 'lucide-react';
+  import { Dialog, DialogContent } from '@/components/reusable-components/dialog';
 
   interface QuestionFormProps {
     initialData?: UIQuestion;
@@ -49,6 +52,9 @@
     points: number;
     moduleId: number;
     lessonId: number;
+    ipa?: string;
+    hint?: string;
+    explanation?: string;
   };
 
 
@@ -283,255 +289,299 @@
 
     };
 
+  const [suggestOpen, setSuggestOpen] = useState<{ type: 'answer' | 'option', index?: number } | null>(null);
 
+  const handleWordSuggestion = (item: any, optionIndex?: number) => {
+    if (formData.questionTypeId === 4) {
+      // Fill in the blank: chỉ có 1 đáp án đúng
+      if (answers.length === 0) addAnswer();
+      handleAnswerChange(0, 'answerText', item.text);
+      if (!formData.ipa && item.ipa) setFormData(prev => ({ ...prev, ipa: item.ipa }));
+    } else if (typeof optionIndex === 'number') {
+      // Multiple choice: cập nhật option tương ứng
+      handleOptionChange(optionIndex, 'optionText', item.text);
+    }
+    setSuggestOpen(null); // Đóng modal sau khi chọn
+  };
+
+  // Dữ liệu mẫu tạm thời cho WordSuggestion
+  const mockUnits = [
+    {
+      id: 1,
+      text: 'Hello',
+      ipa: '/həˈloʊ/',
+      meaning_vi: 'Xin chào',
+      meaning_en: 'A greeting',
+      type: 'noun' as const,
+      language: 'en' as const,
+      difficulty: 'beginner' as const,
+      audio: '/audio/hello.mp3'
+    },
+    {
+      id: 2,
+      text: 'お茶',
+      ipa: '/oˈtʃa/',
+      meaning_vi: 'Trà',
+      meaning_en: 'Tea',
+      type: 'noun' as const,
+      language: 'ja' as const,
+      difficulty: 'beginner' as const
+    },
+    {
+      id: 3,
+      text: 'Beautiful',
+      ipa: '/ˈbjuːtɪfəl/',
+      meaning_vi: 'Đẹp',
+      meaning_en: 'Having beauty',
+      type: 'adjective' as const,
+      language: 'en' as const,
+      difficulty: 'intermediate' as const
+    }
+  ];
+  const mockPhrases = [
+    {
+      id: 1,
+      text: 'How are you?',
+      ipa: '/haʊ ɑr ju/',
+      meaning_vi: 'Bạn có khỏe không?',
+      meaning_en: 'A common greeting question',
+      units: [
+        {
+          id: 1,
+          text: 'Hello',
+          ipa: '/həˈloʊ/',
+          meaning_vi: 'Xin chào',
+          meaning_en: 'A greeting',
+          type: 'noun' as const,
+          language: 'en' as const,
+          difficulty: 'beginner' as const,
+          audio: '/audio/hello.mp3'
+        }
+      ],
+      type: 'greeting' as const,
+      language: 'en' as const,
+      difficulty: 'beginner' as const
+    },
+    {
+      id: 2,
+      text: 'お茶をください',
+      ipa: '/oˈtʃa o kuˈdasai/',
+      meaning_vi: 'Xin cho tôi trà',
+      meaning_en: 'Please give me tea',
+      units: [
+        {
+          id: 2,
+          text: 'お茶',
+          ipa: '/oˈtʃa/',
+          meaning_vi: 'Trà',
+          meaning_en: 'Tea',
+          type: 'noun' as const,
+          language: 'ja' as const,
+          difficulty: 'beginner' as const
+        }
+      ],
+      type: 'conversation' as const,
+      language: 'ja' as const,
+      difficulty: 'intermediate' as const
+    }
+  ];
 
 
     return (
-        <motion.form
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            onSubmit={handleSubmit}
-            className="space-y-6"
+    <form className="w-[1920px] h-[720px] max-w-full mx-auto bg-white rounded-2xl shadow-2xl p-10 space-y-6 overflow-y-auto" onSubmit={handleSubmit}>
+      {/* Question Type */}
+      <div className="mb-2">
+        <Label className="text-base font-semibold mb-1 block">Question Type</Label>
+        <Select
+          value={formData.questionTypeId.toString()}
+          onValueChange={val => setFormData({ ...formData, questionTypeId: parseInt(val) })}
         >
-          {/* Question Text */}
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-gray-700">
-              Question
-            </Label>
-            <Textarea
-                value={formData.questionText}
-                onChange={(e) =>
-                    setFormData({ ...formData, questionText: e.target.value })
-                }
-                className="rounded-2xl border-2 border-gray-200 focus:border-orange-400"
-                placeholder="Enter your question here..."
-                required
-            />
-          </div>
+          <SelectTrigger className="rounded-xl border-2 border-gray-200 h-12 text-base">
+            <SelectValue placeholder="Select question type" />
+          </SelectTrigger>
+          <SelectContent className="rounded-xl">
+            {questionTypes.map(qt => (
+              <SelectItem key={qt.id} value={qt.id.toString()}>{qt.description}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-          {/* Type & Difficulty */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label className="text-sm font-bold text-gray-700">
-                Type
-              </Label>
-              <Select
-                  value={formData.questionTypeId.toString()}
-                  onValueChange={(val) =>
-                      setFormData({
-                        ...formData,
-                        questionTypeId: parseInt(val, 10),
-                      })
-                  }
-              >
-                <SelectTrigger className="rounded-2xl border-2 border-gray-200">
-                  <SelectValue placeholder="Select question type" />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl">
-                  {questionTypes.map((qt) => (
-                      <SelectItem key={qt.id} value={qt.id.toString()}>
-                        {qt.description}
-                      </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      {/* Question Content */}
+      <div className="mb-2">
+        <Label className="text-base font-semibold mb-1 block">Question Content</Label>
+        <Textarea
+          value={formData.questionText}
+          onChange={e => setFormData({ ...formData, questionText: e.target.value })}
+          className="rounded-xl border-2 border-gray-200 h-20 text-base"
+          placeholder="Enter your question here... (Markdown supported: **bold**, *italic*, [link](url))"
+          required
+        />
+        <div className="flex gap-3 mt-3">
+          <Button_admin type="button" className="flex-1 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700">Upload Image</Button_admin>
+          <Button_admin type="button" className="flex-1 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700">Upload Audio</Button_admin>
+          <Button_admin type="button" className="flex-1 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700">Test TTS</Button_admin>
+        </div>
+      </div>
 
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-bold text-gray-700">
-                Difficulty
-              </Label>
-              <Select
-                  value={formData.difficulty}
-                  onValueChange={(value) =>
-                      setFormData({
-                        ...formData,
-                        difficulty: value as FormState['difficulty'],
-                      })
-                  }
-              >
-                <SelectTrigger className="rounded-2xl border-2 border-gray-200">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl">
-                  <SelectItem value="easy">Easy</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="hard">Hard</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+      {/* IPA Pronunciation */}
+      <div className="mb-2">
+        <Label className="text-base font-semibold mb-1 block">IPA Pronunciation (Optional)</Label>
+        <Input_admin
+          value={formData.ipa || ''}
+          onChange={e => setFormData({ ...formData, ipa: e.target.value })}
+          className="rounded-xl border-2 border-gray-200 h-12 text-base"
+          placeholder="e.g. /həˈloʊ/"
+        />
+      </div>
 
-          {/* Module & Lesson */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label className="text-sm font-bold text-gray-700">
-                Module
-              </Label>
-              <Select
-                  value={formData.moduleId.toString()}
-                  onValueChange={(val) => {
-                    const mid = parseInt(val);
-                    setFormData({
-                      ...formData,
-                      moduleId: mid,
-                      lessonId: 0,
-                    });
-                  }}
-              >
-                <SelectTrigger className="rounded-2xl border-2 border-gray-200">
-                  <SelectValue placeholder="Select a module" />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl">
-                  {modules.map((m) => (
-                      <SelectItem key={m.id} value={m.id.toString()}>
-                        {m.name }
-                      </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      {/* Module/Lesson, Difficulty, Points */}
+      <div className="grid grid-cols-3 gap-4 mb-2">
+        <div>
+          <Label className="text-base font-semibold mb-1 block">Module/Lesson</Label>
+          <Select
+            value={formData.moduleId.toString()}
+            onValueChange={val => setFormData({ ...formData, moduleId: parseInt(val), lessonId: 0 })}
+          >
+            <SelectTrigger className="rounded-xl border-2 border-gray-200 h-12 text-base">
+              <SelectValue placeholder="Select a module" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              {modules.map(m => (
+                <SelectItem key={m.id} value={m.id.toString()}>{m.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-base font-semibold mb-1 block">Difficulty</Label>
+          <Select
+            value={formData.difficulty}
+            onValueChange={val => setFormData({ ...formData, difficulty: val as any })}
+          >
+            <SelectTrigger className="rounded-xl border-2 border-gray-200 h-12 text-base">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="easy">Easy</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="hard">Hard</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-base font-semibold mb-1 block">Points</Label>
+          <Input_admin
+            type="number"
+            value={formData.points}
+            onChange={e => setFormData({ ...formData, points: parseInt(e.target.value) || 0 })}
+            className="rounded-xl border-2 border-gray-200 h-12 text-base"
+          />
+        </div>
+      </div>
 
-
-
-
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-bold text-gray-700">
-                Lesson
-              </Label>
-              <Select
-                  value={formData.lessonId.toString()}
-                  onValueChange={(val) =>
-                      setFormData({
-                        ...formData,
-                        lessonId: parseInt(val),
-                      })
-                  }
-              >
-                <SelectTrigger className="rounded-2xl border-2 border-gray-200">
-                  <SelectValue placeholder="Select a lesson" />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl">
-                  {lessons.map((l) => (
-                      <SelectItem key={l.id} value={l.id.toString()}>
-                        {l.name}
-                      </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Points */}
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-gray-700">
-              Points
-            </Label>
+      {/* Answer Options hoặc Correct Answer */}
+      {formData.questionTypeId === 4 ? (
+        <div className="mb-2">
+          <Label className="text-base font-semibold mb-1 block">Correct Answer</Label>
+          <div className="flex gap-3">
             <Input_admin
-                type="number"
-                value={formData.points} // ✅ sửa score -> points
-                onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      points: parseInt(e.target.value, 10),
-                    })
-                }
+              value={answers[0]?.answerText || ''}
+              onChange={e => {
+                const val = e.target.value;
+                if (answers.length === 0) addAnswer();
+                handleAnswerChange(0, 'answerText', val);
+              }}
+              className="flex-1 rounded-xl border-2 border-gray-200 h-12 text-base"
+              placeholder="Enter the correct answer..."
             />
-
-          </div>
-
-
-
-
-
-          {/* Options or Answers UI */}
-          {[1, 2].includes(formData.questionTypeId) && ( // Multiple choice (1 hoặc 2)
-              <div className="space-y-2">
-                <Label className="text-sm font-bold text-gray-700">Options</Label>
-                {options.map((opt, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Input_admin
-                          placeholder={`Option ${index + 1}`}
-                          value={opt.optionText}
-                          onChange={(e) =>
-                              handleOptionChange(index, 'optionText', e.target.value)
-                          }
-                          className="flex-1"
-                      />
-                      <input
-                          type="checkbox"
-                          checked={opt.correct}
-                          onChange={(e) =>
-                              handleOptionChange(index, 'correct', e.target.checked)
-                          }
-                      />
-                      <Button_admin
-                          type="button"
-                          variant="ghost"
-                          onClick={() => removeOption(index)}
-                          className="text-red-500"
-                      >
-                        Remove
-                      </Button_admin>
-                    </div>
-                ))}
-                <Button_admin type="button" onClick={addOption} className="mt-2">
-                  + Add Option
-                </Button_admin>
-              </div>
-          )}
-
-          {formData.questionTypeId === 4 && ( // Text Input
-              <div className="space-y-2">
-                <Label className="text-sm font-bold text-gray-700">Answers</Label>
-                {answers.map((ans, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Input_admin
-                          placeholder={`Answer ${index + 1}`}
-                          value={ans.answerText}
-                          onChange={(e) =>
-                              handleAnswerChange(index, 'answerText', e.target.value)
-                          }
-                          className="flex-1"
-                      />
-                      <input
-                          type="checkbox"
-                          checked={ans.caseSensitive}
-                          onChange={(e) =>
-                              handleAnswerChange(index, 'caseSensitive', e.target.checked)
-                          }
-                      />
-                      <Button_admin
-                          type="button"
-                          variant="ghost"
-                          onClick={() => removeAnswer(index)}
-                          className="text-red-500"
-                      >
-                        Remove
-                      </Button_admin>
-                    </div>
-                ))}
-                <Button_admin type="button" onClick={addAnswer} className="mt-2">
-                  + Add Answer
-                </Button_admin>
-              </div>
-          )}
-
-
-
-
-          {/* Submit */}
-          <div className="flex justify-end pt-6">
-            <Button_admin
-                type="submit"
-                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+            <button
+              type="button"
+              className="rounded-xl border-dashed border-2 border-blue-300 text-blue-600 hover:bg-blue-50 px-4 py-2 text-sm font-semibold flex items-center gap-1"
+              onClick={() => setSuggestOpen({ type: 'answer' })}
             >
-              {initialData ? 'Update Question' : 'Create Question'}
-            </Button_admin>
+              <BookOpen className="w-4 h-4 mr-1" />
+              Suggest
+            </button>
           </div>
-        </motion.form>
-    );
+        </div>
+      ) : (
+        <div className="mb-2">
+          <div className="flex items-center justify-between mb-2">
+            <Label className="text-base font-semibold">Answer Options</Label>
+            <Button_admin type="button" onClick={addOption} className="rounded-xl px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-semibold flex items-center gap-1"><span className="text-lg">+</span> Add Option</Button_admin>
+          </div>
+          <div className="space-y-3">
+            {options.map((opt, i) => (
+              <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 shadow-sm" key={i}>
+                <input type="checkbox" checked={opt.correct} onChange={e => handleOptionChange(i, 'correct', e.target.checked)} className="w-5 h-5 accent-blue-600 rounded" />
+                <Input_admin
+                  value={opt.optionText}
+                  onChange={e => handleOptionChange(i, 'optionText', e.target.value)}
+                  className="flex-1 rounded-xl border-2 border-gray-200 h-10 text-base"
+                  placeholder={`Option ${i + 1}`}
+                />
+                <button
+                  type="button"
+                  className="rounded-xl border-dashed border-2 border-blue-300 text-blue-600 hover:bg-blue-50 px-3 py-2 text-xs font-semibold flex items-center gap-1"
+                  onClick={() => setSuggestOpen({ type: 'option', index: i })}
+                >
+                  <BookOpen className="w-4 h-4 mr-1" />
+                  Suggest
+                </button>
+                <Button_admin type="button" className="rounded-xl px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold" onClick={() => removeOption(i)}>✕</Button_admin>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Hint & Explanation */}
+      <div className="grid grid-cols-2 gap-4 mb-2">
+        <div>
+          <Label className="text-base font-semibold mb-1 block">Hint (Optional)</Label>
+          <Textarea
+            value={formData.hint || ''}
+            onChange={e => setFormData({ ...formData, hint: e.target.value })}
+            className="rounded-xl border-2 border-gray-200 h-12 text-base"
+            placeholder="Provide a helpful hint..."
+          />
+        </div>
+        <div>
+          <Label className="text-base font-semibold mb-1 block">Explanation (Optional)</Label>
+          <Textarea
+            value={formData.explanation || ''}
+            onChange={e => setFormData({ ...formData, explanation: e.target.value })}
+            className="rounded-xl border-2 border-gray-200 h-12 text-base"
+            placeholder="Explain why this is the correct answer..."
+          />
+        </div>
+      </div>
+
+      {/* Preview & Submit */}
+      <div className="flex justify-between mt-6 gap-4">
+        <Button_admin type="button" className="rounded-xl border border-blue-300 text-blue-700 bg-white hover:bg-blue-50 flex-1 h-12 text-base font-semibold">Preview Question</Button_admin>
+        <Button_admin type="submit" className="rounded-xl bg-gradient-to-r from-blue-500 to-green-500 text-white flex-1 h-12 text-base font-semibold hover:from-blue-600 hover:to-green-600">{initialData ? 'Update Question' : 'Create Question'}</Button_admin>
+      </div>
+
+      {/* Modal WordSuggestion */}
+      {suggestOpen && (
+        <Dialog open={!!suggestOpen} onOpenChange={open => !open && setSuggestOpen(null)}>
+          <DialogContent className="max-w-4xl max-h-[80vh] rounded-3xl">
+            <WordSuggestion
+              units={mockUnits}
+              phrases={mockPhrases}
+              onSelect={item =>
+                suggestOpen.type === 'answer'
+                  ? handleWordSuggestion(item)
+                  : handleWordSuggestion(item, suggestOpen.index)
+              }
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+    </form>
+  );
   };
 
   export default QuestionForm;

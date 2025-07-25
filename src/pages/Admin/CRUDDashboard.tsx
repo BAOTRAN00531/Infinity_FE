@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/reusable-components/tabs';
-import { BookOpen, Layers, FileText, HelpCircle, Globe, Users, LayoutDashboard } from 'lucide-react';
+import { BookOpen, Layers, FileText, HelpCircle, Globe, Users, LayoutDashboard,Book } from 'lucide-react';
 import OverviewDashboard from './OverviewDashboard'; // Cùng thư mục pages
 import CoursesCRUD from '@/pages/Admin/CoursesCRUD'; // Cùng thư mục pages
 import ModulesCRUD from '@/pages/Admin/ModulesCRUD';
@@ -8,6 +8,7 @@ import PartsCRUD from '@/pages/Admin/PartsCRUD';
 import QuestionsCRUD from '@/pages/Admin/QuestionsCRUD';
 import LanguagesCRUD from '@/pages/Admin/LanguagesCRUD';
 import UsersCRUD from '@/pages/Admin/UsersCRUD';
+import LexiconCRUD from '@/pages/Admin/LexiconCRUD';
 import {useState} from "react";
 import Header from "../../components/layout-components/Header";
 
@@ -21,6 +22,7 @@ const CRUDDashboard = () => {
     { id: 'modules', label: 'Modules', icon: Layers, color: 'bg-gradient-to-br from-blue-500 to-cyan-500' },
     { id: 'parts', label: 'Parts', icon: FileText, color: 'bg-gradient-to-br from-green-500 to-emerald-500' },
     { id: 'questions', label: 'Questions', icon: HelpCircle, color: 'bg-gradient-to-br from-orange-500 to-red-500' },
+    { id: 'lexicon', label: 'Lexicon', icon: Book, color: 'bg-gradient-to-br from-blue-500 to-purple-500' },
     { id: 'languages', label: 'Languages', icon: Globe, color: 'bg-gradient-to-br from-indigo-500 to-purple-500' },
     { id: 'users', label: 'Users', icon: Users, color: 'bg-gradient-to-br from-pink-500 to-rose-500' },
   ];
@@ -45,7 +47,7 @@ const CRUDDashboard = () => {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             {/* Tab Navigation */}
-            <TabsList className="grid w-full grid-cols-4 md:grid-cols-7 gap-4 h-auto bg-transparent p-0">
+            <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 gap-4 h-auto bg-transparent p-0">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -83,6 +85,9 @@ const CRUDDashboard = () => {
               </TabsContent>
               <TabsContent value="languages" className="m-0">
                 <LanguagesCRUD />
+              </TabsContent>
+              <TabsContent value="lexicon" className="m-0">
+                <LexiconCRUD />
               </TabsContent>
               <TabsContent value="users" className="m-0">
                 <UsersCRUD />
