@@ -24,7 +24,6 @@ interface Course {
   description: string;
   language: Language;
   level: 'Beginner' | 'Intermediate' | 'Advanced';
-  duration: string;
   status: 'active' | 'inactive';
   createdAt: string;
   modulesCount: number;
@@ -32,7 +31,7 @@ interface Course {
 
 interface CourseFormProps {
   initialData?: Course;
-  onSubmit: (data: Omit<Course, 'id' | 'createdAt' | 'modulesCount'>) => void;
+  onSubmit: (data: Omit<Course, 'id' | 'createdAt' | 'modulesCount' | 'duration'>) => void;
 }
 
 const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
@@ -42,22 +41,7 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
     name: initialData?.name || '',
     description: initialData?.description || '',
     level: initialData?.level || 'Beginner' as const,
-    duration: initialData?.duration || '',
     status: initialData?.status || 'active' as const,
-  });
-  const [durationValue, setDurationValue] = useState(() => {
-    if (initialData?.duration) {
-      const match = initialData.duration.match(/(\d+)/);
-      return match ? match[1] : '';
-    }
-    return '';
-  });
-  const [durationUnit, setDurationUnit] = useState(() => {
-    if (initialData?.duration) {
-      const match = initialData.duration.match(/(ngày|tuần|tháng|năm)/);
-      return match ? match[1] : 'tuần';
-    }
-    return 'tuần';
   });
 
   useEffect(() => {
@@ -85,7 +69,6 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
     onSubmit({
       ...formData,
       language: selectedLanguage,
-      duration: durationValue && durationUnit ? `${durationValue} ${durationUnit}` : '',
     });
   };
 

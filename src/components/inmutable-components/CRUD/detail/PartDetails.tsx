@@ -9,8 +9,6 @@ interface Part {
   type: 'video' | 'exercise'
   moduleId: number
   moduleName: string
-  orderIndex: number
-  duration: string
   status: 'active' | 'inactive'
 }
 
@@ -23,9 +21,6 @@ const PartDetails = ({ part }: PartDetailsProps) => {
       <div className="space-y-6">
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6">
           <div className="flex items-center gap-2 mb-2">
-          <span className="text-sm font-bold text-green-600 bg-green-200 px-3 py-1 rounded-full">
-            Part #{part.orderIndex}
-          </span>
             <Badge className="text-xs bg-blue-100 text-blue-800">
               {part.type}
             </Badge>
@@ -44,25 +39,9 @@ const PartDetails = ({ part }: PartDetailsProps) => {
                 <p className="font-bold text-gray-800">{part.moduleName}</p>
               </div>
             </div>
-
-            <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-2xl">
-              <Hash className="w-5 h-5 text-purple-600" />
-              <div>
-                <p className="text-sm font-medium text-gray-600">Order</p>
-                <p className="font-bold text-gray-800">#{part.orderIndex}</p>
-              </div>
-            </div>
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 bg-yellow-50 rounded-2xl">
-              <Clock className="w-5 h-5 text-yellow-600" />
-              <div>
-                <p className="text-sm font-medium text-gray-600">Duration</p>
-                <p className="font-bold text-gray-800">{part.duration}</p>
-              </div>
-            </div>
-
             <div className="flex items-center gap-3 p-4 bg-green-50 rounded-2xl">
               {part.type === 'video' ? (
                   <Play className="w-5 h-5 text-green-600" />
