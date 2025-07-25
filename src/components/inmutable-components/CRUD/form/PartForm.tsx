@@ -16,6 +16,12 @@ import {
 interface Module {
   id: number
   name: string
+  courseId: number // Thêm trường này để fix lỗi linter
+}
+
+interface Course {
+  id: number
+  name: string
 }
 
 export interface Part {
@@ -35,7 +41,9 @@ interface PartFormProps {
 }
 
 const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
+  const [courses, setCourses] = useState<Course[]>([])
   const [modules, setModules] = useState<Module[]>([])
+  const [selectedCourseId, setSelectedCourseId] = useState<number>(initialData ? 0 : 0)
   const [formData, setFormData] = useState<Omit<Part, 'id'>>({
     name: initialData?.name || '',
     type: initialData?.type || 'video',
@@ -46,43 +54,56 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
     status: initialData?.status || 'active',
   })
 
-  // Load modules và set moduleName cho lần đầu
+  // Fetch courses khi mở form
   useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+        if (!token) throw new Error('No token')
+        const res = await axios.get<Course[]>(
+          'http://localhost:8080/api/courses',
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+        setCourses(res.data)
+        // Nếu tạo mới, chọn course đầu tiên
+        if (!initialData && res.data.length > 0) {
+          setSelectedCourseId(res.data[0].id)
+        }
+      } catch {
+        toast.error('Không tải được danh sách courses')
+      }
+    }
+    fetchCourses()
+  }, [initialData])
+
+  // Fetch modules khi chọn course
+  useEffect(() => {
+    if (!selectedCourseId) return
     const fetchModules = async () => {
       try {
         const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
         if (!token) throw new Error('No token')
         const res = await axios.get<Module[]>(
-            'http://localhost:8080/api/modules',
-            { headers: { Authorization: `Bearer ${token}` } }
+          'http://localhost:8080/api/modules',
+          { headers: { Authorization: `Bearer ${token}` }, params: { courseId: selectedCourseId } }
         )
         setModules(res.data)
-
+        // Nếu tạo mới, chọn module đầu tiên
         if (!initialData && res.data.length > 0) {
-          // lần đầu tạo mới, chọn module đầu tiên
           setFormData(fd => ({
             ...fd,
             moduleId: res.data[0].id,
             moduleName: res.data[0].name,
           }))
-        } else if (initialData) {
-          // khi edit, cập nhật moduleName theo initialData
-          const m = res.data.find(m => m.id === initialData.moduleId)
-          if (m) {
-            setFormData(fd => ({
-              ...fd,
-              moduleName: m.name,
-            }))
-          }
         }
       } catch {
         toast.error('Không tải được danh sách modules')
       }
     }
     fetchModules()
-  }, [initialData])
+  }, [selectedCourseId, initialData])
 
-  // Nếu initialData thay đổi (khi edit), set lại toàn bộ formData
+  // Nếu initialData thay đổi (khi edit), set lại toàn bộ formData và selectedCourseId
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -94,6 +115,20 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
         duration: initialData.duration,
         status: initialData.status,
       })
+      // Tìm courseId từ moduleId (nếu có thể)
+      const fetchCourseIdByModule = async () => {
+        try {
+          const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+          if (!token) throw new Error('No token')
+          const res = await axios.get<Module>(
+            `http://localhost:8080/api/modules/${initialData.moduleId}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          )
+          // Giả sử module có trường courseId
+          setSelectedCourseId(res.data.courseId)
+        } catch {}
+      }
+      fetchCourseIdByModule()
     }
   }, [initialData])
 
@@ -154,11 +189,34 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
           </div>
         </div>
 
-        {/* Module */}
-        <div className="space-y-2">
-          <Label>Module</Label>
-          <Select
-              value={String(formData.moduleId)}
+        {/* Course & Module */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Label>Course</Label>
+            <Select
+              value={selectedCourseId ? String(selectedCourseId) : ''}
+              onValueChange={v => {
+                setSelectedCourseId(Number(v))
+                // Reset module khi đổi course
+                setFormData(fd => ({ ...fd, moduleId: 0, moduleName: '' }))
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn course" />
+              </SelectTrigger>
+              <SelectContent>
+                {courses.map(c => (
+                  <SelectItem key={c.id} value={String(c.id)}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Module</Label>
+            <Select
+              value={formData.moduleId ? String(formData.moduleId) : ''}
               onValueChange={async v => {
                 const m = modules.find(x => x.id === Number(v))
                 if (m) {
@@ -171,19 +229,20 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
                   }))
                 }
               }}
-
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select module" />
-            </SelectTrigger>
-            <SelectContent>
-              {modules.map(m => (
+              disabled={!selectedCourseId || modules.length === 0}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn module" />
+              </SelectTrigger>
+              <SelectContent>
+                {modules.map(m => (
                   <SelectItem key={m.id} value={String(m.id)}>
                     {m.name}
                   </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Order, Duration, Status */}

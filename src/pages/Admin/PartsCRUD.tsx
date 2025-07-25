@@ -5,13 +5,8 @@ import { toast } from 'react-toastify'
 import { Plus, Edit, Trash2, Eye, FileText } from 'lucide-react'
 import { Button_admin } from '@/components/reusable-components/button_admin'
 import { Input } from '@/components/reusable-components/input'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/reusable-components/dialog'
+import {Dialog,DialogContent,DialogHeader,DialogTitle,
+DialogTrigger,} from '@/components/reusable-components/dialog'
 import { Badge } from '@/components/reusable-components/badge'
 import PartForm, { Part } from '@/components/inmutable-components/CRUD/form/PartForm'
 import PartDetails from '@/components/inmutable-components/CRUD/detail/PartDetails'

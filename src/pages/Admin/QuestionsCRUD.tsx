@@ -4,31 +4,14 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, Eye, HelpCircle } from 'lucide-react';
 import { Button_admin } from '@/components/reusable-components/button_admin';
 import { Input } from '@/components/reusable-components/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/reusable-components/dialog';
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from '@/components/reusable-components/dialog';
 import { Badge } from '@/components/reusable-components/badge';
 import QuestionForm from '@/components/inmutable-components/CRUD/form/QuestionForm';
 import QuestionDetails from '@/components/inmutable-components/CRUD/detail/QuestionDetails';
 import DeleteConfirmation from '@/components/inmutable-components/DeleteConfirmation';
-import {
-  fetchModules,
-  fetchLessonsByModule,
-  fetchQuestionsByLesson,
-  createQuestion,
-  updateQuestion,
-  deleteQuestion,
-} from '@/api/adminQuestionApi';
+import {fetchModules, fetchLessonsByModule, fetchQuestionsByLesson, createQuestion, updateQuestion, deleteQuestion} from '@/api/adminQuestionApi';
 import {Module, Lesson, UIQuestion, QUESTION_TYPE_MAP} from '@/types';
-import {
-  mapUIQuestionToCreateDto,
-  mapUIQuestionToUpdateDto,
-  mapQuestionResponseToUIQuestion,
-} from '@/utils';
+import {mapUIQuestionToCreateDto, mapUIQuestionToUpdateDto, mapQuestionResponseToUIQuestion} from '@/utils';
 import QuestionsList from "@/pages/Admin/QuestionsList";
 import { toast } from 'react-toastify';
 
@@ -153,7 +136,7 @@ const QuestionsCRUD = () => {
                 <Plus className="w-5 h-5 mr-2" /> Add Question
               </Button_admin>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl rounded-3xl">
+            <DialogContent className="max-w-3xl rounded-3xl">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold">Create New Question</DialogTitle>
               </DialogHeader>

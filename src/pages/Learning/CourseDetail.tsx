@@ -1,5 +1,6 @@
+// CourseDetail.tsx
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
 import Header from "@/components/layout-components/Header";
@@ -19,26 +20,25 @@ export default function CourseDetail() {
     const [course, setCourse] = useState<CourseDto | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (id) {
             axios
                 .get(`/client/api/course/${id}`)
-                .then((res) => {
-                    setCourse(res.data);
-                })
-                .catch(() => {
-                    setError("Không thể tải thông tin khóa học.");
-                })
-                .finally(() => {
-                    setLoading(false);
-                });
+                .then((res) => setCourse(res.data))
+                .catch(() => setError("Không thể tải thông tin khóa học."))
+                .finally(() => setLoading(false));
         }
     }, [id]);
 
     if (loading) return <div className="p-4 text-center">Đang tải...</div>;
     if (error) return <div className="p-4 text-red-600">{error}</div>;
     if (!course) return <div className="p-4 text-gray-600">Không tìm thấy khóa học.</div>;
+
+    const handleBuy = () => {
+        navigate(`/purchase?courseId=${course.id}`);
+    };
 
     return (
         <>
@@ -63,7 +63,7 @@ export default function CourseDetail() {
 
                 <button
                     className="mt-8 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg shadow transition"
-                    onClick={() => alert("TODO: Thêm chức năng mua khóa học")}
+                    onClick={handleBuy}
                 >
                     Mua khóa học
                 </button>
