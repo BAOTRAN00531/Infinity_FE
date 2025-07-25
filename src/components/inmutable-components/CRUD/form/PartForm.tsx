@@ -24,14 +24,17 @@ interface Course {
   name: string
 }
 
+interface Language {
+  id: number;
+  name: string;
+}
+
 export interface Part {
   id: number
   name: string
   type: 'video' | 'exercise'
   moduleId: number
   moduleName: string
-  orderIndex: number
-  duration: string
   status: 'active' | 'inactive'
 }
 
@@ -43,29 +46,50 @@ interface PartFormProps {
 const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
   const [courses, setCourses] = useState<Course[]>([])
   const [modules, setModules] = useState<Module[]>([])
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [selectedLanguageId, setSelectedLanguageId] = useState<number>(0);
   const [selectedCourseId, setSelectedCourseId] = useState<number>(initialData ? 0 : 0)
   const [formData, setFormData] = useState<Omit<Part, 'id'>>({
     name: initialData?.name || '',
     type: initialData?.type || 'video',
     moduleId: initialData?.moduleId || 0,
     moduleName: initialData?.moduleName || '',
-    orderIndex: initialData?.orderIndex || 1,
-    duration: initialData?.duration || '',
     status: initialData?.status || 'active',
   })
 
-  // Fetch courses khi mở form
+  // Fetch languages khi mở form
   useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+        if (!token) throw new Error('No token')
+        const res = await axios.get<Language[]>(
+          'http://localhost:8080/api/languages',
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+        setLanguages(res.data)
+        if (!initialData && res.data.length > 0) {
+          setSelectedLanguageId(res.data[0].id)
+        }
+      } catch {
+        toast.error('Không tải được danh sách ngôn ngữ')
+      }
+    }
+    fetchLanguages()
+  }, [initialData])
+
+  // Fetch courses khi chọn ngôn ngữ
+  useEffect(() => {
+    if (!selectedLanguageId) return;
     const fetchCourses = async () => {
       try {
         const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
         if (!token) throw new Error('No token')
         const res = await axios.get<Course[]>(
-          'http://localhost:8080/api/courses',
+          `http://localhost:8080/api/courses/by-language/${selectedLanguageId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         )
         setCourses(res.data)
-        // Nếu tạo mới, chọn course đầu tiên
         if (!initialData && res.data.length > 0) {
           setSelectedCourseId(res.data[0].id)
         }
@@ -74,7 +98,7 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
       }
     }
     fetchCourses()
-  }, [initialData])
+  }, [selectedLanguageId, initialData])
 
   // Fetch modules khi chọn course
   useEffect(() => {
@@ -84,8 +108,8 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
         const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
         if (!token) throw new Error('No token')
         const res = await axios.get<Module[]>(
-          'http://localhost:8080/api/modules',
-          { headers: { Authorization: `Bearer ${token}` }, params: { courseId: selectedCourseId } }
+          `http://localhost:8080/api/modules?courseId=${selectedCourseId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
         )
         setModules(res.data)
         // Nếu tạo mới, chọn module đầu tiên
@@ -111,8 +135,6 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
         type: initialData.type,
         moduleId: initialData.moduleId,
         moduleName: initialData.moduleName,
-        orderIndex: initialData.orderIndex,
-        duration: initialData.duration,
         status: initialData.status,
       })
       // Tìm courseId từ moduleId (nếu có thể)
@@ -189,17 +211,41 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
           </div>
         </div>
 
-        {/* Course & Module */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Language, Course & Module */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <Label>Language</Label>
+            <Select
+              value={selectedLanguageId ? String(selectedLanguageId) : ''}
+              onValueChange={v => {
+                setSelectedLanguageId(Number(v));
+                setSelectedCourseId(0);
+                setModules([]);
+                setFormData(fd => ({ ...fd, moduleId: 0, moduleName: '' }));
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn ngôn ngữ" />
+              </SelectTrigger>
+              <SelectContent>
+                {languages.map(l => (
+                  <SelectItem key={l.id} value={String(l.id)}>
+                    {l.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="space-y-2">
             <Label>Course</Label>
             <Select
               value={selectedCourseId ? String(selectedCourseId) : ''}
               onValueChange={v => {
                 setSelectedCourseId(Number(v))
-                // Reset module khi đổi course
+                setModules([])
                 setFormData(fd => ({ ...fd, moduleId: 0, moduleName: '' }))
               }}
+              disabled={!selectedLanguageId || courses.length === 0}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Chọn course" />
@@ -217,15 +263,13 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
             <Label>Module</Label>
             <Select
               value={formData.moduleId ? String(formData.moduleId) : ''}
-              onValueChange={async v => {
+              onValueChange={v => {
                 const m = modules.find(x => x.id === Number(v))
                 if (m) {
-                  const nextOrder = await fetchMaxOrder(m.id)
                   setFormData(fd => ({
                     ...fd,
                     moduleId: m.id,
                     moduleName: m.name,
-                    orderIndex: nextOrder,
                   }))
                 }
               }}
@@ -245,45 +289,23 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
           </div>
         </div>
 
-        {/* Order, Duration, Status */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="space-y-2">
-            <Label>Order</Label>
-            <Input_admin
-                type="number"
-             value={formData.orderIndex}
-             onChange={e => setFormData(fd => ({ ...fd, orderIndex: +e.target.value }))}
-            required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Duration</Label>
-            <Input_admin
-                value={formData.duration}
-                onChange={e =>
-                    setFormData(fd => ({ ...fd, duration: e.target.value }))
-                }
-                placeholder="e.g., 5 min"
-                required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <Select
-                value={formData.status}
-                onValueChange={(v: 'active' | 'inactive') =>
-                    setFormData(fd => ({ ...fd, status: v }))
-                }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Status */}
+        <div className="space-y-2">
+          <Label>Status</Label>
+          <Select
+              value={formData.status}
+              onValueChange={(v: 'active' | 'inactive') =>
+                  setFormData(fd => ({ ...fd, status: v }))
+              }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Submit */}
