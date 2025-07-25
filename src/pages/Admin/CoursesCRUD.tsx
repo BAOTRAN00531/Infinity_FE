@@ -9,6 +9,7 @@ import CourseDetails from '@/components/inmutable-components/CRUD/detail/CourseD
 import DeleteConfirmation from '@/components/inmutable-components/DeleteConfirmation';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import api from "@/api";
 
 interface Course {
   id: number;
@@ -37,10 +38,7 @@ const CoursesCRUD = () => {
 
   const fetchCourses = async () => {
     try {
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      const res = await axios.get('http://localhost:8080/api/courses', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get('/api/courses');
       setCourses(res.data);
     } catch {
 
