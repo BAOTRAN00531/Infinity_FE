@@ -15,15 +15,16 @@ import DeleteConfirmation from '@/components/inmutable-components/DeleteConfirma
 const PartsCRUD: React.FC = () => {
   const [parts, setParts] = useState<Part[]>([])
   const [modules, setModules] = useState<{ id: number; name: string }[]>([])
-  const [moduleFilter, setModuleFilter] = useState<number>(0)
+  // Bỏ moduleFilter
   const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState('title-asc');
   const [selectedPart, setSelectedPart] = useState<Part | null>(null)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isViewOpen, setIsViewOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
 
-  // Fetch modules lần đầu
+  // Fetch modules lần đầu (nếu cần cho form), không cần setModuleFilter
   useEffect(() => {
     const fetchModules = async () => {
       try {
@@ -34,9 +35,6 @@ const PartsCRUD: React.FC = () => {
             { headers: { Authorization: `Bearer ${token}` } }
         )
         setModules(res.data)
-        if (res.data.length > 0 && !moduleFilter) {
-          setModuleFilter(res.data[0].id)
-        }
       } catch (err) {
         console.error(err)
         toast.error('Không tải được Modules')
@@ -45,15 +43,14 @@ const PartsCRUD: React.FC = () => {
     fetchModules()
   }, [])
 
-  // Hàm fetch lại parts
+  // Hàm fetch lại parts (luôn fetch toàn bộ)
   const fetchParts = async () => {
     try {
       const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       if (!token) throw new Error('Chưa đăng nhập')
-      const params = moduleFilter > 0 ? { moduleId: moduleFilter } : {}
       const res = await axios.get<Part[]>(
           'http://localhost:8080/api/lessons',
-          { headers: { Authorization: `Bearer ${token}` }, params }
+          { headers: { Authorization: `Bearer ${token}` } }
       )
       setParts(res.data)
     } catch (err) {
@@ -64,7 +61,7 @@ const PartsCRUD: React.FC = () => {
 
   useEffect(() => {
     fetchParts()
-  }, [moduleFilter])
+  }, [])
 
   // Create mới lên API
   const handleCreate = async (data: Omit<Part, 'id'>) => {
@@ -127,34 +124,34 @@ const PartsCRUD: React.FC = () => {
     }
   }
 
-  // Filter an toàn
-  const normalizedTerm = searchTerm.toLowerCase()
-  const filtered = parts.filter(p => {
-    const name = p.name ?? ''
-    const moduleName = p.moduleName ?? ''
-    return (
+  // Filter + sort
+  const normalizedTerm = searchTerm.toLowerCase();
+  const filtered = parts
+    .filter(p => {
+      const name = p.name ?? '';
+      const moduleName = p.moduleName ?? '';
+      return (
         name.toLowerCase().includes(normalizedTerm) ||
         moduleName.toLowerCase().includes(normalizedTerm)
-    )
-  })
+      );
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'title-asc':
+          return a.name.localeCompare(b.name);
+        case 'title-desc':
+          return b.name.localeCompare(a.name);
+        case 'active':
+          return (a.status === 'active' ? -1 : 1) - (b.status === 'active' ? -1 : 1);
+        case 'inactive':
+          return (a.status === 'inactive' ? -1 : 1) - (b.status === 'inactive' ? -1 : 1);
+        default:
+          return 0;
+      }
+    });
 
   return (
       <div className="p-8">
-        {/* Module filter dropdown */}
-        <div className="mb-4">
-          <label className="mr-2 font-medium">Chọn Module:</label>
-          <select
-              value={moduleFilter}
-              onChange={e => setModuleFilter(Number(e.target.value))}
-              className="border p-2 rounded"
-          >
-            <option value={0}>Tất cả</option>
-            {modules.map(m => (
-                <option key={m.id} value={m.id}>{m.name}</option>
-            ))}
-          </select>
-        </div>
-
         {/* Header + Create button */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
@@ -182,14 +179,24 @@ const PartsCRUD: React.FC = () => {
           </Dialog>
         </div>
 
-        {/* Search */}
-        <div className="mb-6">
+        {/* Search + Sort dưới tiêu đề */}
+        <div className="mb-6 flex flex-col sm:flex-row gap-4">
           <Input
               placeholder="Search parts..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="max-w-md"
+              className="max-w-md rounded-2xl"
           />
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            className="rounded-2xl border-2 border-gray-200 focus:border-blue-400 px-4 py-2"
+          >
+            <option value="title-asc">Title: A-Z</option>
+            <option value="title-desc">Title: Z-A</option>
+            <option value="active">Active First</option>
+            <option value="inactive">Inactive First</option>
+          </select>
         </div>
 
         {/* Grid cards */}
@@ -200,9 +207,7 @@ const PartsCRUD: React.FC = () => {
                   className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/50 hover:shadow-xl transition-all"
               >
                 <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                #{part.orderIndex}
-              </span>
+                  {/* Đã xoá orderIndex */}
                   <Badge className="text-xs bg-blue-100 text-blue-800">
                     {part.type}
                   </Badge>
@@ -212,7 +217,6 @@ const PartsCRUD: React.FC = () => {
                 </h3>
                 <p className="text-xs text-gray-500 mb-3">{part.moduleName}</p>
                 <div className="flex items-center justify-between text-sm mb-4">
-                  <span className="text-gray-600">{part.duration}</span>
                   <Badge
                       className={`text-xs font-bold rounded-full ${
                           part.status === 'active'
