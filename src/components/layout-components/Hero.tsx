@@ -34,7 +34,7 @@ export default function Hero() {
                         <FancyButton
                             text="Get started"
                             variant="primary"
-                            to="/register"
+                            to="/client/courses"
                             className="w-full max-w-[300px] md:max-w-[400px] text-lg md:text-xl font-bold"
                         />
 

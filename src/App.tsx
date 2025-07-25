@@ -21,6 +21,8 @@ import LoadingIndicator from 'components/loading-page/LoadingIndicator'
 import OAuth2RedirectHandler from "@/components/auth/OAuth2RedirectHandler";
 import PurchasePage from "@/components/payment/PurchasePage";
 import InvoicePage from "@/components/payment/InvoicePage";
+import ClientCourseList from "@/pages/Learning/ClientCourseList";
+import CourseDetail from "@/pages/Learning/CourseDetail";
 
 
 // ✅ Logic trong App.tsx (bổ sung allowedPaths)
@@ -54,12 +56,12 @@ const App: React.FC = () => {
             const allowedPaths = [
                 '/', '/login', '/register', '/forgot-password',
                 '/verify-otp', '/reset-password',
-                '/buy', '/payment-success', '/verify-email'
+                '/buy', '/payment-success', '/verify-email', '/khoa-hoc'
             ];
 
-            if (!allowedPaths.includes(location.pathname)) {
-                navigate('/');
-            }
+            // if (!allowedPaths.includes(location.pathname)) {
+            //     navigate('/');
+            // }
         }
     }, [navigate, location.pathname]);
 
@@ -75,7 +77,15 @@ const App: React.FC = () => {
             <Route path="/" element={<IndexClient />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/verify-confirmation" element={<VerifyConfirmation />} />
+
+        {/*<Route path="/khoa-hoc" element={<ClientCourseList />} />*/}
+
+
+        <Route path="/client/courses" element={<ClientCourseList />} />
+        <Route path="/client/course/:id" element={<CourseDetail />} />
+
+
+        <Route path="/verify-confirmation" element={<VerifyConfirmation />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/verify-otp" element={<VerifyOtp />} />
             <Route path="/reset-password" element={<ResetPassword />} />
