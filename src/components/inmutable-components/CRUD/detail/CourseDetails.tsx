@@ -8,7 +8,6 @@ interface Course {
   description: string;
   language: { id: number; name: string };
   level: 'Beginner' | 'Intermediate' | 'Advanced';
-  duration: string;
   status: 'active' | 'inactive';
   createdAt: string;
   modulesCount: number;
@@ -65,14 +64,6 @@ const CourseDetails = ({ course }: CourseDetailsProps) => {
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 bg-yellow-50 rounded-2xl">
-              <Clock className="w-5 h-5 text-yellow-600" />
-              <div>
-                <p className="text-sm font-medium text-gray-600">Duration</p>
-                <p className="font-bold text-gray-800">{course.duration}</p>
-              </div>
-            </div>
-
             <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-2xl">
               <Calendar className="w-5 h-5 text-purple-600" />
               <div>

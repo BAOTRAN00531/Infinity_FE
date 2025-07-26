@@ -14,9 +14,15 @@ import {
 } from '@/components/reusable-components/select'
 
 /** Định nghĩa kiểu Course để fetch dropdown */
+interface Language {
+  id: number;
+  name: string;
+}
+
 interface Course {
-  id: number
-  name: string
+  id: number;
+  name: string;
+  languageId: number;
 }
 
 /** Kiểu dữ liệu form truyền lên BE (mapping sang DTO) */
@@ -27,7 +33,6 @@ export interface Module {
   courseId: number
   courseName: string
   order: number
-  duration: string
   status: 'active' | 'inactive'
   partsCount: number
 }
@@ -37,7 +42,6 @@ export interface ModuleRequest {
   description: string;
   courseId: number;
   order: number;
-  duration: string;
   status: 'active' | 'inactive';
 }
 
@@ -50,43 +54,79 @@ interface ModuleFormProps {
 
 
 const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
-  const [courses, setCourses] = useState<Course[]>([])
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [selectedLanguageId, setSelectedLanguageId] = useState<number | null>(null);
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [formData, setFormData] = useState<Omit<Module, 'id'>>({
     name: initialData?.name || '',
     description: initialData?.description || '',
     courseId: initialData?.courseId || 0,
     courseName: initialData?.courseName || 'Select a course',
     order: initialData?.order || 1,
-    duration: initialData?.duration || '',
     status: initialData?.status || 'active',
     partsCount: initialData?.partsCount || 0,
-  })
+  });
 
-  // Fetch courses vào dropdown
+  // Fetch languages và courses
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-        if (!token) throw new Error('No token')
-        const res = await axios.get<Course[]>(
-            'http://localhost:8080/api/courses',
-            { headers: { Authorization: `Bearer ${token}` } }
-        )
-        setCourses(res.data)
-        // nếu edit thì map lại courseName
-        if (initialData) {
-          const found = res.data.find(c => c.id === initialData.courseId)
-          if (found) {
-            setFormData(fd => ({ ...fd, courseName: found.name }))
-          }
-        }
+        const [langRes, courseRes] = await Promise.all([
+          axios.get<Language[]>('http://localhost:8080/api/languages', { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get<Course[]>('http://localhost:8080/api/courses', { headers: { Authorization: `Bearer ${token}` } }),
+        ]);
+        setLanguages(langRes.data);
+        setCourses(courseRes.data);
       } catch (err) {
-        console.error(err)
-        toast.error('Không tải được danh sách courses')
+        toast.error('Không tải được dữ liệu');
       }
+    };
+    fetchData();
+  }, []);
+
+  // Khi chọn ngôn ngữ, gọi API lấy courses theo ngôn ngữ
+  useEffect(() => {
+    if (selectedLanguageId) {
+      const fetchCoursesByLanguage = async () => {
+        try {
+          const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+          const res = await axios.get(`http://localhost:8080/api/courses/by-language/${selectedLanguageId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setFilteredCourses(res.data);
+          setFormData(fd => ({ ...fd, courseId: 0, courseName: '' })); // reset course khi đổi ngôn ngữ
+        } catch (err) {
+          setFilteredCourses([]);
+          setFormData(fd => ({ ...fd, courseId: 0, courseName: '' }));
+        }
+      };
+      fetchCoursesByLanguage();
+    } else {
+      setFilteredCourses([]);
+      setFormData(fd => ({ ...fd, courseId: 0, courseName: '' }));
     }
-    fetchCourses()
-  }, [initialData])
+  }, [selectedLanguageId]);
+
+  // Sau khi chọn course, tự động tăng order
+  useEffect(() => {
+    if (formData.courseId) {
+      const fetchModules = async () => {
+        try {
+          const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+          const res = await axios.get(`http://localhost:8080/api/modules?courseId=${formData.courseId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const maxOrder = res.data.reduce((max: number, m: any) => Math.max(max, m.order), 0);
+          setFormData(fd => ({ ...fd, order: maxOrder + 1 }));
+        } catch (err) {
+          setFormData(fd => ({ ...fd, order: 1 }));
+        }
+      };
+      fetchModules();
+    }
+  }, [formData.courseId]);
 
   // Đồng bộ lại khi initialData thay đổi
   useEffect(() => {
@@ -97,7 +137,6 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
         courseId: initialData.courseId,
         courseName: initialData.courseName,
         order: initialData.order,
-        duration: initialData.duration,
         status: initialData.status,
         partsCount: initialData.partsCount,
       })
@@ -112,7 +151,6 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
       description: formData.description,
       courseId: formData.courseId,
       order: formData.order,
-      duration: formData.duration,
       status: formData.status,
     };
 
@@ -122,139 +160,101 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
 
 
   return (
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Title & Course */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">
-              Module Title
-            </Label>
-            <Input_admin
-                value={formData.name}
-                onChange={e =>
-                    setFormData({ ...formData, name: e.target.value })
-                }
-                className="rounded-2xl border-2 border-gray-200 focus:border-blue-400"
-                required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">
-              Course
-            </Label>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Chọn ngôn ngữ */}
+      <div className="space-y-2">
+        <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Language</Label>
+        <Select
+          value={selectedLanguageId?.toString() || ''}
+          onValueChange={value => setSelectedLanguageId(Number(value))}
+        >
+          <SelectTrigger className="rounded-2xl border-2 border-gray-200">
+            <SelectValue placeholder="Chọn ngôn ngữ" />
+          </SelectTrigger>
+          <SelectContent className="rounded-2xl">
+            {languages.map(lang => (
+              <SelectItem key={lang.id} value={lang.id.toString()}>{lang.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-            <Select
-                value={formData.courseId ? formData.courseId.toString() : undefined}
-                onValueChange={(value) => {
-                  const id = parseInt(value, 10);
-                  const found = courses.find(c => c.id === id);
-                  setFormData({
-                    ...formData,
-                    courseId: id,
-                    courseName: found?.name || '',
-                  });
-                }}
-            >
-              <SelectTrigger className="rounded-2xl border-2 border-gray-200">
-                <SelectValue placeholder="Chọn một khóa học" />
-              </SelectTrigger>
+      {/* Chọn course (lọc theo ngôn ngữ) */}
+      <div className="space-y-2">
+        <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Course</Label>
+        <Select
+          value={formData.courseId ? formData.courseId.toString() : ''}
+          onValueChange={value => {
+            const id = Number(value);
+            const found = filteredCourses.find(c => c.id === id);
+            setFormData({ ...formData, courseId: id, courseName: found?.name || '' });
+          }}
+          disabled={!selectedLanguageId}
+        >
+          <SelectTrigger className="rounded-2xl border-2 border-gray-200">
+            <SelectValue placeholder="Chọn khoá học" />
+          </SelectTrigger>
+          <SelectContent className="rounded-2xl">
+            {filteredCourses.map(course => (
+              <SelectItem key={course.id} value={course.id.toString()}>{course.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-              <SelectContent className="rounded-2xl">
-                {courses.map(course => (
-                    <SelectItem key={course.id} value={course.id.toString()}>
-                      {course.name}
-                    </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+      {/* Title */}
+      <div className="space-y-2">
+        <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Module Title</Label>
+        <Input_admin
+          value={formData.name}
+          onChange={e => setFormData({ ...formData, name: e.target.value })}
+          className="rounded-2xl border-2 border-gray-200 focus:border-blue-400"
+          required
+        />
+      </div>
 
+      {/* Description */}
+      <div className="space-y-2">
+        <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Description</Label>
+        <Textarea
+          value={formData.description}
+          onChange={e => setFormData({ ...formData, description: e.target.value })}
+          className="rounded-2xl border-2 border-gray-200 focus:border-blue-400"
+          required
+        />
+      </div>
 
-        </div>
-
-        {/* Description */}
+      {/* Order / Status */}
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+        {/* Status */}
         <div className="space-y-2">
-          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">
-            Description
-          </Label>
-          <Textarea
-              value={formData.description}
-              onChange={e =>
-                  setFormData({ ...formData, description: e.target.value })
-              }
-              className="rounded-2xl border-2 border-gray-200 focus:border-blue-400"
-              required
-          />
-        </div>
-
-        {/* Order / Duration / Status */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Order */}
-          <div className="space-y-2">
-
-            {/*<Input_admin*/}
-            {/*    type="number"*/}
-            {/*    value={formData.order}*/}
-            {/*    onChange={e =>*/}
-            {/*        setFormData({*/}
-            {/*          ...formData,*/}
-            {/*          order: parseInt(e.target.value, 10) || 1,*/}
-            {/*        })*/}
-            {/*    }*/}
-            {/*    className="rounded-2xl border-2 border-gray-200 focus:border-blue-400"*/}
-            {/*    required*/}
-            {/*/>*/}
-          </div>
-          {/* Duration */}
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">
-              Duration
-            </Label>
-            <Input_admin
-                value={formData.duration}
-                onChange={e =>
-                    setFormData({ ...formData, duration: e.target.value })
-                }
-                placeholder="e.g., 2 hours"
-                className="rounded-2xl border-2 border-gray-200 focus:border-blue-400"
-                required
-            />
-          </div>
-          {/* Status */}
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">
-              Status
-            </Label>
-            <Select
-                value={formData.status}
-                onValueChange={value =>
-                    setFormData({ ...formData, status: value as 'active' | 'inactive' })
-                }
-            >
-              <SelectTrigger className="rounded-2xl border-2 border-gray-200">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="rounded-2xl">
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Submit */}
-        <div className="flex justify-end pt-6">
-          <Button_admin
-              type="submit"
-              className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600
-                     text-white font-bold px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl
-                     transition-all duration-300 disabled:opacity-50"
+          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Status</Label>
+          <Select
+            value={formData.status}
+            onValueChange={value => setFormData({ ...formData, status: value as 'active' | 'inactive' })}
           >
-            {initialData ? 'Update Module' : 'Create Module'}
-          </Button_admin>
+            <SelectTrigger className="rounded-2xl border-2 border-gray-200">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl">
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      </form>
-  )
+      </div>
+
+      {/* Submit */}
+      <div className="flex justify-end pt-6">
+        <Button_admin
+          type="submit"
+          className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
+        >
+          {initialData ? 'Update Module' : 'Create Module'}
+        </Button_admin>
+      </div>
+    </form>
+  );
 }
 
 export default ModuleForm
