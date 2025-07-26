@@ -27,6 +27,7 @@ interface Course {
   status: 'active' | 'inactive';
   createdAt: string;
   modulesCount: number;
+  price: number;
 }
 
 interface CourseFormProps {
@@ -42,7 +43,26 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
     description: initialData?.description || '',
     level: initialData?.level || 'Beginner' as const,
     status: initialData?.status || 'active' as const,
+    price: initialData?.price || 0, // ✅ Thêm dòng này
   });
+
+
+  const [durationValue, setDurationValue] = useState(() => {
+    if (initialData?.duration) {
+      const match = initialData.duration.match(/(\d+)/);
+      return match ? match[1] : '';
+    }
+    return '';
+  });
+  const [durationUnit, setDurationUnit] = useState(() => {
+    if (initialData?.duration) {
+      const match = initialData.duration.match(/(ngày|tuần|tháng|năm)/);
+      return match ? match[1] : 'tuần';
+    }
+    return 'tuần';
+  });
+
+
 
   useEffect(() => {
     const fetchLanguages = async () => {
@@ -70,6 +90,7 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
       ...formData,
       language: selectedLanguage,
     });
+
   };
 
   return (
@@ -182,6 +203,22 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
               </SelectContent>
             </Select>
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="price" className="text-sm font-bold text-gray-700 dark:text-gray-200">Price (VND)</Label>
+            <Input_admin
+                id="price"
+                type="number"
+                min={0}
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                placeholder="Nhập giá khóa học"
+                required
+            />
+          </div>
+
+
+
         </div>
 
         <div className="flex justify-end">
