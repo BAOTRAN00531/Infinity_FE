@@ -32,7 +32,7 @@ interface Course {
 
 interface CourseFormProps {
   initialData?: Course;
-  onSubmit: (data: Omit<Course, 'id' | 'createdAt' | 'modulesCount' | 'duration'>) => void;
+  onSubmit: (data: Omit<Course, 'id' | 'createdAt' | 'modulesCount' >) => void;
 }
 
 const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
@@ -46,21 +46,6 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
     price: initialData?.price || 0, // ✅ Thêm dòng này
   });
 
-
-  const [durationValue, setDurationValue] = useState(() => {
-    if (initialData?.duration) {
-      const match = initialData.duration.match(/(\d+)/);
-      return match ? match[1] : '';
-    }
-    return '';
-  });
-  const [durationUnit, setDurationUnit] = useState(() => {
-    if (initialData?.duration) {
-      const match = initialData.duration.match(/(ngày|tuần|tháng|năm)/);
-      return match ? match[1] : 'tuần';
-    }
-    return 'tuần';
-  });
 
 
 
