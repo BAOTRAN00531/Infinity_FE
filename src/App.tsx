@@ -91,8 +91,8 @@ const App: React.FC = () => {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/user/dashboard" element={<UserDashboard />} />
 
-        <Route path="/buy" element={<PurchasePage />} />
-        <Route path="/payment-success" element={<InvoicePage />} />
+        <Route path="/purchase" element={<PurchasePage />} />
+        <Route path="/invoice" element={<InvoicePage />} />
 
 
             <Route

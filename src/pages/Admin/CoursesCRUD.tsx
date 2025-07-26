@@ -20,7 +20,9 @@ interface Course {
   status: 'active' | 'inactive';
   createdAt: string;
   modulesCount: number;
+  price: number; // ✅ Thêm dòng này
 }
+
 
 const CoursesCRUD = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -172,6 +174,12 @@ const CoursesCRUD = () => {
                     <span>Modules:</span>
                     <span>{course.modulesCount}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span>Price:</span>
+                    <span>{course.price != null ? `${course.price.toLocaleString()}₫` : 'N/A'}</span>
+
+                  </div>
+
                 </div>
 
                 <div className="flex justify-between items-center border-t pt-2 mt-2">

@@ -28,6 +28,7 @@ interface Course {
   status: 'active' | 'inactive';
   createdAt: string;
   modulesCount: number;
+  price: number;
 }
 
 interface CourseFormProps {
@@ -44,7 +45,9 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
     level: initialData?.level || 'Beginner' as const,
     duration: initialData?.duration || '',
     status: initialData?.status || 'active' as const,
+    price: initialData?.price || 0, // ✅ Thêm dòng này
   });
+
   const [durationValue, setDurationValue] = useState(() => {
     if (initialData?.duration) {
       const match = initialData.duration.match(/(\d+)/);
@@ -87,6 +90,7 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
       language: selectedLanguage,
       duration: durationValue && durationUnit ? `${durationValue} ${durationUnit}` : '',
     });
+
   };
 
   return (
@@ -199,6 +203,22 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
               </SelectContent>
             </Select>
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="price" className="text-sm font-bold text-gray-700 dark:text-gray-200">Price (VND)</Label>
+            <Input_admin
+                id="price"
+                type="number"
+                min={0}
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                placeholder="Nhập giá khóa học"
+                required
+            />
+          </div>
+
+
+
         </div>
 
         <div className="flex justify-end">

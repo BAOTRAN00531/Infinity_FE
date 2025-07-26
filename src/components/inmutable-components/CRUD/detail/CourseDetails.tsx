@@ -12,7 +12,9 @@ interface Course {
   status: 'active' | 'inactive';
   createdAt: string;
   modulesCount: number;
+  price: number; // ✅ thêm dòng này
 }
+
 
 interface CourseDetailsProps {
   course: Course;
@@ -54,6 +56,14 @@ const CourseDetails = ({ course }: CourseDetailsProps) => {
             </div>
           </div>
 
+          <div className="flex items-center gap-3 p-4 bg-pink-50 rounded-2xl">
+            <span className="w-5 h-5 text-pink-600 font-bold text-lg">₫</span>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Price</p>
+              <p className="font-bold text-gray-800">{course.price.toLocaleString()} VND</p>
+            </div>
+          </div>
+
           <div className="space-y-4">
             <div className="flex items-center gap-3 p-4 bg-yellow-50 rounded-2xl">
               <Clock className="w-5 h-5 text-yellow-600" />
@@ -90,6 +100,7 @@ const CourseDetails = ({ course }: CourseDetailsProps) => {
               {course.status}
             </Badge>
           </div>
+
         </div>
       </div>
   );
