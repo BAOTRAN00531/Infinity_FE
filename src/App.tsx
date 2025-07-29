@@ -23,6 +23,7 @@ import PurchasePage from "@/components/payment/PurchasePage";
 import InvoicePage from "@/components/payment/InvoicePage";
 import ClientCourseList from "@/pages/Learning/ClientCourseList";
 import CourseDetail from "@/pages/Learning/CourseDetail";
+import OrderHistoryPage from "@/components/history/OrderHistoryPage";
 
 
 // ✅ Logic trong App.tsx (bổ sung allowedPaths)
@@ -94,6 +95,8 @@ const App: React.FC = () => {
         <Route path="/purchase" element={<PurchasePage />} />
         <Route path="/invoice" element={<InvoicePage />} />
 
+        <Route path="/order-history" element={<OrderHistoryPage />} />
+
 
             <Route
                 path="/admin/dashboard"
@@ -112,7 +115,7 @@ const App: React.FC = () => {
                             <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
                                 <LanguageForm
                                     onSubmit={(formData) => {
-                                        const token = localStorage.getItem('access_token');
+                                        const token = localStorage.getItem('access_token'); sessionStorage.getItem('access_token');
                                         if (!token) {
                                             toast.error('Missing token');
                                             return;

@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import ThemeToggle from "../ThemeToggle";
 import FancyButton from "../button/FancyButton";
+import CartButton from "@/components/button/CartButton";
+import OrderHistoryButton  from "@/components/history/OrderHistoryButton";
+
 
 interface HeaderProps {
     welcomeMessage?: string;
@@ -72,6 +75,8 @@ export default function Header({ welcomeMessage }: HeaderProps) {
         }
     };
 
+    const cartItemCount = 2;
+
     return (
         <header className="w-full p-4 bg-white dark:bg-gray-900 shadow text-xl">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
@@ -103,6 +108,12 @@ export default function Header({ welcomeMessage }: HeaderProps) {
 
                     {token ? (
                         <div className="flex items-center gap-2 ml-auto">
+
+                            <OrderHistoryButton />
+
+
+                            {/*<CartButton itemCount={cartItemCount} />*/}
+
                             <img
                                 src={avatar || "/avatar.png"}
                                 alt="Avatar"
@@ -133,6 +144,7 @@ export default function Header({ welcomeMessage }: HeaderProps) {
                         </div>
                     ) : (
                         <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto ml-auto">
+
                             <FancyButton
                                 text="Đăng nhập"
                                 variant="primary"

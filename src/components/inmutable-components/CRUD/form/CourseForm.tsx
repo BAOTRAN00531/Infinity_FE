@@ -32,7 +32,7 @@ interface Course {
 
 interface CourseFormProps {
   initialData?: Course;
-  onSubmit: (data: Omit<Course, 'id' | 'createdAt' | 'modulesCount' >) => void;
+  onSubmit: (data: Omit<Course, 'id' | 'createdAt' | 'modulesCount' | 'duration'>) => void;
 }
 
 const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
