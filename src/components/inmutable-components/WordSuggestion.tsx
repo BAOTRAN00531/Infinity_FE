@@ -6,12 +6,12 @@ import { Badge } from '@/components/reusable-components/badge';
 import { ScrollArea } from '@/components/reusable-components/scroll-area';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/reusable-components/hover-card';
 import { Search, Volume2, BookOpen } from 'lucide-react';
-import { LexiconUnit, LexiconPhrase } from '@/pages/Admin/LexiconCRUD';
+import { LexiconUnit } from '@/pages/Admin/LexiconCRUD';
 
 interface WordSuggestionProps {
   units: LexiconUnit[];
-  phrases: LexiconPhrase[];
-  onSelect: (item: LexiconUnit | LexiconPhrase) => void;
+  phrases: LexiconUnit[];
+  onSelect: (item: LexiconUnit) => void;
   placeholder?: string;
 }
 
@@ -19,20 +19,20 @@ const WordSuggestion: React.FC<WordSuggestionProps> = ({ units = [], phrases = [
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'words' | 'phrases'>('words');
 
-  const allItems: (LexiconPhrase | LexiconUnit)[] = activeTab === 'words' ? units : phrases;
+  const allItems: LexiconUnit[] = activeTab === 'words' ? units : phrases;
   
-  const filteredItems = allItems.filter((item: any) =>
+  const filteredItems = allItems.filter((item: LexiconUnit) =>
     item.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.ipa && item.ipa.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (item.meaning_vi && item.meaning_vi.toLowerCase().includes(searchTerm.toLowerCase()))
+    (item.meaning_en && item.meaning_en.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleSelect = (item: LexiconUnit | LexiconPhrase) => {
+  const handleSelect = (item: LexiconUnit) => {
     onSelect(item);
     setSearchTerm('');
   };
 
-  const playAudio = (item: LexiconUnit | LexiconPhrase, e: React.MouseEvent) => {
+  const playAudio = (item: LexiconUnit, e: React.MouseEvent) => {
     e.stopPropagation();
     if (item.audio) {
       const audio = new Audio(item.audio);
@@ -52,7 +52,16 @@ const WordSuggestion: React.FC<WordSuggestionProps> = ({ units = [], phrases = [
     }
   };
 
-  const WordHoverCard = ({ item }: { item: LexiconUnit | LexiconPhrase }) => (
+  // Helper function để xử lý language an toàn
+  const getSafeLanguage = (language: any): string => {
+    if (!language) return 'EN';
+    if (typeof language === 'string') return language.toUpperCase();
+    if (typeof language === 'object' && language.code) return language.code.toUpperCase();
+    if (typeof language === 'object' && language.name) return language.name.toUpperCase();
+    return 'EN';
+  };
+
+  const WordHoverCard = ({ item }: { item: LexiconUnit }) => (
     <HoverCard>
       <HoverCardTrigger asChild>
         <div 
@@ -71,12 +80,12 @@ const WordSuggestion: React.FC<WordSuggestionProps> = ({ units = [], phrases = [
                 <Volume2 className="w-3 h-3" />
               </Button_admin>
               <Badge className="text-xs bg-blue-100 text-blue-800">
-                {item.language.toUpperCase()}
+                {getSafeLanguage(item.language)}
               </Badge>
             </div>
           </div>
           <p className="text-sm text-gray-600 mb-1">IPA: {item.ipa}</p>
-          <p className="text-sm text-gray-700">{item.meaning_vi}</p>
+          <p className="text-sm text-gray-700">{item.meaning_en}</p>
           <div className="flex gap-1 mt-2">
             <Badge variant="outline" className="text-xs">
               {item.type}
@@ -101,20 +110,8 @@ const WordSuggestion: React.FC<WordSuggestionProps> = ({ units = [], phrases = [
             </Button_admin>
           </div>
           <p className="text-sm text-gray-600">IPA: {item.ipa}</p>
-          <p className="font-semibold text-blue-600">{item.meaning_vi}</p>
+          <p className="font-semibold text-blue-600">{item.meaning_en}</p>
           {item.meaning_en && <p className="text-sm text-gray-500">{item.meaning_en}</p>}
-          {'units' in item && item.units.length > 0 && (
-            <div className="mt-3">
-              <h5 className="font-semibold text-sm mb-2">Components:</h5>
-              <div className="flex flex-wrap gap-1">
-                {item.units.map((unit) => (
-                  <Badge key={unit.id} variant="secondary" className="text-xs">
-                    {unit.text}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </HoverCardContent>
     </HoverCard>
@@ -154,7 +151,7 @@ const WordSuggestion: React.FC<WordSuggestionProps> = ({ units = [], phrases = [
       {/* Results */}
       <ScrollArea className="h-96">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pr-4">
-          {filteredItems.map((item: any) => (
+          {filteredItems.map((item: LexiconUnit) => (
             <WordHoverCard key={item.id} item={item} />
           ))}
           {filteredItems.length === 0 && (

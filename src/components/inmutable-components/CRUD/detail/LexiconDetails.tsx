@@ -4,15 +4,13 @@ import { Button } from '@/components/reusable-components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/reusable-components/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/reusable-components/avatar';
 import { Volume2, Image as ImageIcon } from 'lucide-react';
-import { LexiconUnit, LexiconPhrase } from '@/pages/Admin/LexiconCRUD';
+import { LexiconUnit } from '@/pages/Admin/LexiconCRUD';
 
 interface LexiconDetailsProps {
-  item: LexiconUnit | LexiconPhrase;
+  item: LexiconUnit;
 }
 
 const LexiconDetails: React.FC<LexiconDetailsProps> = ({ item }) => {
-  const isPhrase = 'units' in item;
-
   const playAudio = () => {
     if (item.audio) {
       const audio = new Audio(item.audio);
@@ -32,6 +30,15 @@ const LexiconDetails: React.FC<LexiconDetailsProps> = ({ item }) => {
     }
   };
 
+  // Helper function để xử lý language an toàn
+  const getSafeLanguage = (language: any): string => {
+    if (!language) return 'EN';
+    if (typeof language === 'string') return language.toUpperCase();
+    if (typeof language === 'object' && language.code) return language.code.toUpperCase();
+    if (typeof language === 'object' && language.name) return language.name.toUpperCase();
+    return 'EN';
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -40,7 +47,7 @@ const LexiconDetails: React.FC<LexiconDetailsProps> = ({ item }) => {
           <h3 className="text-2xl font-black text-gray-800 mb-2">{item.text}</h3>
           <div className="flex items-center gap-2 mb-2">
             <Badge className="bg-blue-100 text-blue-800">
-              {item.language.toUpperCase()}
+              {getSafeLanguage(item.language)}
             </Badge>
             <Badge className="bg-purple-100 text-purple-800">
               {item.type}
@@ -75,15 +82,17 @@ const LexiconDetails: React.FC<LexiconDetailsProps> = ({ item }) => {
             <p className="text-lg font-mono bg-gray-50 p-2 rounded-xl">{item.ipa}</p>
           </div>
           
-          <div>
-            <h4 className="font-semibold text-gray-700 mb-1">Vietnamese Meaning</h4>
-            <p className="text-lg">{item.meaning_vi}</p>
-          </div>
-          
           {item.meaning_en && (
             <div>
-              <h4 className="font-semibold text-gray-700 mb-1">English Explanation</h4>
-              <p className="text-gray-600">{item.meaning_en}</p>
+              <h4 className="font-semibold text-gray-700 mb-1">Meaning</h4>
+              <p className="text-lg">{item.meaning_en}</p>
+            </div>
+          )}
+          
+          {item.partOfSpeech && (
+            <div>
+              <h4 className="font-semibold text-gray-700 mb-1">Part of Speech</h4>
+              <p className="text-lg capitalize">{item.partOfSpeech}</p>
             </div>
           )}
         </CardContent>
@@ -121,48 +130,7 @@ const LexiconDetails: React.FC<LexiconDetailsProps> = ({ item }) => {
         </Card>
       )}
 
-      {/* Phrase Components */}
-      {isPhrase && (item as LexiconPhrase).units.length > 0 && (
-        <Card className="rounded-3xl">
-          <CardHeader>
-            <CardTitle className="text-lg font-bold">Phrase Components</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {(item as LexiconPhrase).units.map((unit) => (
-                <div key={unit.id} className="bg-gray-50 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h5 className="font-bold text-gray-800">{unit.text}</h5>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => {
-                        const utterance = new SpeechSynthesisUtterance(unit.text);
-                        speechSynthesis.speak(utterance);
-                      }}
-                      className="p-1"
-                    >
-                      <Volume2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-1">IPA: {unit.ipa}</p>
-                  <p className="text-sm text-gray-700">{unit.meaning_vi}</p>
-                  <div className="flex gap-1 mt-2">
-                    <Badge variant="outline" className="text-xs">
-                      {unit.type}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {unit.difficulty}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Usage Examples */}
+      {/* Usage Information */}
       <Card className="rounded-3xl">
         <CardHeader>
           <CardTitle className="text-lg font-bold">Usage Information</CardTitle>
@@ -183,8 +151,14 @@ const LexiconDetails: React.FC<LexiconDetailsProps> = ({ item }) => {
             </div>
             <div>
               <span className="font-semibold text-gray-700">Category:</span>
-              <p>{isPhrase ? 'Phrase' : 'Word'}</p>
+              <p>{item.type === 'vocabulary' ? 'Word' : 'Phrase'}</p>
             </div>
+            {item.partOfSpeech && (
+              <div>
+                <span className="font-semibold text-gray-700">Part of Speech:</span>
+                <p className="capitalize">{item.partOfSpeech}</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
