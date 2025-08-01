@@ -334,7 +334,7 @@
       ipa: '/həˈloʊ/',
       meaning_vi: 'Xin chào',
       meaning_en: 'A greeting',
-      type: 'noun' as const,
+      type: 'vocabulary' as const,
       language: 'en' as const,
       difficulty: 'beginner' as const,
       audio: '/audio/hello.mp3'
@@ -345,7 +345,7 @@
       ipa: '/oˈtʃa/',
       meaning_vi: 'Trà',
       meaning_en: 'Tea',
-      type: 'noun' as const,
+      type: 'vocabulary' as const,
       language: 'ja' as const,
       difficulty: 'beginner' as const
     },
@@ -355,7 +355,7 @@
       ipa: '/ˈbjuːtɪfəl/',
       meaning_vi: 'Đẹp',
       meaning_en: 'Having beauty',
-      type: 'adjective' as const,
+      type: 'vocabulary' as const,
       language: 'en' as const,
       difficulty: 'intermediate' as const
     }
@@ -374,13 +374,13 @@
           ipa: '/həˈloʊ/',
           meaning_vi: 'Xin chào',
           meaning_en: 'A greeting',
-          type: 'noun' as const,
+          type: 'vocabulary' as const,
           language: 'en' as const,
           difficulty: 'beginner' as const,
           audio: '/audio/hello.mp3'
         }
       ],
-      type: 'greeting' as const,
+      type: 'phrase' as const,
       language: 'en' as const,
       difficulty: 'beginner' as const
     },
@@ -397,12 +397,12 @@
           ipa: '/oˈtʃa/',
           meaning_vi: 'Trà',
           meaning_en: 'Tea',
-          type: 'noun' as const,
+          type: 'vocabulary' as const,
           language: 'ja' as const,
           difficulty: 'beginner' as const
         }
       ],
-      type: 'conversation' as const,
+      type: 'phrase' as const,
       language: 'ja' as const,
       difficulty: 'intermediate' as const
     }

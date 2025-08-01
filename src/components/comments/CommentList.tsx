@@ -50,7 +50,7 @@ export const CommentList: React.FC<Props> = ({
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
                             {c.avatarUrl ? (
-                                <img src={c.avatarUrl} className="w-8 h-8 rounded-full" />
+                                <img src={c.avatarUrl} alt={`${c.user}'s avatar`} className="w-8 h-8 rounded-full" />
                             ) : (
                                 <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">
                                     {c.user.charAt(0).toUpperCase()}
