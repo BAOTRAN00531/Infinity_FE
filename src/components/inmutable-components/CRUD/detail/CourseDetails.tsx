@@ -11,7 +11,8 @@ interface Course {
   status: 'active' | 'inactive';
   createdAt: string;
   modulesCount: number;
-  price: number; // ✅ thêm dòng này
+  price: number;
+  thumbnail?: string;// ✅ thêm dòng này
 }
 
 
@@ -31,27 +32,53 @@ const CourseDetails = ({ course }: CourseDetailsProps) => {
 
   return (
       <div className="space-y-6">
-        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6">
-          <h3 className="text-2xl font-black text-gray-800 mb-2">{course.name}</h3>
-          <p className="text-gray-600">{course.description}</p>
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Thumbnail image */}
+          {course.thumbnail && (
+              <div className="flex-shrink-0">
+                <img
+                    src={course.thumbnail}
+                    alt="Course Thumbnail"
+                    className="w-full md:w-64 h-40 md:h-48 object-cover rounded-2xl shadow"
+                />
+              </div>
+          )}
+
+          {/* Course main info */}
+          <div className="flex-1 space-y-3">
+            <h3 className="text-2xl font-black text-gray-800">{course.name}</h3>
+            <p className="text-gray-600">{course.description}</p>
+
+            <div className="flex flex-wrap gap-3 mt-4">
+              <Badge className={`text-sm font-bold rounded-full ${getLevelColor(course.level)}`}>
+                {course.level}
+              </Badge>
+              <Badge className={`text-sm font-bold rounded-full ${
+                  course.status === 'active'
+                      ? 'bg-green-100 text-green-800 border-green-200'
+                      : 'bg-gray-100 text-gray-800 border-gray-200'
+              }`}>
+                {course.status}
+              </Badge>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-2xl">
-              <Globe className="w-5 h-5 text-blue-600" />
-              <div>
-                <p className="text-sm font-medium text-gray-600">Language</p>
-                <p className="font-bold text-gray-800">{course.language.name}</p>
-              </div>
+        {/* Grid info below */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-2xl">
+            <Globe className="w-5 h-5 text-blue-600" />
+            <div>
+              <p className="text-sm font-medium text-gray-600">Language</p>
+              <p className="font-bold text-gray-800">{course.language.name}</p>
             </div>
+          </div>
 
-            <div className="flex items-center gap-3 p-4 bg-green-50 rounded-2xl">
-              <Layers className="w-5 h-5 text-green-600" />
-              <div>
-                <p className="text-sm font-medium text-gray-600">Modules</p>
-                <p className="font-bold text-gray-800">{course.modulesCount} modules</p>
-              </div>
+          <div className="flex items-center gap-3 p-4 bg-green-50 rounded-2xl">
+            <Layers className="w-5 h-5 text-green-600" />
+            <div>
+              <p className="text-sm font-medium text-gray-600">Modules</p>
+              <p className="font-bold text-gray-800">{course.modulesCount} modules</p>
             </div>
           </div>
 
@@ -63,38 +90,17 @@ const CourseDetails = ({ course }: CourseDetailsProps) => {
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-2xl">
-              <Calendar className="w-5 h-5 text-purple-600" />
-              <div>
-                <p className="text-sm font-medium text-gray-600">Created</p>
-                <p className="font-bold text-gray-800">{course.createdAt}</p>
-              </div>
+          <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-2xl">
+            <Calendar className="w-5 h-5 text-purple-600" />
+            <div>
+              <p className="text-sm font-medium text-gray-600">Created</p>
+              <p className="font-bold text-gray-800">{course.createdAt}</p>
             </div>
           </div>
         </div>
-
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-          <div>
-            <p className="text-sm font-medium text-gray-600">Level</p>
-            <Badge className={`text-sm font-bold rounded-full mt-1 ${getLevelColor(course.level)}`}>
-              {course.level}
-            </Badge>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-600">Status</p>
-            <Badge className={`text-sm font-bold rounded-full mt-1 ${
-                course.status === 'active'
-                    ? 'bg-green-100 text-green-800 border-green-200'
-                    : 'bg-gray-100 text-gray-800 border-gray-200'
-            }`}>
-              {course.status}
-            </Badge>
-          </div>
-
-        </div>
       </div>
   );
+
 };
 
 export default CourseDetails;

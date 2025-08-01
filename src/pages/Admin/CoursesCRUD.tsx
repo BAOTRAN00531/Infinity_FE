@@ -23,6 +23,8 @@ interface Course {
   createdAt: string;
   modulesCount: number;
   price: number; // ✅ Thêm dòng này
+  thumbnail: string;
+
 }
 
 
@@ -194,54 +196,98 @@ const CoursesCRUD = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCourses.map((course) => (
-              <div key={course.id} className="bg-white rounded-3xl p-6 shadow-md">
-                <div className="mb-2">
-                  <h3 className="text-lg font-bold text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">{course.name}</h3>
-                  <p className="text-sm text-gray-500 line-clamp-2">{course.description}</p>
+              <div
+                  key={course.id}
+                  onClick={() => {
+                    setSelectedCourse(course);
+                    setIsViewOpen(true);
+                  }}
+                  className="bg-white rounded-3xl shadow-md overflow-hidden transition transform hover:scale-[1.01] hover:shadow-xl duration-300 cursor-pointer group"
+              >
+                {/* Thumbnail */}
+                <div className="relative aspect-[4/2.2] bg-gray-100 dark:bg-slate-800">
+                  {course.thumbnail ? (
+                      <img
+                          src={course.thumbnail}
+                          alt={course.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                      />
+                  ) : (
+                      <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">
+                        Không có ảnh
+                      </div>
+                  )}
                 </div>
 
-                <div className="text-sm space-y-1 mb-3">
-                  <div className="flex justify-between">
-                    <span>Language:</span>
-                    <span className="font-semibold text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md ">{course.language.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Level:</span>
-                    <Badge className={`rounded-full text-xs ${getLevelColor(course.level)}`}>{course.level}</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Modules:</span>
-                    <span>{course.modulesCount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Price:</span>
-                    <span>{course.price != null ? `${course.price.toLocaleString()}₫` : 'N/A'}</span>
-
+                {/* Content */}
+                <div className="p-6 space-y-3">
+                  <div className="mb-2">
+                    <h3 className="text-lg font-bold text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md line-clamp-1">
+                      {course.name}
+                    </h3>
+                    <p className="text-sm text-gray-500 line-clamp-2">{course.description}</p>
                   </div>
 
-                </div>
+                  <div className="text-sm space-y-1">
+                    <div className="flex justify-between">
+                      <span>Language:</span>
+                      <span className="font-semibold text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))]">{course.language.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Level:</span>
+                      <Badge className={`rounded-full text-xs ${getLevelColor(course.level)}`}>{course.level}</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Modules:</span>
+                      <span>{course.modulesCount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Price:</span>
+                      <span>{course.price != null ? `${course.price.toLocaleString()}₫` : 'N/A'}</span>
+                    </div>
+                  </div>
 
-                <div className="flex justify-between items-center border-t pt-2 mt-2">
-                  <Badge className={`text-xs rounded-full ${
-                      course.status === 'active'
-                          ? 'bg-green-100 text-green-800 border-green-200'
-                          : 'bg-gray-100 text-gray-800 border-gray-200'
-                  }`}>
-                    {course.status}
-                  </Badge>
-                  <div className="flex gap-2">
-                    <Button_admin variant="ghost" size="sm" onClick={() => { setSelectedCourse(course); setIsViewOpen(true); }}>
-                      <Eye className="w-4 h-4" />
-                    </Button_admin>
-                    <Button_admin variant="ghost" size="sm" onClick={() => { setSelectedCourse(course); setIsEditOpen(true); }}>
-                      <Edit className="w-4 h-4" />
-                    </Button_admin>
-                    <Button_admin variant="ghost" size="sm" onClick={() => { setSelectedCourse(course); setIsDeleteOpen(true); }} className="text-red-500">
-                      <Trash2 className="w-4 h-4" />
-                    </Button_admin>
+                  <div className="flex justify-between items-center border-t pt-2 mt-2">
+                    <Badge className={`text-xs rounded-full ${
+                        course.status === 'active'
+                            ? 'bg-green-100 text-green-800 border-green-200'
+                            : 'bg-gray-100 text-gray-800 border-gray-200'
+                    }`}>
+                      {course.status}
+                    </Badge>
+                    <div className="flex gap-2">
+                      {/* Stop propagation to avoid triggering card click */}
+                      <Button_admin
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setSelectedCourse(course); setIsViewOpen(true); }}
+                          className="hover:bg-gray-100 dark:hover:bg-slate-800 transition"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button_admin>
+                      <Button_admin
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setSelectedCourse(course); setIsEditOpen(true); }}
+                          className="hover:bg-yellow-100 dark:hover:bg-yellow-900 transition"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button_admin>
+                      <Button_admin
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setSelectedCourse(course); setIsDeleteOpen(true); }}
+                          className="text-red-500 hover:bg-red-100 dark:hover:bg-red-900 transition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button_admin>
+                    </div>
                   </div>
                 </div>
               </div>
+
+
           ))}
         </div>
 
