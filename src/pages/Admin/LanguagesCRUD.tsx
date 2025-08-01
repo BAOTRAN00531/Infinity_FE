@@ -60,7 +60,9 @@ const LanguagesCRUD = () => {
       setLanguages(langs);
     } catch (error: any) {
       console.error(error);
-      toast.error("Failed to fetch languages");
+      toast.error("Failed to fetch languages", {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   };
 
@@ -73,11 +75,15 @@ const LanguagesCRUD = () => {
       await axios.post('http://localhost:8080/api/languages', formData, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
       });
-      toast.success('Language created');
+      toast.success('Language created', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
       setIsCreateOpen(false);
       fetchLanguages();
     } catch (error) {
-      toast.error('Failed to create language');
+      toast.error('Failed to create language', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   };
 
@@ -89,12 +95,16 @@ const LanguagesCRUD = () => {
       await axios.put(`http://localhost:8080/api/languages/${selectedLanguage.id}`, formData, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
       });
-      toast.success('Language updated');
+      toast.success('Language updated', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
       setIsEditOpen(false);
       setSelectedLanguage(null);
       fetchLanguages();
     } catch (error) {
-      toast.error('Failed to update language');
+      toast.error('Failed to update language', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   };
 
@@ -109,9 +119,13 @@ const LanguagesCRUD = () => {
         fetchLanguages();
         setIsDeleteOpen(false);
         setSelectedLanguage(null);
-        toast.success('Language deleted successfully');
+        toast.success('Language deleted successfully', {
+          autoClose: 1200, // 👈 1.2 giây riêng lẻ
+        });
       } catch (error) {
-        toast.error('Failed to delete language');
+        toast.error('Failed to delete language', {
+          autoClose: 1200, // 👈 1.2 giây riêng lẻ
+        });
       }
     }
   };

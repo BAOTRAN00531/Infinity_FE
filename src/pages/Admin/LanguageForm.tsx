@@ -29,7 +29,9 @@ const LanguageForm: React.FC<LanguageFormProps> = ({ initialData, onSubmit, onCa
         const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
 
         if (!token) {
-            toast.error('Missing token. Please login.');
+            toast.error('Missing token. Please login.', {
+                autoClose: 1200, // 👈 1.2 giây riêng lẻ
+            });
             return;
         }
 
@@ -40,7 +42,9 @@ const LanguageForm: React.FC<LanguageFormProps> = ({ initialData, onSubmit, onCa
             }
         })
             .then(res => setTemplates(res.data))
-            .catch(() => toast.error('Failed to load templates'));
+            .catch(() => toast.error('Failed to load templates', {
+                autoClose: 1200, // 👈 1.2 giây riêng lẻ
+            }));
     }, []);
 
     const handleSubmit = (e: React.FormEvent) => {

@@ -58,7 +58,9 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
         });
         setLanguages(res.data);
       } catch {
-        toast.error('Failed to load languages');
+        toast.error('Failed to load languages', {
+          autoClose: 1200, // 👈 1.2 giây riêng lẻ
+        });
       }
     };
     fetchLanguages();
@@ -68,7 +70,9 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
     e.preventDefault();
     const selectedLanguage = languages.find(lang => lang.id === languageId);
     if (!selectedLanguage) {
-      toast.error('Please select a language');
+      toast.error('Please select a language', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
       return;
     }
     onSubmit({

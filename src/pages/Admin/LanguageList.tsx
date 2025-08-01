@@ -21,7 +21,9 @@ const LanguageList: React.FC = () => {
             });
             setLanguages(response.data);
         } catch (error) {
-            toast.error('Failed to fetch languages');
+            toast.error('Failed to fetch languages', {
+                autoClose: 1200, // 👈 1.2 giây riêng lẻ
+            });
         }
     };
 

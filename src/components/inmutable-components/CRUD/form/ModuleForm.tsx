@@ -80,7 +80,9 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
         setLanguages(langRes.data);
         setCourses(courseRes.data);
       } catch (err) {
-        toast.error('Không tải được dữ liệu');
+        toast.error('Không tải được dữ liệu', {
+          autoClose: 1200, // 👈 1.2 giây riêng lẻ
+        });
       }
     };
     fetchData();

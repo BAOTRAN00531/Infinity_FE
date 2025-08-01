@@ -46,7 +46,9 @@ const CoursesCRUD = () => {
       setCourses(res.data);
     } catch {
 
-      toast.error('Failed to fetch courses');
+      toast.error('Failed to fetch courses', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   };
 
@@ -79,11 +81,15 @@ const CoursesCRUD = () => {
       await axios.post('http://localhost:8080/api/courses', courseData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Course created');
+      toast.success('Course created', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
       setIsCreateOpen(false);
       fetchCourses();
     } catch {
-      toast.error('Failed to create course');
+      toast.error('Failed to create course', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   };
 
@@ -94,12 +100,16 @@ const CoursesCRUD = () => {
       await axios.put(`http://localhost:8080/api/courses/${selectedCourse.id}`, courseData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Course updated');
+      toast.success('Course updated', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
       setIsEditOpen(false);
       setSelectedCourse(null);
       fetchCourses();
     } catch {
-      toast.error('Failed to update course');
+      toast.error('Failed to update course', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   };
 
@@ -110,12 +120,16 @@ const CoursesCRUD = () => {
       await axios.delete(`http://localhost:8080/api/courses/${selectedCourse.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Course deleted');
+      toast.success('Course deleted', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
       setIsDeleteOpen(false);
       setSelectedCourse(null);
       fetchCourses();
     } catch {
-      toast.error('Failed to delete course');
+      toast.error('Failed to delete course', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   };
 

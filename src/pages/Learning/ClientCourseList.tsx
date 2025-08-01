@@ -3,6 +3,7 @@ import { CourseCard } from './MiniComponent/CourseCard';
 import Header from '@/components/layout-components/Header';
 import axios from 'axios';
 import { motion } from 'framer-motion';
+import PageLayout from '@/components/layout-components/PageLayout';
 import {
     Select,
     SelectTrigger,
@@ -65,9 +66,11 @@ const ClientCourseList: React.FC = () => {
     }, [courses, statusFilter, sortPrice, searchQuery]);
 
     return (
+        <PageLayout>
+
         <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white transition-colors duration-300">
 
-        <Header />
+
             <div className="max-w-7xl mx-auto px-4 py-10">
                 <h1 className="text-3xl font-extrabold mb-8 text-center tracking-tight text-gray-900 dark:text-white">
                     📚 Khám Phá Các Khoá Học Hot Nhất
@@ -134,6 +137,7 @@ const ClientCourseList: React.FC = () => {
                 </motion.div>
             </div>
         </div>
+        </PageLayout>
     );
 };
 

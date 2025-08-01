@@ -37,7 +37,9 @@ const PartsCRUD: React.FC = () => {
         setModules(res.data)
       } catch (err) {
         console.error(err)
-        toast.error('Không tải được Modules')
+        toast.error('Không tải được Modules', {
+          autoClose: 1200, // 👈 1.2 giây riêng lẻ
+        });
       }
     }
     fetchModules()
@@ -55,7 +57,9 @@ const PartsCRUD: React.FC = () => {
       setParts(res.data)
     } catch (err) {
       console.error(err)
-      toast.error('Không tải được Parts')
+      toast.error('Không tải được Parts', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   }
 
@@ -74,12 +78,16 @@ const PartsCRUD: React.FC = () => {
           data,
           { headers: { Authorization: `Bearer ${token}` } }
       )
-      toast.success('Tạo Part thành công')
+      toast.success('Tạo Part thành công', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
       setIsCreateOpen(false)
       await fetchParts()
     } catch (err) {
       console.error(err)
-      toast.error('Tạo Part thất bại')
+      toast.error('Tạo Part thất bại', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   }
 
@@ -94,13 +102,17 @@ const PartsCRUD: React.FC = () => {
           data,
           { headers: { Authorization: `Bearer ${token}` } }
       )
-      toast.success('Cập nhật Part thành công')
+      toast.success('Cập nhật Part thành công', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
       setIsEditOpen(false)
       setSelectedPart(null)
       await fetchParts()
     } catch (err) {
       console.error(err)
-      toast.error('Cập nhật Part thất bại')
+      toast.error('Cập nhật Part thất bại', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   }
 
@@ -114,13 +126,17 @@ const PartsCRUD: React.FC = () => {
           `http://localhost:8080/api/lessons/${selectedPart.id}`,
           { headers: { Authorization: `Bearer ${token}` } }
       )
-      toast.success('Xóa Part thành công')
+      toast.success('Xóa Part thành công', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
       setIsDeleteOpen(false)
       setSelectedPart(null)
       await fetchParts()
     } catch (err) {
       console.error(err)
-      toast.error('Xóa Part thất bại')
+      toast.error('Xóa Part thất bại', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   }
 

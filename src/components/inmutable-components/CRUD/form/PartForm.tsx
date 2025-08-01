@@ -72,7 +72,9 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
           setSelectedLanguageId(res.data[0].id)
         }
       } catch {
-        toast.error('Không tải được danh sách ngôn ngữ')
+        toast.error('Không tải được danh sách ngôn ngữ', {
+          autoClose: 1200, // 👈 1.2 giây riêng lẻ
+        });
       }
     }
     fetchLanguages()
@@ -94,7 +96,9 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
           setSelectedCourseId(res.data[0].id)
         }
       } catch {
-        toast.error('Không tải được danh sách courses')
+        toast.error('Không tải được danh sách courses', {
+          autoClose: 1200, // 👈 1.2 giây riêng lẻ
+        });
       }
     }
     fetchCourses()
@@ -121,7 +125,9 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
           }))
         }
       } catch {
-        toast.error('Không tải được danh sách modules')
+        toast.error('Không tải được danh sách modules', {
+          autoClose: 1200, // 👈 1.2 giây riêng lẻ
+        });
       }
     }
     fetchModules()
@@ -167,7 +173,9 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
       )
       return res.data.maxOrder + 1
     } catch {
-      toast.error('Không lấy được order index')
+      toast.error('Không lấy được order index', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
       return 1
     }
   }

@@ -7,6 +7,7 @@ import momoIcon from "@/components/payment/icons/momo-logo.png";
 import vnpayIcon from "@/components/payment/icons/vnpay-logo.png";
 import codIcon from "@/components/payment/icons/cod.png";
 import Header from "@/components/layout-components/Header";
+import PageLayout from "@/components/layout-components/PageLayout";
 
 const PurchasePage: React.FC = () => {
     const navigate = useNavigate();
@@ -94,7 +95,7 @@ const PurchasePage: React.FC = () => {
     return (
 
         <>
-<Header></Header>
+            <PageLayout>
         <div className="max-w-xl mx-auto p-6 md:p-10 bg-white dark:bg-gray-900 rounded-xl shadow-lg mt-10">
             <h1 className="text-2xl font-bold mb-4 text-blue-600 dark:text-blue-400">Mua khóa học</h1>
 
@@ -176,8 +177,9 @@ const PurchasePage: React.FC = () => {
                 </div>
             )}
         </div>
-
+            </PageLayout>
         </>
+
     );
 };
 
