@@ -1,11 +1,11 @@
 // pages/InvoicePage.tsx
 import React, { useEffect, useState } from 'react';
-
-import axios from 'axios';
+import {Link, useNavigate, useSearchParams} from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import PageLayout from '@/components/layout-components/PageLayout';
-import {useNavigate, useSearchParams} from "react-router-dom";
+import api from '@/api';
+import {ShoppingCart} from "lucide-react"; // ✅ thay vì axios
 
 interface OrderDetailDTO {
     serviceName: string;
@@ -36,27 +36,17 @@ const InvoicePage: React.FC = () => {
     const navigate                = useNavigate();
 
     const orderCode = searchParams.get('orderId');
-    const result    = searchParams.get('result');   // success | fail
+    const result    = searchParams.get('result');
 
-    /* 📥 Lấy hoá đơn */
     useEffect(() => {
         const fetchData = async () => {
             if (!orderCode) return;
 
-            const token =
-                localStorage.getItem('access_token') ??
-                sessionStorage.getItem('access_token');
-
             try {
-                const { data } = await axios.get<Invoice>(
-                    `/api/orders/code/${orderCode}`,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
+                const { data } = await api.get<Invoice>(`/api/orders/code/${orderCode}`);
                 setInvoice(data);
             } catch (err) {
-                toast.error('Không thể tải hoá đơn', {
-                    autoClose: 1200, // 👈 1.2 giây riêng lẻ
-                });
+                toast.error('Không thể tải hoá đơn', { autoClose: 1200 });
             } finally {
                 setLoading(false);
             }
@@ -64,34 +54,19 @@ const InvoicePage: React.FC = () => {
         fetchData();
     }, [orderCode]);
 
-    /* 🗑 Huỷ đơn */
     const handleCancel = async () => {
         if (!invoice) return;
         if (!window.confirm('Bạn chắc chắn muốn huỷ đơn hàng này?')) return;
 
-        const token =
-            localStorage.getItem('access_token') ??
-            sessionStorage.getItem('access_token');
-
         try {
-            await axios.post(
-                `/api/orders/cancel?orderCode=${invoice.orderCode}`,
-                {},
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            toast.success('Huỷ đơn thành công!', {
-                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            });
-            // Chờ toast rồi về lịch sử
+            await api.post(`/api/orders/cancel?orderCode=${invoice.orderCode}`, {});
+            toast.success('Huỷ đơn thành công!', { autoClose: 1200 });
             setTimeout(() => navigate('/order-history'), 1500);
         } catch (err) {
-            toast.error('Không thể huỷ đơn. Vui lòng thử lại.', {
-                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            });
+            toast.error('Không thể huỷ đơn. Vui lòng thử lại.', { autoClose: 1200 });
         }
     };
 
-    /* UI */
     if (loading)
         return <div className="p-10 text-gray-600">Đang tải...</div>;
     if (!invoice)
@@ -183,6 +158,23 @@ const InvoicePage: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* Nút tiếp tục mua hàng */}
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="mt-6 flex justify-center"
+            >
+                <Link
+                    to="/client/course"
+                    className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-2xl shadow-md transition duration-300"
+                >
+                    <ShoppingCart className="w-5 h-5" />
+                    Tiếp tục mua hàng
+                </Link>
+            </motion.div>
+
         </PageLayout>
     );
 };

@@ -1,11 +1,12 @@
 // pages/OrderHistoryPage.tsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+
 import PageLayout from "@/components/layout-components/PageLayout";
 import Header from "@/components/layout-components/Header";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import api from '@/api'; // ✅ Thay vì axios
 
 interface OrderResponse {
     courseName: string;
@@ -38,13 +39,9 @@ const OrderHistoryPage: React.FC = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const token =
-                    localStorage.getItem('access_token') ||
-                    sessionStorage.getItem('access_token');
-                const res = await axios.get<OrderResponse[]>(`/api/orders/history${statusFilter ? '?status=' + statusFilter : ''}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-
+                const res = await api.get<OrderResponse[]>(
+                    `/api/orders/history${statusFilter ? '?status=' + statusFilter : ''}`
+                );
                 setOrders(res.data);
             } catch (err) {
                 console.error('Lỗi khi tải lịch sử đơn hàng:', err);

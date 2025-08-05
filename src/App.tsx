@@ -9,7 +9,7 @@ import ForgotPassword from './pages/Client/ForgotPassword';
 import VerifyOtp from './pages/Client/VerifyOtp';
 import ResetPassword from './pages/Client/ResetPassword';
 import AdminDashboard from './pages/Admin/AdminDashboard';
-import UserDashboard from './pages/Admin/UserDashboard';
+import UserDashboard from './pages/Student/UserDashboard';
 import ProtectedRoute from './utils/ProtectedRoute';
 import LanguageList from './pages/Admin/LanguageList';
 import LanguageForm from './pages/Admin/LanguageForm';
@@ -25,6 +25,9 @@ import ClientCourseList from "@/pages/Learning/ClientCourseList";
 import CourseDetail from "@/pages/Learning/CourseDetail";
 import OrderHistoryPage from "@/components/history/OrderHistoryPage";
 import Breadcrumbs from './components/Breadcrumbs';
+import StudentCourses from "@/pages/Student/StudentCourses";
+
+import SePayPaymentPage from "@/components/payment/SePayPaymentPage";
 
 
 // ✅ Logic trong App.tsx (bổ sung allowedPaths)
@@ -89,6 +92,11 @@ const App: React.FC = () => {
         <Route path="/client/course" element={<ClientCourseList />} />
         <Route path="/client/course/:id" element={<CourseDetail />} />
 
+
+        {/*Student*/}
+        <Route path="/student/course/:id" element={<StudentCourses />} />
+
+        <Route path="/sepay-payment" element={<SePayPaymentPage  />} />
 
         <Route path="/verify-confirmation" element={<VerifyConfirmation />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

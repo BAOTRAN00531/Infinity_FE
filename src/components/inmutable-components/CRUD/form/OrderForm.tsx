@@ -1,8 +1,8 @@
 import { useForm } from "react-hook-form";
 import { Button_admin } from "@/components/reusable-components/button_admin";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { OrderResponse } from "@/pages/Admin/OrderCRUD";
+import api from "@/api"; // ✅ dùng instance đã có baseURL và token
 
 type CreateOrderForm = {
     courseId: number;
@@ -14,8 +14,6 @@ type Props = {
     onSuccess: () => void;
     onCancel: () => void;
 };
-
-const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
 
 const OrderForm = ({ initialData, onSuccess, onCancel }: Props) => {
     const { register, handleSubmit, reset } = useForm<CreateOrderForm>({
@@ -29,29 +27,21 @@ const OrderForm = ({ initialData, onSuccess, onCancel }: Props) => {
         try {
             if (initialData) {
                 // Chỉnh sửa
-                await axios.put(`/api/orders/update?orderCode=${initialData.orderCode}`, data, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                toast.success("Đã cập nhật đơn hàng", {
-                    autoClose: 1200, // 👈 1.2 giây riêng lẻ
-                });
+                await api.put(`/api/orders/update?orderCode=${initialData.orderCode}`, data);
+                toast.success("Đã cập nhật đơn hàng", { autoClose: 1200 });
             } else {
                 // Tạo mới
-                await axios.post("/api/orders/create", data, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                toast.success("Đã tạo đơn hàng", {
-                    autoClose: 1200, // 👈 1.2 giây riêng lẻ
-                });
+                await api.post("/api/orders/create", data);
+                toast.success("Đã tạo đơn hàng", { autoClose: 1200 });
             }
 
             onSuccess();
         } catch (error) {
-            toast.error("Thao tác thất bại", {
-                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            });
+            console.error("❌ Lỗi khi tạo/cập nhật đơn hàng:", error);
+            toast.error("Thao tác thất bại", { autoClose: 1200 });
         }
     };
+
     return (
         <div className="p-6 max-w-md bg-white rounded-xl shadow space-y-4">
             <h2 className="text-lg font-semibold">
@@ -79,6 +69,8 @@ const OrderForm = ({ initialData, onSuccess, onCancel }: Props) => {
                         <option value="CASH">Tiền mặt</option>
                         <option value="MOMO">MOMO</option>
                         <option value="VNPAY">VNPAY</option>
+                        <option value="SEPAY">SePay</option>
+
                     </select>
                 </div>
 

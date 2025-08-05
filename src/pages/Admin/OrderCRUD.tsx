@@ -1,25 +1,23 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { Eye, CheckCircle, Badge, Plus, Edit, Trash2, Clock, XCircle } from 'lucide-react';
 
-import {Eye, CheckCircle, Badge, Plus, Edit, Trash2  , Clock, XCircle,} from 'lucide-react';
-
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from '@/components/reusable-components/dialog';
-import {Button_admin} from "@/components/reusable-components/button_admin";
-import {toast} from "react-toastify";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/reusable-components/dialog';
+import { Button_admin } from "@/components/reusable-components/button_admin";
+import { toast } from "react-toastify";
 import OrderForm from "@/components/inmutable-components/CRUD/form/OrderForm";
 import OrderDetail from "@/components/inmutable-components/CRUD/detail/OrderDetail";
+import api from '@/api'; // ✅ Thay thế axios
 
 export interface OrderResponse {
     orderCode: string;
     userName: string;
-    courseId: number;                  // thêm dòng này
+    courseId: number;
     courseName: string;
     totalAmount: number;
     orderDate: string;
     status: OrderStatus;
-    paymentMethod: string;            // thêm dòng này
+    paymentMethod: string;
 }
-
 
 export interface OrderDetailDTO {
     courseId: number;
@@ -29,10 +27,7 @@ export interface OrderDetailDTO {
     total: number;
 }
 
-
-
-type OrderStatus = 'pending' | 'paid' | 'cancelled' | 'failed' ;
-
+type OrderStatus = 'pending' | 'paid' | 'cancelled' | 'failed';
 
 const statusColor: Record<OrderStatus, string> = {
     pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -41,11 +36,7 @@ const statusColor: Record<OrderStatus, string> = {
     failed: 'bg-gray-100 text-gray-600 border-gray-200',
 };
 
-
 const OrderCRUD = () => {
-
-
-
     const [orders, setOrders] = useState<OrderResponse[]>([]);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isViewOpen, setIsViewOpen] = useState(false);
@@ -56,14 +47,8 @@ const OrderCRUD = () => {
         orderCode: null,
     });
 
-
-    const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
     const fetchOrders = () => {
-        axios.get('/api/admin/history', {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            }
-        })
+        api.get('/api/admin/history')
             .then((res) => {
                 const normalizedOrders = res.data.map((order: any) => ({
                     ...order,
@@ -71,52 +56,47 @@ const OrderCRUD = () => {
                 }));
                 setOrders(normalizedOrders);
             })
-            .catch(() => toast.error('Lỗi khi tải danh sách đơn hàng', {
-                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            }));
+            .catch(() =>
+                toast.error('Lỗi khi tải danh sách đơn hàng', {
+                    autoClose: 1200,
+                })
+            );
     };
-
-
 
     useEffect(() => {
         fetchOrders();
     }, []);
 
     const handleApprove = (orderCode: string) => {
-        axios.post(`/api/admin/approve?orderCode=${orderCode}`, {}, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            }
-        })
+        api.post(`/api/admin/approve?orderCode=${orderCode}`)
             .then(() => {
                 toast.success('Đơn đã được duyệt', {
-                    autoClose: 1200, // 👈 1.2 giây riêng lẻ
+                    autoClose: 1200,
                 });
-                fetchOrders(); // 🔁 Gọi lại API và normalize
+                fetchOrders();
                 setIsViewOpen(false);
             })
-            .catch(() => toast.error('Lỗi khi duyệt đơn', {
-                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            }));
+            .catch(() =>
+                toast.error('Lỗi khi duyệt đơn', {
+                    autoClose: 1200,
+                })
+            );
     };
-
 
     const handleDelete = (orderCode: string) => {
-
-        axios.delete(`/api/admin/delete/${orderCode}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        api.delete(`/api/admin/delete/${orderCode}`)
             .then(() => {
                 toast.success("Đã xóa đơn hàng", {
-                    autoClose: 1200, // 👈 1.2 giây riêng lẻ
+                    autoClose: 1200,
                 });
-                fetchOrders(); // reload lại danh sách
+                fetchOrders();
             })
-            .catch(() => toast.error("Lỗi khi xóa đơn hàng", {
-                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            }));
+            .catch(() =>
+                toast.error("Lỗi khi xóa đơn hàng", {
+                    autoClose: 1200,
+                })
+            );
     };
-
 
     return (
         <div className="p-8">

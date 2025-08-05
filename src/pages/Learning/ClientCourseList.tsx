@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CourseCard } from './MiniComponent/CourseCard';
 import Header from '@/components/layout-components/Header';
-import axios from 'axios';
 import { motion } from 'framer-motion';
 import PageLayout from '@/components/layout-components/PageLayout';
 import {
@@ -13,6 +12,7 @@ import {
 } from '@/components/reusable-components/select';
 import { Input_admin } from '@/components/reusable-components/input_admin';
 import { Skeleton } from '@/components/reusable-components/skeleton';
+import api from '@/api'; // ✅ Thay thế axios
 
 interface CourseDto {
     id: number;
@@ -22,7 +22,6 @@ interface CourseDto {
     status: string;
     level: 'Beginner' | 'Intermediate' | 'Advanced';
 }
-
 
 const ClientCourseList: React.FC = () => {
     const [courses, setCourses] = useState<CourseDto[]>([]);
@@ -35,7 +34,7 @@ const ClientCourseList: React.FC = () => {
 
     useEffect(() => {
         setLoading(true);
-        axios.get('/client/api/course')
+        api.get('/client/api/course') // ✅ Sử dụng api thay vì axios
             .then((res) => {
                 setCourses(res.data);
                 setLoading(false);

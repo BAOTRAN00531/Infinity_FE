@@ -93,6 +93,13 @@ export default function Header({ welcomeMessage }: HeaderProps) {
                     </div>
                 </Link>
 
+                <Link
+                    to="/user/dashboard"
+                    className="text-sm font-medium text-gray-700 hover:text-primary transition"
+                >
+                    Dashboard
+                </Link>
+
                 <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-sm text-gray-600 dark:text-gray-300 w-full md:w-auto mt-4 md:mt-0">
                     <div className="flex items-center gap-2">
             <span className="hidden sm:inline">

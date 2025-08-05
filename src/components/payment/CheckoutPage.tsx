@@ -1,7 +1,7 @@
 // CheckoutPage.tsx
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '@/api'; // ✅ dùng axios instance có baseURL & token
 
 const CheckoutPage: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -13,27 +13,21 @@ const CheckoutPage: React.FC = () => {
 
     const handleSubmit = async () => {
         try {
-            const token = localStorage.getItem('access_token');
-            const res = await axios.post(
-                'http://localhost:8080/api/orders/create',
-                {
-                    courseId,
-                    paymentMethod: method,
-                    fullName,
-                    phone,
-                },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
+            const res = await api.post('/api/orders/create', {
+                courseId,
+                paymentMethod: method,
+                fullName,
+                phone,
+            });
 
             if (method === 'VNPAY') {
-                window.location.href = res.data.paymentUrl; // BE trả về URL của VNPAY
+                window.location.href = res.data.paymentUrl; // ✅ redirect đến VNPAY
             } else {
                 navigate(`/invoice?orderId=${res.data.orderCode}&result=success`);
             }
         } catch (err) {
             console.error('Lỗi tạo đơn hàng:', err);
+            alert('Không thể tạo đơn hàng. Vui lòng thử lại.');
         }
     };
 
