@@ -1,10 +1,15 @@
 // pages/OrderHistoryPage.tsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
+import PageLayout from "@/components/layout-components/PageLayout";
+import Header from "@/components/layout-components/Header";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import api from '@/api'; // ✅ Thay vì axios
+
 interface OrderResponse {
+    courseName: string;
     orderCode: string;
     status: string;
     totalAmount: number;
@@ -34,14 +39,9 @@ const OrderHistoryPage: React.FC = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const token =
-                    localStorage.getItem('access_token') ||
-                    sessionStorage.getItem('access_token');
-                const res = await axios.get<OrderResponse[]>('/api/orders/history', {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
+                const res = await api.get<OrderResponse[]>(
+                    `/api/orders/history${statusFilter ? '?status=' + statusFilter : ''}`
+                );
                 setOrders(res.data);
             } catch (err) {
                 console.error('Lỗi khi tải lịch sử đơn hàng:', err);
@@ -80,6 +80,8 @@ const OrderHistoryPage: React.FC = () => {
     };
 
     return (
+
+          <PageLayout>
         <div className="max-w-6xl mx-auto px-4 py-8">
             <motion.h2
                 className="text-2xl font-bold text-gray-800 dark:text-white mb-6"
@@ -109,7 +111,7 @@ const OrderHistoryPage: React.FC = () => {
                     <option value="PENDING">Chờ xử lý</option>
                     <option value="PROCESSING">Đang xử lý</option>
                     <option value="COMPLETED">Hoàn tất</option>
-                    <option value="CANCELED">Đã huỷ</option>
+                    <option value="CANCELLED">Đã huỷ</option>
                 </select>
             </div>
 
@@ -129,6 +131,7 @@ const OrderHistoryPage: React.FC = () => {
                             <thead>
                             <tr className="bg-gray-100 dark:bg-gray-700 text-left text-xs uppercase text-gray-600 dark:text-gray-300 tracking-wider">
                                 <th className="px-6 py-3">Mã đơn</th>
+                                <th className="px-6 py-3">Khóa học</th>
                                 <th className="px-6 py-3">Trạng thái</th>
                                 <th className="px-6 py-3">Ngày đặt</th>
                                 <th className="px-6 py-3">Tổng tiền</th>
@@ -148,6 +151,10 @@ const OrderHistoryPage: React.FC = () => {
                                     <td className="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
                                         {order.orderCode}
                                     </td>
+                                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
+                                        {order.courseName}
+                                    </td>
+
                                     <td className="px-6 py-4">
                                             <span
                                                 className={`text-xs font-semibold px-2.5 py-0.5 rounded ${statusColors[order.status.toLowerCase()] || 'bg-gray-100 text-gray-800'}`}
@@ -163,14 +170,24 @@ const OrderHistoryPage: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <button
-                                            onClick={() =>
-                                                navigate(`/invoice?orderId=${order.orderCode}&result=success`)
-                                            }
+                                            onClick={() => {
+                                                let result = 'fail'; // mặc định
+
+                                                if (order.status === 'PAID') {
+                                                    result = 'success';
+                                                } else if (order.status === 'PENDING' || order.status === 'PROCESSING') {
+                                                    result = 'pending';
+                                                }
+
+                                                navigate(`/invoice?orderId=${order.orderCode}&result=${result}`);
+                                            }}
                                             className="text-sm px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 transition"
                                         >
                                             Xem chi tiết
                                         </button>
                                     </td>
+
+
                                 </motion.tr>
                             ))}
                             </tbody>
@@ -198,6 +215,8 @@ const OrderHistoryPage: React.FC = () => {
                 </>
             )}
         </div>
+          </PageLayout>
+
     );
 };
 

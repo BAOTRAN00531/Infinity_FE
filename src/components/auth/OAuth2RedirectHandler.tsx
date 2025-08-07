@@ -22,12 +22,16 @@ const OAuth2RedirectHandler: React.FC = () => {
             if (name) localStorage.setItem("name", decodeURIComponent(name));
             if (avatar) localStorage.setItem("avatar", decodeURIComponent(avatar));
 
-            toast.success("🎉 Đăng nhập thành công!");
+            toast.success("🎉 Đăng nhập thành công!", {
+                autoClose: 1200, // 👈 1.2 giây riêng lẻ
+            });
 
             setTimeout(() => navigate("/"), 1000);
         } else {
             console.error("OAuth2 error:", error);
-            toast.error(`Đăng nhập thất bại. ${error || ""}`);
+            toast.error(`Đăng nhập thất bại. ${error || ""}`, {
+                autoClose: 1200, // 👈 1.2 giây riêng lẻ
+            });
             setTimeout(() => navigate("/login"), 2000);
         }
     }, [location, navigate]);

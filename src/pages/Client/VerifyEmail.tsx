@@ -14,7 +14,9 @@ const VerifyEmail: React.FC = () => {
 
     useEffect(() => {
         if (!token) {
-            toast.error('Không tìm thấy token xác thực.');
+            toast.error('Không tìm thấy token xác thực.', {
+                autoClose: 1200, // 👈 1.2 giây riêng lẻ
+            });
             return;
         }
 
@@ -34,7 +36,9 @@ const VerifyEmail: React.FC = () => {
                 return response.json();
             })
             .then((data) => {
-                toast.success(data.message || 'Xác thực thành công!');
+                toast.success(data.message || 'Xác thực thành công!', {
+                    autoClose: 1200, // 👈 1.2 giây riêng lẻ
+                });
 
                 if (data.redirectTo) {
                     setRedirectTo(data.redirectTo);
@@ -57,7 +61,9 @@ const VerifyEmail: React.FC = () => {
                     return;
                 }
                 console.error(error);
-                toast.error(error.message || 'Có lỗi xảy ra!');
+                toast.error(error.message || 'Có lỗi xảy ra!', {
+                    autoClose: 1200, // 👈 1.2 giây riêng lẻ
+                });
             });
 
         return () => controller.abort();

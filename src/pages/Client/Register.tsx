@@ -29,15 +29,21 @@ export default function RegisterPage() {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!emailRegex.test(email)) {
-            toast.error("Email không hợp lệ.");
+            toast.error("Email không hợp lệ.", {
+                autoClose: 1200, // 👈 1.2 giây riêng lẻ
+            });
             return false;
         }
         if (username.length < 3) {
-            toast.error("Tên đăng nhập tối thiểu 3 ký tự.");
+            toast.error("Tên đăng nhập tối thiểu 3 ký tự.", {
+                autoClose: 1200, // 👈 1.2 giây riêng lẻ
+            });
             return false;
         }
         if (password.length < 8) {
-            toast.error("Mật khẩu tối thiểu 8 ký tự.");
+            toast.error("Mật khẩu tối thiểu 8 ký tự.", {
+                autoClose: 1200, // 👈 1.2 giây riêng lẻ
+            });
             return false;
         }
         return true;
@@ -53,14 +59,20 @@ export default function RegisterPage() {
         try {
             const result = await register(formData);
             if (result.status === 200) {
-                toast.success("Đăng ký thành công. Vui lòng kiểm tra email để xác nhận.");
+                toast.success("Đăng ký thành công. Vui lòng kiểm tra email để xác nhận.", {
+                    autoClose: 2200, // 👈 1.2 giây riêng lẻ
+                });
                 setFormData({ email: "", username: "", password: "" });
                 setTimeout(() => navigate("/verify-confirmation"), 3000);
             } else {
-                toast.error("Đăng ký thất bại. Mã trạng thái: " + result.status);
+                toast.error("Đăng ký thất bại. Mã trạng thái: " + result.status, {
+                    autoClose: 1200, // 👈 1.2 giây riêng lẻ
+                });
             }
         } catch (err: any) {
-            toast.error("Đăng ký thất bại. " + (err.response?.data?.message || "Vui lòng thử lại."));
+            toast.error("Đăng ký thất bại. " + (err.response?.data?.message || "Vui lòng thử lại.", {
+                autoClose: 1200, // 👈 1.2 giây riêng lẻ
+            }));
         } finally {
             setLoading(false);
         }

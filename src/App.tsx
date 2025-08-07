@@ -9,7 +9,7 @@ import ForgotPassword from './pages/Client/ForgotPassword';
 import VerifyOtp from './pages/Client/VerifyOtp';
 import ResetPassword from './pages/Client/ResetPassword';
 import AdminDashboard from './pages/Admin/AdminDashboard';
-import UserDashboard from './pages/Admin/UserDashboard';
+import UserDashboard from './pages/Student/UserDashboard';
 import ProtectedRoute from './utils/ProtectedRoute';
 import LanguageList from './pages/Admin/LanguageList';
 import LanguageForm from './pages/Admin/LanguageForm';
@@ -24,6 +24,10 @@ import InvoicePage from "@/components/payment/InvoicePage";
 import ClientCourseList from "@/pages/Learning/ClientCourseList";
 import CourseDetail from "@/pages/Learning/CourseDetail";
 import OrderHistoryPage from "@/components/history/OrderHistoryPage";
+import Breadcrumbs from './components/Breadcrumbs';
+import StudentCourses from "@/pages/Student/StudentCourses";
+
+import SePayPaymentPage from "@/components/payment/SePayPaymentPage";
 
 
 // ✅ Logic trong App.tsx (bổ sung allowedPaths)
@@ -40,7 +44,9 @@ const App: React.FC = () => {
                 const role = decodedToken.role;
 
                 if (isSession) {
-                    toast.success('🎉 Đăng nhập thành công!');
+                    toast.success('🎉 Đăng nhập thành công!', {
+                        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+                    });
                 }
 
                 if (role === 'ROLE_ADMIN') {
@@ -70,6 +76,7 @@ const App: React.FC = () => {
     return (
         <div>
         <LoadingIndicator />
+
     <Routes>
         <Route path="/oauth2/success" element={<OAuth2RedirectHandler />} />
 
@@ -82,9 +89,14 @@ const App: React.FC = () => {
         {/*<Route path="/khoa-hoc" element={<ClientCourseList />} />*/}
 
 
-        <Route path="/client/courses" element={<ClientCourseList />} />
+        <Route path="/client/course" element={<ClientCourseList />} />
         <Route path="/client/course/:id" element={<CourseDetail />} />
 
+
+        {/*Student*/}
+        <Route path="/student/course/:id" element={<StudentCourses />} />
+
+        <Route path="/sepay-payment" element={<SePayPaymentPage  />} />
 
         <Route path="/verify-confirmation" element={<VerifyConfirmation />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -117,7 +129,9 @@ const App: React.FC = () => {
                                     onSubmit={(formData) => {
                                         const token = localStorage.getItem('access_token'); sessionStorage.getItem('access_token');
                                         if (!token) {
-                                            toast.error('Missing token');
+                                            toast.error('Missing token', {
+                                                autoClose: 1200, // 👈 1.2 giây riêng lẻ
+                                            });
                                             return;
                                         }
                                         fetch('http://localhost:8080/api/languages', {
@@ -125,7 +139,9 @@ const App: React.FC = () => {
                                             headers: { Authorization: `Bearer ${token}` },
                                             body: formData,
                                         }).then(() => {
-                                            toast.success('Created!');
+                                            toast.success('Created!', {
+                                                autoClose: 1200, // 👈 1.2 giây riêng lẻ
+                                            });
                                             setTimeout(() => {
                                                 window.location.href = '/languages';
                                             }, 1500);

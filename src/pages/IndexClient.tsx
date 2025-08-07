@@ -9,6 +9,7 @@ import InfieFeature from "../components/layout-components/InfieFeature";
 import CTA from "../components/layout-components/CTA";
 import Footer from "../components/layout-components/Footer";
 import HeroBanners from "@/components/layout-components/HeroBanners";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function IndexClient() {
     const navigate = useNavigate();
@@ -19,6 +20,7 @@ export default function IndexClient() {
     return (
         <main className="bg-white dark:bg-gray-900">
             <Header/>
+            <Breadcrumbs />
             <Hero />
             <div className=" hidden md:block">
                 <LanguageSwitcher />

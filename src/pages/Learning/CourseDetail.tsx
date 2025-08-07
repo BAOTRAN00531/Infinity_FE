@@ -8,6 +8,7 @@ import { Star } from "lucide-react";
 import { Tab } from "@headlessui/react";
 import { CommentSection } from "@/components/comments/CommentSection";
 import { CommentFirebase } from "@/components/comments/CommentFirebase";
+import PageLayout from "@/components/layout-components/PageLayout";
 
 // ...
 
@@ -64,7 +65,7 @@ export default function CourseDetail() {
 
     return (
         <>
-            <Header />
+            <PageLayout>
 
             {/* Banner background */}
             <div className="w-full h-72 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex items-center justify-center">
@@ -183,6 +184,7 @@ export default function CourseDetail() {
             {/*        </div>*/}
             {/*    </div>*/}
             </div>
+                </PageLayout>
         </>
     );
 }

@@ -28,6 +28,7 @@ interface Course {
   createdAt: string;
   modulesCount: number;
   price: number;
+  thumbnail: string;
 }
 
 interface CourseFormProps {
@@ -43,8 +44,10 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
     description: initialData?.description || '',
     level: initialData?.level || 'Beginner' as const,
     status: initialData?.status || 'active' as const,
-    price: initialData?.price || 0, // ✅ Thêm dòng này
+    price: initialData?.price || 0,
+    thumbnail: initialData?.thumbnail || '', // ✅ Thêm dòng này
   });
+
 
 
 
@@ -58,7 +61,9 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
         });
         setLanguages(res.data);
       } catch {
-        toast.error('Failed to load languages');
+        toast.error('Failed to load languages', {
+          autoClose: 1200, // 👈 1.2 giây riêng lẻ
+        });
       }
     };
     fetchLanguages();
@@ -68,7 +73,9 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
     e.preventDefault();
     const selectedLanguage = languages.find(lang => lang.id === languageId);
     if (!selectedLanguage) {
-      toast.error('Please select a language');
+      toast.error('Please select a language', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
       return;
     }
     onSubmit({
@@ -200,6 +207,46 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
                 placeholder="Nhập giá khóa học"
                 required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="thumbnail" className="text-sm font-bold text-gray-700 dark:text-gray-200">Thumbnail Image</Label>
+            <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  const formDataUpload = new FormData();
+                  formDataUpload.append('file', file);
+
+                  try {
+                    const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+                    const res = await axios.post('http://localhost:8080/api/uploads', formDataUpload, {
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data',
+                      },
+                    });
+
+                    const url = res.data.url;
+                    setFormData(prev => ({ ...prev, thumbnail: url }));
+                    toast.success('Uploaded thumbnail successfully', { autoClose: 1200 });
+                  } catch (err) {
+                    toast.error('Failed to upload thumbnail', { autoClose: 1200 });
+                  }
+                }}
+                className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-2xl file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+            />
+
+            {formData.thumbnail && (
+                <img
+                    src={formData.thumbnail}
+                    alt="Thumbnail preview"
+                    className="mt-2 rounded-lg border w-40 h-24 object-cover"
+                />
+            )}
           </div>
 
 

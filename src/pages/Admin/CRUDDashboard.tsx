@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/reusable-components/tabs';
-import { BookOpen, Layers, FileText, HelpCircle, Globe, Users, LayoutDashboard,Book } from 'lucide-react';
+import { BookOpen, Layers, FileText, HelpCircle, Globe, Users, LayoutDashboard,Book, ShoppingCart  } from 'lucide-react';
 import OverviewDashboard from './OverviewDashboard'; // Cùng thư mục pages
 import CoursesCRUD from '@/pages/Admin/CoursesCRUD'; // Cùng thư mục pages
 import ModulesCRUD from '@/pages/Admin/ModulesCRUD';
@@ -9,6 +9,7 @@ import QuestionsCRUD from '@/pages/Admin/QuestionsCRUD';
 import LanguagesCRUD from '@/pages/Admin/LanguagesCRUD';
 import UsersCRUD from '@/pages/Admin/UsersCRUD';
 import LexiconCRUD from '@/pages/Admin/LexiconCRUD';
+import OrderCRUD from '@/pages/Admin/OrderCRUD';
 import {useState} from "react";
 import Header from "../../components/layout-components/Header";
 
@@ -25,6 +26,7 @@ const CRUDDashboard = () => {
     { id: 'lexicon', label: 'Lexicon', icon: Book, color: 'bg-gradient-to-br from-blue-500 to-purple-500' },
     { id: 'languages', label: 'Languages', icon: Globe, color: 'bg-gradient-to-br from-indigo-500 to-purple-500' },
     { id: 'users', label: 'Users', icon: Users, color: 'bg-gradient-to-br from-pink-500 to-rose-500' },
+    { id: 'orders', label: 'Orders', icon: ShoppingCart, color: 'bg-gradient-to-br from-yellow-500 to-orange-500' },
   ];
 
   return (
@@ -91,6 +93,9 @@ const CRUDDashboard = () => {
               </TabsContent>
               <TabsContent value="users" className="m-0">
                 <UsersCRUD />
+              </TabsContent>
+              <TabsContent value="orders" className="m-0">
+                <OrderCRUD />
               </TabsContent>
             </div>
           </Tabs>

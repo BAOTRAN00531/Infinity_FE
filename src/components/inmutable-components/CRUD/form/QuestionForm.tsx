@@ -96,13 +96,17 @@
           const data = await res.json();
           if (!Array.isArray(data)) {
             setQuestionTypes([]);
-            toast.error('Dữ liệu question types không hợp lệ!');
+            toast.error('Dữ liệu question types không hợp lệ!', {
+              autoClose: 1200, // 👈 1.2 giây riêng lẻ
+            });
             return;
           }
           setQuestionTypes(data);
         } catch (err) {
           setQuestionTypes([]);
-          toast.error('Không thể tải question types');
+          toast.error('Không thể tải question types', {
+            autoClose: 1200, // 👈 1.2 giây riêng lẻ
+          });
         }
       };
 
@@ -181,7 +185,9 @@
           setModules(res.data);
         } catch (err) {
           console.error(err);
-          toast.error('Không thể tải danh sách modules');
+          toast.error('Không thể tải danh sách modules', {
+            autoClose: 1200, // 👈 1.2 giây riêng lẻ
+          });
         }
       };
 
@@ -201,7 +207,9 @@
           });
           setLessons(res.data);
         } catch (err) {
-          toast.error('Không tải được danh sách lessons');
+          toast.error('Không tải được danh sách lessons', {
+            autoClose: 1200, // 👈 1.2 giây riêng lẻ
+          });
         }
       };
 
@@ -225,19 +233,25 @@
       try {
         // ❗ Validate: nếu là multiple-choice thì cần ít nhất 1 option
         if ([1, 2].includes(formData.questionTypeId) && options.length === 0) {
-          toast.error("Câu hỏi trắc nghiệm cần ít nhất 1 phương án!");
+          toast.error("Câu hỏi trắc nghiệm cần ít nhất 1 phương án!", {
+            autoClose: 1200, // 👈 1.2 giây riêng lẻ
+          });
           return;
         }
 
         // ❗ Validate: nếu là multiple-choice thì ít nhất 1 đáp án đúng
         if ([1, 2].includes(formData.questionTypeId) && !options.some(o => o.correct)) {
-          toast.error("Phải chọn ít nhất 1 đáp án đúng!");
+          toast.error("Phải chọn ít nhất 1 đáp án đúng!", {
+            autoClose: 1200, // 👈 1.2 giây riêng lẻ
+          });
           return;
         }
 
         // ❗ Validate: nếu là text-input thì cần ít nhất 1 answer
         if (formData.questionTypeId === 4 && answers.length === 0) {
-          toast.error("Bạn cần nhập ít nhất 1 câu trả lời!");
+          toast.error("Bạn cần nhập ít nhất 1 câu trả lời!", {
+            autoClose: 1200, // 👈 1.2 giây riêng lẻ
+          });
           return;
         }
 
@@ -286,7 +300,9 @@
         onSubmit(uiQuestion);
       } catch (err) {
         console.error("Submit lỗi:", err);
-        toast.error("Có lỗi xảy ra khi gửi câu hỏi.");
+        toast.error("Có lỗi xảy ra khi gửi câu hỏi.", {
+          autoClose: 1200, // 👈 1.2 giây riêng lẻ
+        });
       } finally {
         isSubmittingRef.current = false; // ✅ cho phép submit lại
       }

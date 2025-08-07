@@ -39,7 +39,9 @@ const QuestionsCRUD = () => {
   useEffect(() => {
     fetchModules()
         .then(setModules)
-        .catch(() => toast.error('Không thể tải modules'));
+        .catch(() => toast.error('Không thể tải modules', {
+          autoClose: 1200, // 👈 1.2 giây riêng lẻ
+        }));
   }, []);
 
 
@@ -51,7 +53,9 @@ const QuestionsCRUD = () => {
       setSelectedLesson(null); // ✅ Reset lesson
       setQuestions([]); // ✅ Clear old questions nếu cần
     } catch (err) {
-      toast.error("Không thể tải danh sách bài học");
+      toast.error("Không thể tải danh sách bài học", {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   };
 

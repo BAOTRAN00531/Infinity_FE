@@ -44,7 +44,9 @@ const ModulesCRUD = () => {
 
         setModules(res.data);
       } catch (err) {
-        toast.error('Failed to load modules');
+        toast.error('Failed to load modules', {
+          autoClose: 1200, // 👈 1.2 giây riêng lẻ
+        });
       }
     };
     fetchModules();
@@ -91,10 +93,14 @@ const ModulesCRUD = () => {
 
       setModules((prev) => [...prev, res.data]);
       setIsCreateOpen(false);
-      toast.success('Module created successfully');
+      toast.success('Module created successfully', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     } catch (error) {
       console.error(error);
-      toast.error('Failed to create module');
+      toast.error('Failed to create module', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   };
 
@@ -119,10 +125,14 @@ const ModulesCRUD = () => {
 
       setIsEditOpen(false);
       setSelectedModule(null);
-      toast.success('Module updated successfully');
+      toast.success('Module updated successfully', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     } catch (error) {
       console.error(error);
-      toast.error('Failed to update module');
+      toast.error('Failed to update module', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   };
 
@@ -137,9 +147,13 @@ const ModulesCRUD = () => {
       setModules(modules.filter((m) => m.id !== selectedModule.id));
       setIsDeleteOpen(false);
       setSelectedModule(null);
-      toast.success('Module deleted');
+      toast.success('Module deleted', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     } catch (error) {
-      toast.error('Failed to delete module');
+      toast.error('Failed to delete module', {
+        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      });
     }
   };
 

@@ -13,7 +13,7 @@ interface CourseCardProps {
         price: number;
         status: string;
         level: 'Beginner' | 'Intermediate' | 'Advanced';
-        thumbnailUrl?: string; // optional image
+        thumbnail?: string; // optional image
         progress?: number; // optional progress, 0-100
     };
 }
@@ -31,9 +31,9 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
         >
             {/* Thumbnail */}
             <div className="h-32 bg-gray-200 dark:bg-slate-800 flex items-center justify-center">
-                {course.thumbnailUrl ? (
+                {course.thumbnail ? (
                     <img
-                        src={course.thumbnailUrl}
+                        src={course.thumbnail}
                         alt={course.name}
                         className="h-full w-full object-cover"
                     />
@@ -41,7 +41,6 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
                     <span className="text-gray-400 text-sm">Không có ảnh</span>
                 )}
             </div>
-
             {/* Nội dung */}
             <div className="p-4 flex flex-col justify-between flex-grow space-y-3">
                 <div>

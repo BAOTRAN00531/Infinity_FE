@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import api from '@/api'; // ✅ Thay axios bằng api
 
 const LanguageList: React.FC = () => {
     const [languages, setLanguages] = useState<any[]>([]);
@@ -16,12 +16,13 @@ const LanguageList: React.FC = () => {
         try {
             const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
             if (!token) throw new Error('No token found');
-            const response = await axios.get('http://localhost:8080/api/languages', {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+
+            const response = await api.get('/api/languages'); // ✅ dùng api (token đã cấu hình sẵn)
             setLanguages(response.data);
         } catch (error) {
-            toast.error('Failed to fetch languages');
+            toast.error('Failed to fetch languages', {
+                autoClose: 1200,
+            });
         }
     };
 
