@@ -11,9 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import LexiconForm from '@/components/inmutable-components/CRUD/form/LexiconForm';
 import LexiconDetails from '@/components/inmutable-components/CRUD/detail/LexiconDetails';
 import DeleteConfirmation from '@/components/inmutable-components/DeleteConfirmation';
-import { lexiconApi } from '@/api/lexiconApi';
+import { lexiconApi, Language } from '@/api/lexiconApi';
 import { toast } from 'react-toastify';
-import axios from 'axios'; // Added axios import
 
 export interface LexiconUnit {
   id: number;
@@ -42,10 +41,12 @@ const LexiconCRUD = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [availableVoices, setAvailableVoices] = useState<any[]>([]);
   const [selectedVoice, setSelectedVoice] = useState('');
+  const [languages, setLanguages] = useState<Language[]>([]);
 
   // Load data from API on component mount
   useEffect(() => {
     loadData();
+    loadLanguages();
     loadVoices();
   }, []);
 
@@ -70,27 +71,27 @@ const LexiconCRUD = () => {
     }
   };
 
+  const loadLanguages = async () => {
+    try {
+      const languagesResponse = await lexiconApi.languages.getAll();
+      setLanguages(languagesResponse);
+      
+      // Set default language to first available
+      if (languagesResponse.length > 0) {
+        setSelectedLanguage(languagesResponse[0].code);
+      }
+    } catch (error) {
+      console.error('Error loading languages:', error);
+      toast.error("Failed to load languages. Please try again.");
+    }
+  };
+
   const loadVoices = async () => {
     try {
-      // Lấy danh sách ngôn ngữ từ API trước
-      const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-      if (!token) throw new Error("Token not found");
-
-      const languagesResponse = await axios.get(
-        "http://localhost:8080/api/languages",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // Lấy voices cho ngôn ngữ đầu tiên (hoặc ngôn ngữ được chọn)
-      if (languagesResponse.data.length > 0) {
-        const firstLanguage = languagesResponse.data[0];
-        const voicesResponse = await lexiconApi.tts.getAvailableVoices(firstLanguage.code);
+      // Lấy voices cho ngôn ngữ được chọn
+      if (selectedLanguage) {
+        const voicesResponse = await lexiconApi.tts.getAvailableVoices(selectedLanguage);
         setAvailableVoices(voicesResponse);
-        setSelectedLanguage(firstLanguage.code);
       }
     } catch (error) {
       console.error('Error loading voices:', error);
@@ -189,7 +190,6 @@ const LexiconCRUD = () => {
           language: data.language,
           difficulty: data.difficulty
         };
-
         const response = await lexiconApi.units.update(selectedItem.id, unitDto);
         const updatedUnit = mapResponseToLexiconUnit(response);
         
@@ -283,22 +283,109 @@ const LexiconCRUD = () => {
     }
   };
 
-  const playAudio = (audioUrl?: string, text?: string) => {
+  const playAudio = (audioUrl?: string, text?: string, language?: string) => {
     if (audioUrl) {
       // Nếu có audio URL từ backend, phát audio đó
       const audio = new Audio(audioUrl);
       audio.play().catch(error => {
         console.error('Error playing audio:', error);
         // Fallback to TTS nếu audio không phát được
-        if (text) {
-          const utterance = new SpeechSynthesisUtterance(text);
-          speechSynthesis.speak(utterance);
+        if (text && language) {
+          playTTSWithLanguage(text, language);
         }
       });
-    } else if (text) {
-      // Nếu không có audio URL, sử dụng TTS của browser
-      const utterance = new SpeechSynthesisUtterance(text);
+    } else if (text && language) {
+      // Nếu không có audio URL, sử dụng TTS của browser với ngôn ngữ phù hợp
+      playTTSWithLanguage(text, language);
+    }
+  };
+
+  // Hàm mới để phát TTS với ngôn ngữ phù hợp
+  const playTTSWithLanguage = (text: string, language: string) => {
+    // Dừng bất kỳ audio nào đang phát
+    speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Tìm language object từ danh sách languages
+    const languageObj = languages.find(lang => lang.code === language);
+    
+    // Thiết lập ngôn ngữ dựa trên language code từ database
+    const languageMap: { [key: string]: string } = {
+      'vi': 'vi-VN',
+      'th-TH': 'th-TH', 
+      'ms-MY': 'ms-MY',
+      'fr-FR': 'fr-FR',
+      'zh-CN': 'zh-CN',
+      'vi-VN': 'vi-VN',
+      'ar-EG': 'ar-EG',
+      'ru-RU': 'ru-RU',
+      'en': 'en-US',
+      'ja': 'ja-JP',
+      'ko': 'ko-KR',
+      'es': 'es-ES'
+    };
+
+    // Sử dụng language code từ database hoặc fallback
+    utterance.lang = languageMap[language] || language || 'en-US';
+    
+    // Hàm để tìm và thiết lập voice
+    const findAndSetVoice = () => {
+      const voices = speechSynthesis.getVoices();
+      console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+      
+      // Tìm giọng đọc phù hợp với ngôn ngữ
+      const preferredVoice = voices.find(voice => {
+        // Kiểm tra exact match trước
+        if (voice.lang === utterance.lang) return true;
+        
+        // Kiểm tra language code base (trước dấu -)
+        const baseLang = utterance.lang.split('-')[0];
+        const voiceBaseLang = voice.lang.split('-')[0];
+        return voiceBaseLang === baseLang;
+      });
+      
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+        console.log(`Using voice: ${preferredVoice.name} for language: ${utterance.lang}`);
+      } else {
+        console.warn(`No suitable voice found for language: ${utterance.lang}`);
+        // Fallback to first available voice
+        if (voices.length > 0) {
+          utterance.voice = voices[0];
+          console.log(`Fallback to voice: ${voices[0].name}`);
+        }
+      }
+
+      // Thiết lập tốc độ và pitch phù hợp
+      utterance.rate = 0.8; // Chậm hơn một chút
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+
+      // Xử lý lỗi
+      utterance.onerror = (event) => {
+        console.error('TTS Error:', event);
+        const languageName = languageObj?.name || language;
+        toast.error(`Cannot pronounce "${text}" in ${languageName}. Please generate audio instead.`);
+      };
+
+      utterance.onend = () => {
+        console.log('TTS finished');
+      };
+
       speechSynthesis.speak(utterance);
+    };
+
+    // Kiểm tra xem voices đã được load chưa
+    if (speechSynthesis.getVoices().length > 0) {
+      findAndSetVoice();
+    } else {
+      // Đợi voices được load
+      speechSynthesis.onvoiceschanged = () => {
+        findAndSetVoice();
+        // Remove listener sau khi sử dụng
+        speechSynthesis.onvoiceschanged = null;
+      };
     }
   };
 
@@ -348,7 +435,7 @@ const LexiconCRUD = () => {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  onClick={() => playAudio(item.audio, item.text)}
+                  onClick={() => playAudio(item.audio, item.text, item.language)}
                   className="p-1"
                 >
                   <Volume2 className="w-4 h-4" />
@@ -374,7 +461,7 @@ const LexiconCRUD = () => {
           variant="ghost" 
           size="sm" 
           className="rounded-xl hover:bg-green-100"
-          onClick={() => playAudio(item.audio, item.text)}
+          onClick={() => playAudio(item.audio, item.text, item.language)}
         >
           <Volume2 className="w-4 h-4" />
         </Button>
@@ -476,12 +563,11 @@ const LexiconCRUD = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="en">English</SelectItem>
-              <SelectItem value="ja">Japanese</SelectItem>
-              <SelectItem value="ko">Korean</SelectItem>
-              <SelectItem value="zh">Chinese</SelectItem>
-              <SelectItem value="es">Spanish</SelectItem>
-              <SelectItem value="fr">French</SelectItem>
+              {languages.map((language) => (
+                <SelectItem key={language.code} value={language.code}>
+                  {language.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           

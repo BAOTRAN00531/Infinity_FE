@@ -225,10 +225,42 @@ export const ttsApi = {
   }
 };
 
+// Language API Types
+export interface Language {
+  id: number;
+  code: string;
+  name: string;
+  flag?: string;
+  difficulty?: string;
+  popularity?: string;
+}
+
+// Language API
+export const languageApi = {
+  // Get all languages
+  getAll: async (): Promise<Language[]> => {
+    const response = await api.get('/api/languages');
+    return response.data;
+  },
+
+  // Get language by code
+  getByCode: async (code: string): Promise<Language> => {
+    const response = await api.get(`/api/languages/${code}`);
+    return response.data;
+  },
+
+  // Get supported languages for TTS
+  getSupportedLanguages: async (): Promise<Language[]> => {
+    const response = await api.get('/api/languages/supported');
+    return response.data;
+  }
+};
+
 // Combined Lexicon API for convenience
 export const lexiconApi = {
   units: lexiconUnitsApi,
   tts: ttsApi,
+  languages: languageApi,
   
   // Get statistics
   getStats: async (): Promise<{
