@@ -6,13 +6,9 @@ import { Label } from '@/components/reusable-components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/reusable-components/select';
 import { Volume2 } from 'lucide-react';
 import { LexiconUnit } from '@/pages/Admin/LexiconCRUD';
-import axios from 'axios';
+import { lexiconApi, Language } from '@/api/lexiconApi';
 
-interface Language {
-  id: number;
-  name: string;
-  code: string;
-}
+// Remove duplicate interface since we're importing from lexiconApi
 
 interface LexiconFormProps {
   onSubmit: (data: Omit<LexiconUnit, 'id'>) => void;
@@ -27,7 +23,7 @@ const LexiconForm: React.FC<LexiconFormProps> = ({ onSubmit, initialData, type, 
   const [formData, setFormData] = useState<any>({
     text: initialData?.text || '',
     ipa: initialData?.ipa || '',
-    meaning_en: initialData?.meaning_en || '',
+    meaning_en: initialData?.meaning_en ||  '',
     image: initialData?.image || '',
     type: initialData?.type || (type === 'units' ? 'vocabulary' : 'phrase'),
     partOfSpeech: initialData?.partOfSpeech || '',
@@ -40,29 +36,20 @@ const LexiconForm: React.FC<LexiconFormProps> = ({ onSubmit, initialData, type, 
     const fetchLanguages = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-        if (!token) throw new Error("Token not found");
-
-        const response = await axios.get(
-          "http://localhost:8080/api/languages",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        setLanguages(response.data);
+        const languagesResponse = await lexiconApi.languages.getAll();
+        setLanguages(languagesResponse);
       } catch (error) {
         console.error('Error fetching languages:', error);
         // Fallback to default languages if API fails
         setLanguages([
-          { id: 1, name: 'English', code: 'en' },
-          { id: 2, name: 'Japanese', code: 'ja' },
-          { id: 3, name: 'Korean', code: 'ko' },
-          { id: 4, name: 'Chinese', code: 'zh' },
-          { id: 5, name: 'Spanish', code: 'es' },
-          { id: 6, name: 'French', code: 'fr' }
+          { id: 1, name: 'Vietnamese', code: 'vi' },
+          { id: 2, name: 'Thailand', code: 'th-TH' },
+          { id: 3, name: 'Malaysia', code: 'ms-MY' },
+          { id: 4, name: 'French', code: 'fr-FR' },
+          { id: 5, name: 'China', code: 'zh-CN' },
+          { id: 6, name: 'Vietnam', code: 'vi-VN' },
+          { id: 7, name: 'Egypt', code: 'ar-EG' },
+          { id: 8, name: 'Russia', code: 'ru-RU' }
         ]);
       } finally {
         setLoading(false);
@@ -83,8 +70,77 @@ const LexiconForm: React.FC<LexiconFormProps> = ({ onSubmit, initialData, type, 
   };
 
   const testTTS = () => {
+    // Dừng bất kỳ audio nào đang phát
+    speechSynthesis.cancel();
+
     const utterance = new SpeechSynthesisUtterance(formData.text);
-    speechSynthesis.speak(utterance);
+    
+    // Thiết lập ngôn ngữ dựa trên language code từ database
+    const languageMap: { [key: string]: string } = {
+      'vi': 'vi-VN',
+      'th-TH': 'th-TH', 
+      'ms-MY': 'ms-MY',
+      'fr-FR': 'fr-FR',
+      'zh-CN': 'zh-CN',
+      'vi-VN': 'vi-VN',
+      'ar-EG': 'ar-EG',
+      'ru-RU': 'ru-RU',
+      'en': 'en-US',
+      'ja': 'ja-JP',
+      'ko': 'ko-KR',
+      'es': 'es-ES'
+    };
+
+    // Sử dụng language code từ form data
+    utterance.lang = languageMap[formData.language] || formData.language || 'en-US';
+    
+    // Hàm để tìm và thiết lập voice
+    const findAndSetVoice = () => {
+      const voices = speechSynthesis.getVoices();
+      console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+      
+      // Tìm giọng đọc phù hợp với ngôn ngữ
+      const preferredVoice = voices.find(voice => {
+        // Kiểm tra exact match trước
+        if (voice.lang === utterance.lang) return true;
+        
+        // Kiểm tra language code base (trước dấu -)
+        const baseLang = utterance.lang.split('-')[0];
+        const voiceBaseLang = voice.lang.split('-')[0];
+        return voiceBaseLang === baseLang;
+      });
+      
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+        console.log(`Using voice: ${preferredVoice.name} for language: ${utterance.lang}`);
+      } else {
+        console.warn(`No suitable voice found for language: ${utterance.lang}`);
+        // Fallback to first available voice
+        if (voices.length > 0) {
+          utterance.voice = voices[0];
+          console.log(`Fallback to voice: ${voices[0].name}`);
+        }
+      }
+
+      // Thiết lập tốc độ và pitch phù hợp
+      utterance.rate = 0.8;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+
+      speechSynthesis.speak(utterance);
+    };
+
+    // Kiểm tra xem voices đã được load chưa
+    if (speechSynthesis.getVoices().length > 0) {
+      findAndSetVoice();
+    } else {
+      // Đợi voices được load
+      speechSynthesis.onvoiceschanged = () => {
+        findAndSetVoice();
+        // Remove listener sau khi sử dụng
+        speechSynthesis.onvoiceschanged = null;
+      };
+    }
   };
 
   const difficulties = ['beginner', 'intermediate', 'advanced'];

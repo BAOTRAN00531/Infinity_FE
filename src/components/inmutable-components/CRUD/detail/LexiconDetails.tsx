@@ -14,10 +14,88 @@ const LexiconDetails: React.FC<LexiconDetailsProps> = ({ item }) => {
   const playAudio = () => {
     if (item.audio) {
       const audio = new Audio(item.audio);
-      audio.play();
+      audio.play().catch(error => {
+        console.error('Error playing audio:', error);
+        // Fallback to TTS
+        playTTSWithLanguage(item.text, item.language);
+      });
     } else {
-      const utterance = new SpeechSynthesisUtterance(item.text);
+      playTTSWithLanguage(item.text, item.language);
+    }
+  };
+
+  // Hàm TTS với ngôn ngữ phù hợp
+  const playTTSWithLanguage = (text: string, language: string) => {
+    // Dừng bất kỳ audio nào đang phát
+    speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Thiết lập ngôn ngữ dựa trên language code từ database
+    const languageMap: { [key: string]: string } = {
+      'vi': 'vi-VN',
+      'th-TH': 'th-TH', 
+      'ms-MY': 'ms-MY',
+      'fr-FR': 'fr-FR',
+      'zh-CN': 'zh-CN',
+      'vi-VN': 'vi-VN',
+      'ar-EG': 'ar-EG',
+      'ru-RU': 'ru-RU',
+      'en': 'en-US',
+      'ja': 'ja-JP',
+      'ko': 'ko-KR',
+      'es': 'es-ES'
+    };
+
+    // Sử dụng language code từ database hoặc fallback
+    utterance.lang = languageMap[language] || language || 'en-US';
+    
+    // Hàm để tìm và thiết lập voice
+    const findAndSetVoice = () => {
+      const voices = speechSynthesis.getVoices();
+      console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+      
+      // Tìm giọng đọc phù hợp với ngôn ngữ
+      const preferredVoice = voices.find(voice => {
+        // Kiểm tra exact match trước
+        if (voice.lang === utterance.lang) return true;
+        
+        // Kiểm tra language code base (trước dấu -)
+        const baseLang = utterance.lang.split('-')[0];
+        const voiceBaseLang = voice.lang.split('-')[0];
+        return voiceBaseLang === baseLang;
+      });
+      
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+        console.log(`Using voice: ${preferredVoice.name} for language: ${utterance.lang}`);
+      } else {
+        console.warn(`No suitable voice found for language: ${utterance.lang}`);
+        // Fallback to first available voice
+        if (voices.length > 0) {
+          utterance.voice = voices[0];
+          console.log(`Fallback to voice: ${voices[0].name}`);
+        }
+      }
+
+      // Thiết lập tốc độ và pitch phù hợp
+      utterance.rate = 0.8;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+
       speechSynthesis.speak(utterance);
+    };
+
+    // Kiểm tra xem voices đã được load chưa
+    if (speechSynthesis.getVoices().length > 0) {
+      findAndSetVoice();
+    } else {
+      // Đợi voices được load
+      speechSynthesis.onvoiceschanged = () => {
+        findAndSetVoice();
+        // Remove listener sau khi sử dụng
+        speechSynthesis.onvoiceschanged = null;
+      };
     }
   };
 
