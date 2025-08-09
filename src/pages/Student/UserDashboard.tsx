@@ -21,7 +21,7 @@ const UserDashboard: React.FC = () => {
 
     useEffect(() => {
         api
-            .get('/student/dashboard') // ✅ Không cần /api/ vì baseURL đã set trong api.ts
+            .get('/api/student/dashboard') // ✅ Không cần /api/ vì baseURL đã set trong api.ts
             .then((res) => setCourses(res.data))
             .catch((err) => console.error('Lỗi khi load dashboard:', err))
             .finally(() => setLoading(false));
