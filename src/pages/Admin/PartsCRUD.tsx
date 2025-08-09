@@ -1,21 +1,19 @@
 // src/pages/PartsCRUD.tsx
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import { toast } from 'react-toastify'
 import { Plus, Edit, Trash2, Eye, FileText } from 'lucide-react'
 import { Button_admin } from '@/components/reusable-components/button_admin'
 import { Input } from '@/components/reusable-components/input'
-import {Dialog,DialogContent,DialogHeader,DialogTitle,
-DialogTrigger,} from '@/components/reusable-components/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/reusable-components/dialog'
 import { Badge } from '@/components/reusable-components/badge'
 import PartForm, { Part } from '@/components/inmutable-components/CRUD/form/PartForm'
 import PartDetails from '@/components/inmutable-components/CRUD/detail/PartDetails'
 import DeleteConfirmation from '@/components/inmutable-components/DeleteConfirmation'
+import api from '@/api' // ✅ Dùng instance api có interceptor
 
 const PartsCRUD: React.FC = () => {
   const [parts, setParts] = useState<Part[]>([])
   const [modules, setModules] = useState<{ id: number; name: string }[]>([])
-  // Bỏ moduleFilter
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('title-asc');
   const [selectedPart, setSelectedPart] = useState<Part | null>(null)
@@ -24,119 +22,73 @@ const PartsCRUD: React.FC = () => {
   const [isViewOpen, setIsViewOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
 
-  // Fetch modules lần đầu (nếu cần cho form), không cần setModuleFilter
-  useEffect(() => {
-    const fetchModules = async () => {
-      try {
-        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-        if (!token) throw new Error('Chưa đăng nhập')
-        const res = await axios.get<{ id: number; name: string }[]>(
-            'http://localhost:8080/api/modules',
-            { headers: { Authorization: `Bearer ${token}` } }
-        )
-        setModules(res.data)
-      } catch (err) {
-        console.error(err)
-        toast.error('Không tải được Modules', {
-          autoClose: 1200, // 👈 1.2 giây riêng lẻ
-        });
-      }
+  // Fetch modules cho form
+  const fetchModules = async () => {
+    try {
+      const res = await api.get<{ id: number; name: string }[]>('/api/modules')
+      setModules(res.data)
+    } catch (err) {
+      console.error(err)
+      toast.error('Không tải được Modules', { autoClose: 1200 })
     }
-    fetchModules()
-  }, [])
+  }
 
-  // Hàm fetch lại parts (luôn fetch toàn bộ)
+  // Fetch toàn bộ parts
   const fetchParts = async () => {
     try {
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      if (!token) throw new Error('Chưa đăng nhập')
-      const res = await axios.get<Part[]>(
-          'http://localhost:8080/api/lessons',
-          { headers: { Authorization: `Bearer ${token}` } }
-      )
+      const res = await api.get<Part[]>('/api/lessons')
       setParts(res.data)
     } catch (err) {
       console.error(err)
-      toast.error('Không tải được Parts', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.error('Không tải được Parts', { autoClose: 1200 })
     }
   }
 
   useEffect(() => {
+    fetchModules()
     fetchParts()
   }, [])
 
-  // Create mới lên API
+  // Create mới
   const handleCreate = async (data: Omit<Part, 'id'>) => {
     try {
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      if (!token) throw new Error('Chưa đăng nhập')
-      console.log('Data gửi lên:', data)
-      await axios.post(
-          'http://localhost:8080/api/lessons',
-          data,
-          { headers: { Authorization: `Bearer ${token}` } }
-      )
-      toast.success('Tạo Part thành công', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      await api.post('/api/lessons', data)
+      toast.success('Tạo Part thành công', { autoClose: 1200 })
       setIsCreateOpen(false)
-      await fetchParts()
+      fetchParts()
     } catch (err) {
       console.error(err)
-      toast.error('Tạo Part thất bại', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.error('Tạo Part thất bại', { autoClose: 1200 })
     }
   }
 
-  // Update lên API
+  // Update
   const handleUpdate = async (data: Omit<Part, 'id'>) => {
     if (!selectedPart) return
     try {
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      if (!token) throw new Error('Chưa đăng nhập')
-      await axios.put(
-          `http://localhost:8080/api/lessons/${selectedPart.id}`,
-          data,
-          { headers: { Authorization: `Bearer ${token}` } }
-      )
-      toast.success('Cập nhật Part thành công', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      await api.put(`/api/lessons/${selectedPart.id}`, data)
+      toast.success('Cập nhật Part thành công', { autoClose: 1200 })
       setIsEditOpen(false)
       setSelectedPart(null)
-      await fetchParts()
+      fetchParts()
     } catch (err) {
       console.error(err)
-      toast.error('Cập nhật Part thất bại', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.error('Cập nhật Part thất bại', { autoClose: 1200 })
     }
   }
 
-  // Xóa lên API
+  // Delete
   const handleDelete = async () => {
     if (!selectedPart) return
     try {
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      if (!token) throw new Error('Chưa đăng nhập')
-      await axios.delete(
-          `http://localhost:8080/api/lessons/${selectedPart.id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-      )
-      toast.success('Xóa Part thành công', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      await api.delete(`/api/lessons/${selectedPart.id}`)
+      toast.success('Xóa Part thành công', { autoClose: 1200 })
       setIsDeleteOpen(false)
       setSelectedPart(null)
-      await fetchParts()
+      fetchParts()
     } catch (err) {
       console.error(err)
-      toast.error('Xóa Part thất bại', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.error('Xóa Part thất bại', { autoClose: 1200 })
     }
   }
 

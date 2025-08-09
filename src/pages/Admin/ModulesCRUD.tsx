@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Plus, Edit, Trash2, Eye, Layers, ArrowUpDown } from 'lucide-react';
 import { Button_admin } from '@/components/reusable-components/button_admin';
 import { Input_admin } from '@/components/reusable-components/input_admin';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/reusable-components/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/reusable-components/select';
 import { Badge } from '@/components/reusable-components/badge';
-import ModuleForm from '../../components/inmutable-components/CRUD/form/ModuleForm';
+import ModuleForm, { ModuleRequest } from '../../components/inmutable-components/CRUD/form/ModuleForm';
 import ModuleDetails from '../../components/inmutable-components/CRUD/detail/ModuleDetails';
 import DeleteConfirmation from '../../components/inmutable-components/DeleteConfirmation';
+import api from '@/api'; // ✅ Dùng api thay axios
 import { toast } from 'react-toastify';
-import { ModuleRequest } from '../../components/inmutable-components/CRUD/form/ModuleForm'; // hoặc wherever bạn định nghĩa
 
 interface Module {
   id: number;
@@ -34,126 +33,85 @@ const ModulesCRUD = () => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchModules = async () => {
-      try {
-        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-        const res = await axios.get('http://localhost:8080/api/modules', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  const fetchModules = async () => {
+    try {
+      const res = await api.get('/api/modules');
+      setModules(res.data);
+    } catch {
+      toast.error('Failed to load modules', { autoClose: 1200 });
+    }
+  };
 
-        setModules(res.data);
-      } catch (err) {
-        toast.error('Failed to load modules', {
-          autoClose: 1200, // 👈 1.2 giây riêng lẻ
-        });
-      }
-    };
+  useEffect(() => {
     fetchModules();
   }, []);
 
   const filteredModules = modules
-  .filter(module =>
-      (module.name?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
-      (module.courseName?.toLowerCase().includes(searchTerm.toLowerCase()) || '')
-  )
-  .sort((a, b) => {
-    switch (sortBy) {
-      case 'title-asc':
-        return a.name.localeCompare(b.name);
-      case 'title-desc':
-        return b.name.localeCompare(a.name);
-      case 'status-asc':
-        return a.status.localeCompare(b.status);
-      case 'status-desc':
-        return b.status.localeCompare(a.status);
-      case 'parts-asc':
-        return a.partsCount - b.partsCount;
-      case 'parts-desc':
-        return b.partsCount - a.partsCount;
-      case 'duration-asc':
-        return parseInt(a.duration) - parseInt(b.duration);
-      case 'duration-desc':
-        return parseInt(b.duration) - parseInt(a.duration);
-      default:
-        return 0;
-    }
-  })
-  ;
-
+      .filter(module =>
+          (module.name?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
+          (module.courseName?.toLowerCase().includes(searchTerm.toLowerCase()) || '')
+      )
+      .sort((a, b) => {
+        switch (sortBy) {
+          case 'title-asc':
+            return a.name.localeCompare(b.name);
+          case 'title-desc':
+            return b.name.localeCompare(a.name);
+          case 'status-asc':
+            return a.status.localeCompare(b.status);
+          case 'status-desc':
+            return b.status.localeCompare(a.status);
+          case 'parts-asc':
+            return a.partsCount - b.partsCount;
+          case 'parts-desc':
+            return b.partsCount - a.partsCount;
+          case 'duration-asc':
+            return parseInt(a.duration) - parseInt(b.duration);
+          case 'duration-desc':
+            return parseInt(b.duration) - parseInt(a.duration);
+          default:
+            return 0;
+        }
+      });
 
   const handleCreate = async (moduleData: ModuleRequest) => {
     try {
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      if (!token) throw new Error('No token');
-
-      const res = await axios.post('http://localhost:8080/api/modules', moduleData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setModules((prev) => [...prev, res.data]);
+      const res = await api.post('/api/modules', moduleData);
+      setModules(prev => [...prev, res.data]);
       setIsCreateOpen(false);
-      toast.success('Module created successfully', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.success('Module created successfully', { autoClose: 1200 });
     } catch (error) {
       console.error(error);
-      toast.error('Failed to create module', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.error('Failed to create module', { autoClose: 1200 });
     }
   };
 
   const handleUpdate = async (moduleData: ModuleRequest) => {
     if (!selectedModule) return;
-
     try {
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      if (!token) throw new Error('No token');
-
-      const res = await axios.put(
-          `http://localhost:8080/api/modules/${selectedModule.id}`,
-          moduleData,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+      const res = await api.put(`/api/modules/${selectedModule.id}`, moduleData);
+      setModules(prev =>
+          prev.map(m => (m.id === selectedModule.id ? res.data : m))
       );
-
-      setModules((prev) =>
-          prev.map((m) => (m.id === selectedModule.id ? res.data : m))
-      );
-
       setIsEditOpen(false);
       setSelectedModule(null);
-      toast.success('Module updated successfully', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.success('Module updated successfully', { autoClose: 1200 });
     } catch (error) {
       console.error(error);
-      toast.error('Failed to update module', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.error('Failed to update module', { autoClose: 1200 });
     }
   };
-
 
   const handleDelete = async () => {
     if (!selectedModule) return;
     try {
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      await axios.delete(`http://localhost:8080/api/modules/${selectedModule.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setModules(modules.filter((m) => m.id !== selectedModule.id));
+      await api.delete(`/api/modules/${selectedModule.id}`);
+      setModules(modules.filter(m => m.id !== selectedModule.id));
       setIsDeleteOpen(false);
       setSelectedModule(null);
-      toast.success('Module deleted', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.success('Module deleted', { autoClose: 1200 });
     } catch (error) {
-      toast.error('Failed to delete module', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.error('Failed to delete module', { autoClose: 1200 });
     }
   };
 
