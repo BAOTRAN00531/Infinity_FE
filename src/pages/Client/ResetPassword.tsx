@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-
-
-import { FaEye, FaEyeSlash , FaSpinner } from "../../components/lib/icon";
+import { FaEye, FaEyeSlash, FaSpinner } from "../../components/lib/icon";
 import FancyButton from "../../components/button/FancyButton";
+import api from "@/api"; // ✅ Import API instance đã cấu hình
 
 const ResetPassword: React.FC = () => {
     const [newPassword, setNewPassword] = useState('');
@@ -49,27 +48,27 @@ const ResetPassword: React.FC = () => {
         }
 
         setLoading(true);
-        const response = await fetch('http://localhost:8080/auth/reset-password', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                otp: localStorage.getItem('otp') || '',
+        try {
+            const { data } = await api.post("/auth/reset-password", {
+                otp: localStorage.getItem("otp") || "",
                 newPassword,
-            }),
-        });
-        const data = await response.json();
-        setMessage(data.message);
-        setPopupType(response.ok ? 'success' : 'error');
-        setShowPopup(true);
-        setLoading(false);
+            });
 
-        if (response.ok) {
+            setMessage(data.message);
+            setPopupType('success');
+            setShowPopup(true);
+
             setTimeout(() => {
                 setShowPopup(false);
-                navigate('/login');
+                navigate("/login");
             }, 2000);
-        } else {
+        } catch (error: any) {
+            setMessage(error?.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại.");
+            setPopupType('error');
+            setShowPopup(true);
             setTimeout(() => setShowPopup(false), 3000);
+        } finally {
+            setLoading(false);
         }
     };
 

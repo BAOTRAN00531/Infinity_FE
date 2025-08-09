@@ -27,6 +27,7 @@
   import WordSuggestion from '@/components/inmutable-components/WordSuggestion'; // Đảm bảo đúng đường dẫn
   import { BookOpen } from 'lucide-react';
   import { Dialog, DialogContent } from '@/components/reusable-components/dialog';
+  import api from "@/api";
 
   interface QuestionFormProps {
     initialData?: UIQuestion;
@@ -84,32 +85,22 @@
 
     const [questionTypes, setQuestionTypes] = useState<QuestionType[]>([]);
 
+// Lấy question types
     useEffect(() => {
       const fetchQuestionTypes = async () => {
         try {
-          const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-          const res = await fetch('http://localhost:8080/api/question-types', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const data = await res.json();
-          if (!Array.isArray(data)) {
+          const res = await api.get('/api/question-types');
+          if (!Array.isArray(res.data)) {
             setQuestionTypes([]);
-            toast.error('Dữ liệu question types không hợp lệ!', {
-              autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            });
+            toast.error('Dữ liệu question types không hợp lệ!', { autoClose: 1200 });
             return;
           }
-          setQuestionTypes(data);
-        } catch (err) {
+          setQuestionTypes(res.data);
+        } catch {
           setQuestionTypes([]);
-          toast.error('Không thể tải question types', {
-            autoClose: 1200, // 👈 1.2 giây riêng lẻ
-          });
+          toast.error('Không thể tải question types', { autoClose: 1200 });
         }
       };
-
       fetchQuestionTypes();
     }, []);
 
@@ -172,47 +163,33 @@
       setAnswers(updated);
     };
 
+// Lấy modules
     useEffect(() => {
       const fetchModules = async () => {
         try {
-          const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-          if (!token) throw new Error('Bạn chưa đăng nhập');
-          const res = await axios.get('http://localhost:8080/api/modules', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          const res = await api.get('/api/modules');
           setModules(res.data);
         } catch (err) {
           console.error(err);
-          toast.error('Không thể tải danh sách modules', {
-            autoClose: 1200, // 👈 1.2 giây riêng lẻ
-          });
+          toast.error('Không thể tải danh sách modules', { autoClose: 1200 });
         }
       };
-
       fetchModules();
     }, []);
 
+// Lấy lessons theo moduleId
     useEffect(() => {
       const fetchLessons = async () => {
         try {
-          const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-          if (!token || !formData.moduleId) return;
-          const res = await axios.get('http://localhost:8080/api/lessons', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+          if (!formData.moduleId) return;
+          const res = await api.get('/api/lessons', {
             params: { moduleId: formData.moduleId },
           });
           setLessons(res.data);
-        } catch (err) {
-          toast.error('Không tải được danh sách lessons', {
-            autoClose: 1200, // 👈 1.2 giây riêng lẻ
-          });
+        } catch {
+          toast.error('Không tải được danh sách lessons', { autoClose: 1200 });
         }
       };
-
       fetchLessons();
     }, [formData.moduleId]);
 

@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/reusable-components/select'
+import api from "@/api";
 
 interface Module {
   id: number
@@ -57,83 +58,63 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
     status: initialData?.status || 'active',
   })
 
-  // Fetch languages khi mở form
+// Fetch languages khi mở form
   useEffect(() => {
     const fetchLanguages = async () => {
       try {
-        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-        if (!token) throw new Error('No token')
-        const res = await axios.get<Language[]>(
-          'http://localhost:8080/api/languages',
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
-        setLanguages(res.data)
+        const res = await api.get<Language[]>('/api/languages');
+        setLanguages(res.data);
         if (!initialData && res.data.length > 0) {
-          setSelectedLanguageId(res.data[0].id)
+          setSelectedLanguageId(res.data[0].id);
         }
       } catch {
-        toast.error('Không tải được danh sách ngôn ngữ', {
-          autoClose: 1200, // 👈 1.2 giây riêng lẻ
-        });
+        toast.error('Không tải được danh sách ngôn ngữ', { autoClose: 1200 });
       }
-    }
-    fetchLanguages()
-  }, [initialData])
+    };
+    fetchLanguages();
+  }, [initialData]);
 
-  // Fetch courses khi chọn ngôn ngữ
+// Fetch courses khi chọn ngôn ngữ
   useEffect(() => {
     if (!selectedLanguageId) return;
     const fetchCourses = async () => {
       try {
-        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-        if (!token) throw new Error('No token')
-        const res = await axios.get<Course[]>(
-          `http://localhost:8080/api/courses/by-language/${selectedLanguageId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
-        setCourses(res.data)
+        const res = await api.get<Course[]>(`/api/courses/by-language/${selectedLanguageId}`);
+        setCourses(res.data);
         if (!initialData && res.data.length > 0) {
-          setSelectedCourseId(res.data[0].id)
+          setSelectedCourseId(res.data[0].id);
         }
       } catch {
-        toast.error('Không tải được danh sách courses', {
-          autoClose: 1200, // 👈 1.2 giây riêng lẻ
-        });
+        toast.error('Không tải được danh sách courses', { autoClose: 1200 });
       }
-    }
-    fetchCourses()
-  }, [selectedLanguageId, initialData])
+    };
+    fetchCourses();
+  }, [selectedLanguageId, initialData]);
 
-  // Fetch modules khi chọn course
+// Fetch modules khi chọn course
   useEffect(() => {
-    if (!selectedCourseId) return
+    if (!selectedCourseId) return;
     const fetchModules = async () => {
       try {
-        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-        if (!token) throw new Error('No token')
-        const res = await axios.get<Module[]>(
-          `http://localhost:8080/api/modules?courseId=${selectedCourseId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
-        setModules(res.data)
-        // Nếu tạo mới, chọn module đầu tiên
+        const res = await api.get<Module[]>(`/api/modules`, {
+          params: { courseId: selectedCourseId },
+        });
+        setModules(res.data);
         if (!initialData && res.data.length > 0) {
           setFormData(fd => ({
             ...fd,
             moduleId: res.data[0].id,
             moduleName: res.data[0].name,
-          }))
+          }));
         }
       } catch {
-        toast.error('Không tải được danh sách modules', {
-          autoClose: 1200, // 👈 1.2 giây riêng lẻ
-        });
+        toast.error('Không tải được danh sách modules', { autoClose: 1200 });
       }
-    }
-    fetchModules()
-  }, [selectedCourseId, initialData])
+    };
+    fetchModules();
+  }, [selectedCourseId, initialData]);
 
-  // Nếu initialData thay đổi (khi edit), set lại toàn bộ formData và selectedCourseId
+// Nếu initialData thay đổi (khi edit)
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -142,43 +123,29 @@ const PartForm: React.FC<PartFormProps> = ({ initialData, onSubmit }) => {
         moduleId: initialData.moduleId,
         moduleName: initialData.moduleName,
         status: initialData.status,
-      })
-      // Tìm courseId từ moduleId (nếu có thể)
+      });
       const fetchCourseIdByModule = async () => {
         try {
-          const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-          if (!token) throw new Error('No token')
-          const res = await axios.get<Module>(
-            `http://localhost:8080/api/modules/${initialData.moduleId}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          )
-          // Giả sử module có trường courseId
-          setSelectedCourseId(res.data.courseId)
+          const res = await api.get<Module>(`/api/modules/${initialData.moduleId}`);
+          setSelectedCourseId(res.data.courseId);
         } catch {}
-      }
-      fetchCourseIdByModule()
+      };
+      fetchCourseIdByModule();
     }
-  }, [initialData])
+  }, [initialData]);
 
+// Hàm lấy max order
   const fetchMaxOrder = async (moduleId: number) => {
     try {
-      const token = localStorage.getItem('access_token')
-      if (!token) throw new Error('No token')
-      const res = await axios.get<{ maxOrder: number }>(
-          `http://localhost:8080/api/lessons/max-order`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { moduleId },
-          }
-      )
-      return res.data.maxOrder + 1
-    } catch {
-      toast.error('Không lấy được order index', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
+      const res = await api.get<{ maxOrder: number }>(`/api/lessons/max-order`, {
+        params: { moduleId },
       });
-      return 1
+      return res.data.maxOrder + 1;
+    } catch {
+      toast.error('Không lấy được order index', { autoClose: 1200 });
+      return 1;
     }
-  }
+  };
 
 
   const handleSubmit = async (e: React.FormEvent) => {

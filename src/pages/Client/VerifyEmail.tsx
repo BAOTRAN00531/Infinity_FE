@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import api from "@/api";
 
 const VerifyEmail: React.FC = () => {
     const location = useLocation();
@@ -14,37 +15,25 @@ const VerifyEmail: React.FC = () => {
 
     useEffect(() => {
         if (!token) {
-            toast.error('Không tìm thấy token xác thực.', {
-                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            });
+            toast.error('Không tìm thấy token xác thực.', { autoClose: 1200 });
             return;
         }
 
         const controller = new AbortController();
 
-        fetch(`http://localhost:8080/auth/verify-email?token=${token}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            signal: controller.signal
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    return response.json().then(err => {
-                        throw new Error(err.message);
-                    });
-                }
-                return response.json();
+        api
+            .get('/auth/verify-email', {
+                params: { token },
+                signal: controller.signal,
             })
-            .then((data) => {
-                toast.success(data.message || 'Xác thực thành công!', {
-                    autoClose: 1200, // 👈 1.2 giây riêng lẻ
-                });
+            .then((res) => {
+                const data = res.data;
+                toast.success(data.message || 'Xác thực thành công!', { autoClose: 1200 });
 
                 if (data.redirectTo) {
                     setRedirectTo(data.redirectTo);
-
                     const timer = setInterval(() => {
-                        setCountdown(prev => {
+                        setCountdown((prev) => {
                             if (prev <= 1) {
                                 clearInterval(timer);
                                 navigate(data.redirectTo);
@@ -56,14 +45,12 @@ const VerifyEmail: React.FC = () => {
                 }
             })
             .catch((error) => {
-                if (error.name === 'AbortError') {
+                if (error.name === 'CanceledError') {
                     console.log('Request aborted — ignore.');
                     return;
                 }
                 console.error(error);
-                toast.error(error.message || 'Có lỗi xảy ra!', {
-                    autoClose: 1200, // 👈 1.2 giây riêng lẻ
-                });
+                toast.error(error.response?.data?.message || 'Có lỗi xảy ra!', { autoClose: 1200 });
             });
 
         return () => controller.abort();

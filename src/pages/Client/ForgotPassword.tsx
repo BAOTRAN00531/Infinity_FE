@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaEnvelope, FaSpinner } from "@/components/lib/icon";
-
+import api from "@/api";
 
 import Header from "../../components/layout-components/Header";
 import FancyButton from "../../components/button/FancyButton";
@@ -16,18 +16,19 @@ const ForgotPassword: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        try {
-            const response = await fetch("http://localhost:8080/auth/forgot-password", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email }),
-            });
 
-            const data = await response.json();
+        try {
+            const { data } = await api.post("/auth/forgot-password", { email });
             setMessage(data.message);
-            if (response.ok) navigate("/verify-otp");
-        } catch (error) {
-            setMessage("Có lỗi xảy ra. Vui lòng thử lại.");
+
+            // Nếu API trả success thì chuyển trang
+            if (data?.success) {
+                navigate("/verify-otp");
+            }
+        } catch (error: any) {
+            setMessage(
+                error?.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại."
+            );
         } finally {
             setLoading(false);
         }

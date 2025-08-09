@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
 import { toast } from 'react-toastify'
 import { Button_admin } from '@/components/reusable-components/button_admin'
 import { Input_admin } from '@/components/reusable-components/input_admin'
@@ -12,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/reusable-components/select'
+import api from '@/api' // ✅ thay axios bằng instance
 
 /** Định nghĩa kiểu Course để fetch dropdown */
 interface Language {
@@ -45,13 +45,11 @@ export interface ModuleRequest {
   status: 'active' | 'inactive';
 }
 
-
 /** Props mà ModulesCRUD truyền vào */
 interface ModuleFormProps {
   initialData?: Module;
   onSubmit: (data: ModuleRequest) => Promise<void>;
 }
-
 
 const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
   const [languages, setLanguages] = useState<Language[]>([]);
@@ -72,17 +70,14 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
         const [langRes, courseRes] = await Promise.all([
-          axios.get<Language[]>('http://localhost:8080/api/languages', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get<Course[]>('http://localhost:8080/api/courses', { headers: { Authorization: `Bearer ${token}` } }),
+          api.get<Language[]>('/api/languages'),
+          api.get<Course[]>('/api/courses'),
         ]);
         setLanguages(langRes.data);
         setCourses(courseRes.data);
       } catch (err) {
-        toast.error('Không tải được dữ liệu', {
-          autoClose: 1200, // 👈 1.2 giây riêng lẻ
-        });
+        toast.error('Không tải được dữ liệu', { autoClose: 1200 });
       }
     };
     fetchData();
@@ -93,13 +88,10 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
     if (selectedLanguageId) {
       const fetchCoursesByLanguage = async () => {
         try {
-          const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-          const res = await axios.get(`http://localhost:8080/api/courses/by-language/${selectedLanguageId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const res = await api.get<Course[]>(`/api/courses/by-language/${selectedLanguageId}`);
           setFilteredCourses(res.data);
           setFormData(fd => ({ ...fd, courseId: 0, courseName: '' })); // reset course khi đổi ngôn ngữ
-        } catch (err) {
+        } catch {
           setFilteredCourses([]);
           setFormData(fd => ({ ...fd, courseId: 0, courseName: '' }));
         }
@@ -116,13 +108,10 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
     if (formData.courseId) {
       const fetchModules = async () => {
         try {
-          const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-          const res = await axios.get(`http://localhost:8080/api/modules?courseId=${formData.courseId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const res = await api.get(`/api/modules?courseId=${formData.courseId}`);
           const maxOrder = res.data.reduce((max: number, m: any) => Math.max(max, m.order), 0);
           setFormData(fd => ({ ...fd, order: maxOrder + 1 }));
-        } catch (err) {
+        } catch {
           setFormData(fd => ({ ...fd, order: 1 }));
         }
       };
@@ -141,13 +130,12 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
         order: initialData.order,
         status: initialData.status,
         partsCount: initialData.partsCount,
-      })
+      });
     }
-  }, [initialData])
+  }, [initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const payload: ModuleRequest = {
       name: formData.name,
       description: formData.description,
@@ -155,10 +143,8 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
       order: formData.order,
       status: formData.status,
     };
-
     await onSubmit(payload);
   };
-
 
 
   return (

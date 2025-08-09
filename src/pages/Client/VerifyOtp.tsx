@@ -4,6 +4,7 @@ import { motion, AnimatePresence  } from 'framer-motion';
 
 import { FaEnvelope, FaSpinner } from "../../components/lib/icon";
 import FancyButton from "../../components/button/FancyButton";
+import api from "@/api";
 
 const VerifyOtp: React.FC = () => {
     const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
@@ -64,40 +65,44 @@ const VerifyOtp: React.FC = () => {
     const handleVerify = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        const otpCode = otp.join('');
-        const response = await fetch('http://localhost:8080/auth/verify-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ otp: otpCode, email }),
-        });
-        const data = await response.json();
-        setMessage(data.message);
-        setShowMessage(true);
-        setLoading(false);
-        setOtp(Array(6).fill(''));
 
-        if (response.ok) {
-            localStorage.setItem('otp', otpCode);
-            setTimeout(() => navigate('/reset-password'), 1000);
+        try {
+            const otpCode = otp.join('');
+            const res = await api.post('/auth/verify-otp', { otp: otpCode, email });
+
+            setMessage(res.data.message);
+            setShowMessage(true);
+            setOtp(Array(6).fill(''));
+
+            if (res.status === 200) {
+                localStorage.setItem('otp', otpCode);
+                setTimeout(() => navigate('/reset-password'), 1000);
+            }
+        } catch (err: any) {
+            setMessage(err.response?.data?.message || 'Xác minh thất bại');
+            setShowMessage(true);
+        } finally {
+            setLoading(false);
+            setTimeout(() => setShowMessage(false), 3000);
         }
-
-        setTimeout(() => setShowMessage(false), 3000);
     };
 
     const handleResend = async () => {
         if (resendCountdown > 0) return;
-        const response = await fetch('http://localhost:8080/auth/resend-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email }),
-        });
-        const data = await response.json();
-        setMessage(data.message);
-        setShowMessage(true);
-        setResendCountdown(60);
 
-        setTimeout(() => setShowMessage(false), 3000);
+        try {
+            const res = await api.post('/auth/resend-otp', { email });
+            setMessage(res.data.message);
+            setShowMessage(true);
+            setResendCountdown(60);
+        } catch (err: any) {
+            setMessage(err.response?.data?.message || 'Không thể gửi lại OTP');
+            setShowMessage(true);
+        } finally {
+            setTimeout(() => setShowMessage(false), 3000);
+        }
     };
+
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-[#f4f4f4] dark:bg-gray-900 px-4 relative">
