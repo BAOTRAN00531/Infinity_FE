@@ -64,8 +64,9 @@ export default function LoginPage() {
 
             // Điều hướng luôn, không dùng setTimeout
             if (role === "ROLE_ADMIN") {
+                const baseUrl = process.env.REACT_APP_BASE_URL;
                 if (!rememberMe) {
-                    window.location.href = "http://localhost:3000/admin/dashboard";
+                    window.location.href = `${baseUrl}/admin/dashboard`;
                 } else {
                     navigate("/admin/dashboard");
                 }
