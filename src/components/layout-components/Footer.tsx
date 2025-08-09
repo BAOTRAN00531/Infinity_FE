@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Separator } from "../reusable-components/separator";
 import { motion } from "framer-motion";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
-import axios from "axios";
+import api from "@/api";
 
 const FacebookIcon = FaFacebook as React.FC<React.SVGProps<SVGSVGElement>>;
 const TwitterIcon = FaTwitter as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -12,49 +12,42 @@ const LinkedinIcon = FaLinkedin as React.FC<React.SVGProps<SVGSVGElement>>;
 const LANGUAGE_CODES = [
   "العربية","বাংলা","Čeština","Deutsch","Ελληνικά","English","Español","Français","हिंदी","Magyar","Bahasa Indonesia","Italiano","日本語","한국어","Nederlands","Polski","Português","Română","Русский","svenska","தமிழ்","తెలుగు","ภาษาไทย","Tagalog","Türkçe","Українською","Tiếng Việt","中文"
 ];
+
 export default function Footer() {
   const [courses, setCourses] = useState<string[]>([]);
   const [modules, setModules] = useState<string[]>([]);
   const [languages, setLanguages] = useState<any[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
-  const getToken = () => localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-
   useEffect(() => {
     // Fetch courses
     const fetchCourses = async () => {
       try {
-        const token = getToken();
-        const res = await axios.get("http://localhost:8080/api/courses", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get("/api/courses");
         setCourses(res.data.map((c: any) => c.name));
       } catch {}
     };
+
     // Fetch modules
     const fetchModules = async () => {
       try {
-        const token = getToken();
-        const res = await axios.get("http://localhost:8080/api/modules", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get("/api/modules");
         setModules(res.data.map((m: any) => m.name));
       } catch {}
     };
+
     // Fetch languages
     const fetchLanguages = async () => {
       try {
-        const token = getToken();
-        const res = await axios.get("http://localhost:8080/api/language-templates", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        // Lọc chỉ các ngôn ngữ trong LANGUAGE_CODES
+        const res = await api.get("/api/language-templates");
         setLanguages(res.data.filter((l: any) => LANGUAGE_CODES.includes(l.name)));
       } catch {}
     };
+
     fetchCourses();
     fetchModules();
     fetchLanguages();
+
     // Lấy ngôn ngữ đã chọn từ localStorage
     setSelectedLanguage(localStorage.getItem("selectedLanguage"));
   }, []);
@@ -63,6 +56,7 @@ export default function Footer() {
     setSelectedLanguage(lang);
     localStorage.setItem("selectedLanguage", lang);
   };
+
 
   return (
     <motion.footer

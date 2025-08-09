@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import api from '@/api';
 import { toast } from 'react-toastify';
 
 interface LanguageFormProps {
@@ -21,36 +22,17 @@ const LanguageForm: React.FC<LanguageFormProps> = ({ initialData, onSubmit, onCa
     const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>(initialData?.difficulty || 'Medium');
     const [popularity, setPopularity] = useState<'High' | 'Medium' | 'Low'>(initialData?.popularity || 'Medium');
     const [flag, setFlag] = useState(initialData?.flag || '');
+
     const [templates, setTemplates] = useState<{ name: string; code: string; flag: string }[]>([]);
 
     useEffect(() => {
-        const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-
-        if (!token) {
-            toast.error('Missing token. Please login.', { autoClose: 1200 });
-            return;
-        }
-
-        (async () => {
-            try {
-                const res = await fetch('http://localhost:8080/api/language-templates', {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                if (!res.ok) {
-                    throw new Error('Failed to fetch');
-                }
-
-                const data = await res.json();
-                setTemplates(data);
-            } catch (error) {
-                toast.error('Failed to load templates', { autoClose: 1200 });
-            }
-        })();
+        api.get('/api/language-templates')
+            .then(res => setTemplates(res.data))
+            .catch(() =>
+                toast.error('Failed to load templates', {
+                    autoClose: 1200,
+                })
+            );
     }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
