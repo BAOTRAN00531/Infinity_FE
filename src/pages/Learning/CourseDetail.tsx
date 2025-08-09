@@ -149,11 +149,14 @@ export default function CourseDetail() {
                     </Tab.Panels>
                 </Tab.Group>
 
-                <CommentFirebase
-                    courseId={course.id.toString()}
-                    userName={userName}
-                    userAvatarUrl={userAvatarUrl}
-                />
+                {course?.id && (
+                    <CommentFirebase
+                        courseId={course.id.toString()}
+                        userName={userName}
+                        userAvatarUrl={userAvatarUrl}
+                    />
+                )}
+
 
 
 
