@@ -12,6 +12,7 @@ import {
 } from '@/components/reusable-components/select';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import api from "@/api";
 
 interface Language {
   id: number;
@@ -48,24 +49,35 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
     thumbnail: initialData?.thumbnail || '', // ✅ Thêm dòng này
   });
 
+  // Fetch languages
+  const fetchLanguages = async () => {
+    try {
+      const res = await api.get('/api/languages');
+      setLanguages(res.data);
+    } catch {
+      toast.error('Failed to load languages', { autoClose: 1200 });
+    }
+  };
 
+  // Upload thumbnail
+  const handleUploadThumbnail = async (file: File) => {
+    const formDataUpload = new FormData();
+    formDataUpload.append('file', file);
 
+    try {
+      const res = await api.post('/api/uploads', formDataUpload, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
 
+      const url = res.data.url;
+      setFormData(prev => ({ ...prev, thumbnail: url }));
+      toast.success('Uploaded thumbnail successfully', { autoClose: 1200 });
+    } catch {
+      toast.error('Failed to upload thumbnail', { autoClose: 1200 });
+    }
+  };
 
   useEffect(() => {
-    const fetchLanguages = async () => {
-      try {
-        const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-        const res = await axios.get('http://localhost:8080/api/languages', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setLanguages(res.data);
-      } catch {
-        toast.error('Failed to load languages', {
-          autoClose: 1200, // 👈 1.2 giây riêng lẻ
-        });
-      }
-    };
     fetchLanguages();
   }, []);
 
@@ -73,15 +85,11 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
     e.preventDefault();
     const selectedLanguage = languages.find(lang => lang.id === languageId);
     if (!selectedLanguage) {
-      toast.error('Please select a language', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.error('Please select a language', { autoClose: 1200 });
       return;
     }
-    onSubmit({
-      ...formData,
-      language: selectedLanguage,
-    });
+    onSubmit({ ...formData, language: selectedLanguage });
+
 
   };
 
@@ -210,32 +218,15 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="thumbnail" className="text-sm font-bold text-gray-700 dark:text-gray-200">Thumbnail Image</Label>
+            <Label htmlFor="thumbnail" className="text-sm font-bold text-gray-700 dark:text-gray-200">
+              Thumbnail Image
+            </Label>
             <input
                 type="file"
                 accept="image/*"
-                onChange={async (e) => {
+                onChange={e => {
                   const file = e.target.files?.[0];
-                  if (!file) return;
-
-                  const formDataUpload = new FormData();
-                  formDataUpload.append('file', file);
-
-                  try {
-                    const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-                    const res = await axios.post('http://localhost:8080/api/uploads', formDataUpload, {
-                      headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data',
-                      },
-                    });
-
-                    const url = res.data.url;
-                    setFormData(prev => ({ ...prev, thumbnail: url }));
-                    toast.success('Uploaded thumbnail successfully', { autoClose: 1200 });
-                  } catch (err) {
-                    toast.error('Failed to upload thumbnail', { autoClose: 1200 });
-                  }
+                  if (file) handleUploadThumbnail(file);
                 }}
                 className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-2xl file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
             />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, BookOpen } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, BookOpen, ArrowUpDown } from 'lucide-react';
 import { Button_admin } from '@/components/reusable-components/button_admin';
 import { Input_admin } from '@/components/reusable-components/input_admin';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/reusable-components/dialog';
@@ -7,11 +7,9 @@ import { Badge } from '@/components/reusable-components/badge';
 import CourseForm from '@/components/inmutable-components/CRUD/form/CourseForm';
 import CourseDetails from '@/components/inmutable-components/CRUD/detail/CourseDetails';
 import DeleteConfirmation from '@/components/inmutable-components/DeleteConfirmation';
-import axios from 'axios';
+import api from '@/api'; // ✅ Dùng api.ts
 import { toast } from 'react-toastify';
-import api from "@/api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/reusable-components/select';
-import { ArrowUpDown } from 'lucide-react';
 
 interface Course {
   id: number;
@@ -22,11 +20,9 @@ interface Course {
   status: 'active' | 'inactive';
   createdAt: string;
   modulesCount: number;
-  price: number; // ✅ Thêm dòng này
+  price: number;
   thumbnail: string;
-
 }
-
 
 const CoursesCRUD = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -47,91 +43,67 @@ const CoursesCRUD = () => {
       const res = await api.get('/api/courses');
       setCourses(res.data);
     } catch {
-
-      toast.error('Failed to fetch courses', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.error('Failed to fetch courses', { autoClose: 1200 });
     }
   };
 
-  const levelOrder = { 'Beginner': 1, 'Intermediate': 2, 'Advanced': 3 };
+  const levelOrder = { Beginner: 1, Intermediate: 2, Advanced: 3 };
 
   const filteredCourses = courses
-    .filter(course =>
-      course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.language.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.level.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'title-asc':
-          return a.name.localeCompare(b.name);
-        case 'title-desc':
-          return b.name.localeCompare(a.name);
-        case 'level-asc':
-          return levelOrder[a.level] - levelOrder[b.level];
-        case 'level-desc':
-          return levelOrder[b.level] - levelOrder[a.level];
-        default:
-          return 0;
-      }
-    });
+      .filter(course =>
+          course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          course.language.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          course.level.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        switch (sortBy) {
+          case 'title-asc':
+            return a.name.localeCompare(b.name);
+          case 'title-desc':
+            return b.name.localeCompare(a.name);
+          case 'level-asc':
+            return levelOrder[a.level] - levelOrder[b.level];
+          case 'level-desc':
+            return levelOrder[b.level] - levelOrder[a.level];
+          default:
+            return 0;
+        }
+      });
 
   const handleCreate = async (courseData: Omit<Course, 'id' | 'createdAt' | 'modulesCount'>) => {
     try {
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      await axios.post('http://localhost:8080/api/courses', courseData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success('Course created', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      await api.post('/api/courses', courseData);
+      toast.success('Course created', { autoClose: 1200 });
       setIsCreateOpen(false);
       fetchCourses();
     } catch {
-      toast.error('Failed to create course', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.error('Failed to create course', { autoClose: 1200 });
     }
   };
 
   const handleUpdate = async (courseData: Omit<Course, 'id' | 'createdAt' | 'modulesCount'>) => {
     if (!selectedCourse) return;
     try {
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      await axios.put(`http://localhost:8080/api/courses/${selectedCourse.id}`, courseData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success('Course updated', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      await api.put(`/api/courses/${selectedCourse.id}`, courseData);
+      toast.success('Course updated', { autoClose: 1200 });
       setIsEditOpen(false);
       setSelectedCourse(null);
       fetchCourses();
     } catch {
-      toast.error('Failed to update course', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.error('Failed to update course', { autoClose: 1200 });
     }
   };
 
   const handleDelete = async () => {
     if (!selectedCourse) return;
     try {
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      await axios.delete(`http://localhost:8080/api/courses/${selectedCourse.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success('Course deleted', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      await api.delete(`/api/courses/${selectedCourse.id}`);
+      toast.success('Course deleted', { autoClose: 1200 });
       setIsDeleteOpen(false);
       setSelectedCourse(null);
       fetchCourses();
     } catch {
-      toast.error('Failed to delete course', {
-        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-      });
+      toast.error('Failed to delete course', { autoClose: 1200 });
     }
   };
 

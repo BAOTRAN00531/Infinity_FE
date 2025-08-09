@@ -7,7 +7,7 @@ import { Badge } from '@/components/reusable-components/badge';
 import LanguageForm from '@/pages/Admin/LanguageForm';
 import LanguageDetails from '@/components/inmutable-components/CRUD/detail/LanguageDetails';
 import DeleteConfirmation from '@/components/inmutable-components/DeleteConfirmation';
-import axios from 'axios';
+import api from '@/api'; // ✅ Thay vì axios
 import { toast } from 'react-toastify';
 
 interface Language {
@@ -37,18 +37,7 @@ const LanguagesCRUD = () => {
   const fetchLanguages = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-      if (!token) throw new Error("Token not found");
-
-      const response = await axios.get(
-        "http://localhost:8080/api/languages/with-course-count",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      const response = await api.get('/api/languages/with-course-count');
       const langs = response.data.map((lang: any) => ({
         id: lang.id,
         name: lang.name,
@@ -58,7 +47,6 @@ const LanguagesCRUD = () => {
         popularity: lang.popularity || 'Medium',
         coursesCount: lang.courseCount || 0,
       }));
-
       setLanguages(langs);
     } catch (error: any) {
       console.error(error);
@@ -70,10 +58,8 @@ const LanguagesCRUD = () => {
 
   const handleCreate = async (formData: FormData) => {
     try {
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      if (!token) throw new Error('No token');
-      await axios.post('http://localhost:8080/api/languages', formData, {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
+      await api.post('/api/languages', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast.success('Language created');
       setIsCreateOpen(false);
@@ -86,10 +72,8 @@ const LanguagesCRUD = () => {
   const handleUpdate = async (formData: FormData) => {
     if (!selectedLanguage) return;
     try {
-      const token = localStorage.getItem('access_token');
-      if (!token) throw new Error('No token');
-      await axios.put(`http://localhost:8080/api/languages/${selectedLanguage.id}`, formData, {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
+      await api.put(`/api/languages/${selectedLanguage.id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast.success('Language updated');
       setIsEditOpen(false);
@@ -103,11 +87,7 @@ const LanguagesCRUD = () => {
   const handleDelete = async () => {
     if (selectedLanguage) {
       try {
-        const token = localStorage.getItem('access_token');
-        if (!token) throw new Error('No token found');
-        await axios.delete(`http://localhost:8080/api/languages/${selectedLanguage.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api.delete(`/api/languages/${selectedLanguage.id}`);
         fetchLanguages();
         setIsDeleteOpen(false);
         setSelectedLanguage(null);
