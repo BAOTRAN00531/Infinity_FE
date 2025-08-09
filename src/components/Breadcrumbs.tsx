@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import api from "@/api"; // Axios instance đã cấu hình baseURL sẵn
 
 interface Course {
     id: string;
@@ -23,23 +24,16 @@ const Breadcrumbs: React.FC = () => {
     const [courseTitle, setCourseTitle] = useState<string | null>(null);
 
     const pathnames = location.pathname.split('/').filter(Boolean);
-
-    // Lấy ID khóa học nếu ở route /client/course/:id
-    const courseId = pathnames[2]; // path: ['client', 'course', ':id']
+    const courseId = pathnames[2]; // /client/course/:id
 
     useEffect(() => {
         const fetchCourseTitle = async () => {
             if (pathnames[0] === 'client' && pathnames[1] === 'course' && courseId) {
                 try {
-                    const response = await fetch(`http://localhost:8080/api/courses/${courseId}`);
-                    if (response.ok) {
-                        const data: Course = await response.json();
-                        setCourseTitle(data.title);
-                    } else {
-                        setCourseTitle(null);
-                    }
+                    const { data } = await api.get<Course>(`/api/courses/${courseId}`);
+                    setCourseTitle(data.title);
                 } catch (err) {
-                    console.error('Lỗi khi fetch course:', err);
+                    console.error('Lỗi khi lấy course:', err);
                     setCourseTitle(null);
                 }
             }
