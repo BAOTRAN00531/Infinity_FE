@@ -1,6 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import axios from "axios";
-import {toast} from "react-toastify";
+import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface LanguageFormProps {
     initialData?: Language;
@@ -22,29 +21,36 @@ const LanguageForm: React.FC<LanguageFormProps> = ({ initialData, onSubmit, onCa
     const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>(initialData?.difficulty || 'Medium');
     const [popularity, setPopularity] = useState<'High' | 'Medium' | 'Low'>(initialData?.popularity || 'Medium');
     const [flag, setFlag] = useState(initialData?.flag || '');
-
     const [templates, setTemplates] = useState<{ name: string; code: string; flag: string }[]>([]);
 
     useEffect(() => {
         const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
 
         if (!token) {
-            toast.error('Missing token. Please login.', {
-                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            });
+            toast.error('Missing token. Please login.', { autoClose: 1200 });
             return;
         }
 
-        axios.get('http://localhost:8080/api/language-templates', {
-            withCredentials: true,
-            headers: {
-                Authorization: `Bearer ${token}`
+        (async () => {
+            try {
+                const res = await fetch('http://localhost:8080/api/language-templates', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                if (!res.ok) {
+                    throw new Error('Failed to fetch');
+                }
+
+                const data = await res.json();
+                setTemplates(data);
+            } catch (error) {
+                toast.error('Failed to load templates', { autoClose: 1200 });
             }
-        })
-            .then(res => setTemplates(res.data))
-            .catch(() => toast.error('Failed to load templates', {
-                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            }));
+        })();
     }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -55,7 +61,7 @@ const LanguageForm: React.FC<LanguageFormProps> = ({ initialData, onSubmit, onCa
         formData.append('name', name);
         formData.append('difficulty', difficulty);
         formData.append('popularity', popularity);
-        formData.append('flag', flag); // ✅ flag dạng URL string
+        formData.append('flag', flag);
 
         onSubmit(formData);
     };
