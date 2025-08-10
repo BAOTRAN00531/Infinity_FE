@@ -1,51 +1,19 @@
-import React, { useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
-import { Button_admin } from '@/components/reusable-components/button_admin'
-import { Input_admin } from '@/components/reusable-components/input_admin'
-import { Label } from '@/components/reusable-components/label'
-import { Textarea } from '@/components/reusable-components/textarea'
+import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import { Button_admin } from '@/components/reusable-components/button_admin';
+import { Input_admin } from '@/components/reusable-components/input_admin';
+import { Label } from '@/components/reusable-components/label';
+import { Textarea } from '@/components/reusable-components/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/reusable-components/select'
-import api from '@/api' // ✅ thay axios bằng instance
+} from '@/components/reusable-components/select';
+import { Language, Course, Module, ModuleRequest } from '@/types';
+import { fetchLanguages, fetchCourses, fetchCoursesByLanguage, fetchModules } from '@/api/module.service';
 
-/** Định nghĩa kiểu Course để fetch dropdown */
-interface Language {
-  id: number;
-  name: string;
-}
-
-interface Course {
-  id: number;
-  name: string;
-  languageId: number;
-}
-
-/** Kiểu dữ liệu form truyền lên BE (mapping sang DTO) */
-export interface Module {
-  id: number
-  name: string
-  description: string
-  courseId: number
-  courseName: string
-  order: number
-  status: 'active' | 'inactive'
-  partsCount: number
-}
-
-export interface ModuleRequest {
-  name: string;
-  description: string;
-  courseId: number;
-  order: number;
-  status: 'active' | 'inactive';
-}
-
-/** Props mà ModulesCRUD truyền vào */
 interface ModuleFormProps {
   initialData?: Module;
   onSubmit: (data: ModuleRequest) => Promise<void>;
@@ -64,6 +32,7 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
     order: initialData?.order || 1,
     status: initialData?.status || 'active',
     partsCount: initialData?.partsCount || 0,
+    duration: initialData?.duration || '',
   });
 
   // Fetch languages và courses
@@ -71,51 +40,61 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
     const fetchData = async () => {
       try {
         const [langRes, courseRes] = await Promise.all([
-          api.get<Language[]>('/api/languages'),
-          api.get<Course[]>('/api/courses'),
+          fetchLanguages(),
+          fetchCourses(),
         ]);
-        setLanguages(langRes.data);
-        setCourses(courseRes.data);
+        setLanguages(langRes);
+        setCourses(courseRes);
+        // Nếu có initialData, tự động chọn ngôn ngữ của khóa học
+        if (initialData?.courseId) {
+          const course = courseRes.find(c => c.id === initialData.courseId);
+          if (course?.language?.id) {
+            setSelectedLanguageId(course.language.id);
+          }
+        }
       } catch (err) {
         toast.error('Không tải được dữ liệu', { autoClose: 1200 });
       }
     };
     fetchData();
-  }, []);
+  }, [initialData]);
 
   // Khi chọn ngôn ngữ, gọi API lấy courses theo ngôn ngữ
   useEffect(() => {
     if (selectedLanguageId) {
-      const fetchCoursesByLanguage = async () => {
+      const fetchCoursesByLanguageData = async () => {
         try {
-          const res = await api.get<Course[]>(`/api/courses/by-language/${selectedLanguageId}`);
-          setFilteredCourses(res.data);
-          setFormData(fd => ({ ...fd, courseId: 0, courseName: '' })); // reset course khi đổi ngôn ngữ
+          const res = await fetchCoursesByLanguage(selectedLanguageId);
+          setFilteredCourses(res);
+          // Nếu initialData có courseId, giữ lại courseId và courseName
+          if (!initialData?.courseId) {
+            setFormData(fd => ({ ...fd, courseId: 0, courseName: '' }));
+          }
         } catch {
           setFilteredCourses([]);
           setFormData(fd => ({ ...fd, courseId: 0, courseName: '' }));
         }
       };
-      fetchCoursesByLanguage();
+      fetchCoursesByLanguageData();
     } else {
       setFilteredCourses([]);
       setFormData(fd => ({ ...fd, courseId: 0, courseName: '' }));
     }
-  }, [selectedLanguageId]);
+  }, [selectedLanguageId, initialData]);
 
   // Sau khi chọn course, tự động tăng order
   useEffect(() => {
     if (formData.courseId) {
-      const fetchModules = async () => {
+      const fetchModulesData = async () => {
         try {
-          const res = await api.get(`/api/modules?courseId=${formData.courseId}`);
-          const maxOrder = res.data.reduce((max: number, m: any) => Math.max(max, m.order), 0);
+          const res = await fetchModules(formData.courseId);
+          const maxOrder = res.reduce((max: number, m: Module) => Math.max(max, m.order), 0);
           setFormData(fd => ({ ...fd, order: maxOrder + 1 }));
         } catch {
           setFormData(fd => ({ ...fd, order: 1 }));
         }
       };
-      fetchModules();
+      fetchModulesData();
     }
   }, [formData.courseId]);
 
@@ -130,6 +109,7 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
         order: initialData.order,
         status: initialData.status,
         partsCount: initialData.partsCount,
+        duration: initialData.duration || '',
       });
     }
   }, [initialData]);
@@ -145,7 +125,6 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
     };
     await onSubmit(payload);
   };
-
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

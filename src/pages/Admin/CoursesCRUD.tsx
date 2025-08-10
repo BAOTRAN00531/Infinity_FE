@@ -10,19 +10,9 @@ import DeleteConfirmation from '@/components/inmutable-components/DeleteConfirma
 import api from '@/api'; // ✅ Dùng api.ts
 import { toast } from 'react-toastify';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/reusable-components/select';
+import { Course } from '@/types';
+import { getCourses, createCourse, updateCourse, deleteCourse } from '@/api/course.service';
 
-interface Course {
-  id: number;
-  name: string;
-  description: string;
-  language: { id: number; name: string };
-  level: 'Beginner' | 'Intermediate' | 'Advanced';
-  status: 'active' | 'inactive';
-  createdAt: string;
-  modulesCount: number;
-  price: number;
-  thumbnail: string;
-}
 
 const CoursesCRUD = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -40,8 +30,8 @@ const CoursesCRUD = () => {
 
   const fetchCourses = async () => {
     try {
-      const res = await api.get('/api/courses');
-      setCourses(res.data);
+      const data = await getCourses();
+      setCourses(data);
     } catch {
       toast.error('Failed to fetch courses', { autoClose: 1200 });
     }
@@ -72,7 +62,7 @@ const CoursesCRUD = () => {
 
   const handleCreate = async (courseData: Omit<Course, 'id' | 'createdAt' | 'modulesCount'>) => {
     try {
-      await api.post('/api/courses', courseData);
+      await createCourse(courseData);
       toast.success('Course created', { autoClose: 1200 });
       setIsCreateOpen(false);
       fetchCourses();
@@ -84,7 +74,7 @@ const CoursesCRUD = () => {
   const handleUpdate = async (courseData: Omit<Course, 'id' | 'createdAt' | 'modulesCount'>) => {
     if (!selectedCourse) return;
     try {
-      await api.put(`/api/courses/${selectedCourse.id}`, courseData);
+      await updateCourse(selectedCourse.id, courseData);
       toast.success('Course updated', { autoClose: 1200 });
       setIsEditOpen(false);
       setSelectedCourse(null);
@@ -97,7 +87,7 @@ const CoursesCRUD = () => {
   const handleDelete = async () => {
     if (!selectedCourse) return;
     try {
-      await api.delete(`/api/courses/${selectedCourse.id}`);
+      await deleteCourse(selectedCourse.id);
       toast.success('Course deleted', { autoClose: 1200 });
       setIsDeleteOpen(false);
       setSelectedCourse(null);

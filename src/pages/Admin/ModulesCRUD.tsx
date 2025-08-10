@@ -5,23 +5,13 @@ import { Input_admin } from '@/components/reusable-components/input_admin';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/reusable-components/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/reusable-components/select';
 import { Badge } from '@/components/reusable-components/badge';
-import ModuleForm, { ModuleRequest } from '../../components/inmutable-components/CRUD/form/ModuleForm';
+import ModuleForm from '../../components/inmutable-components/CRUD/form/ModuleForm';
+import { Module, ModuleRequest } from '@/types';
+
 import ModuleDetails from '../../components/inmutable-components/CRUD/detail/ModuleDetails';
 import DeleteConfirmation from '../../components/inmutable-components/DeleteConfirmation';
-import api from '@/api'; // ✅ Dùng api thay axios
+import { fetchModules, createModule, updateModule, deleteModule } from '@/api/module.service';
 import { toast } from 'react-toastify';
-
-interface Module {
-  id: number;
-  name: string;
-  description: string;
-  courseId: number;
-  courseName: string;
-  order: number;
-  duration: string;
-  status: 'active' | 'inactive';
-  partsCount: number;
-}
 
 const ModulesCRUD = () => {
   const [modules, setModules] = useState<Module[]>([]);
@@ -33,17 +23,17 @@ const ModulesCRUD = () => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const fetchModules = async () => {
+  const fetchModulesData = async () => {
     try {
-      const res = await api.get('/api/modules');
-      setModules(res.data);
+      const res = await fetchModules();
+      setModules(res);
     } catch {
       toast.error('Failed to load modules', { autoClose: 1200 });
     }
   };
 
   useEffect(() => {
-    fetchModules();
+    fetchModulesData();
   }, []);
 
   const filteredModules = modules
@@ -66,9 +56,9 @@ const ModulesCRUD = () => {
           case 'parts-desc':
             return b.partsCount - a.partsCount;
           case 'duration-asc':
-            return parseInt(a.duration) - parseInt(b.duration);
+            return (a.duration || '0').localeCompare(b.duration || '0');
           case 'duration-desc':
-            return parseInt(b.duration) - parseInt(a.duration);
+            return (b.duration || '0').localeCompare(a.duration || '0');
           default:
             return 0;
         }
@@ -76,8 +66,8 @@ const ModulesCRUD = () => {
 
   const handleCreate = async (moduleData: ModuleRequest) => {
     try {
-      const res = await api.post('/api/modules', moduleData);
-      setModules(prev => [...prev, res.data]);
+      const newModule = await createModule(moduleData);
+      setModules(prev => [...prev, newModule]);
       setIsCreateOpen(false);
       toast.success('Module created successfully', { autoClose: 1200 });
     } catch (error) {
@@ -89,9 +79,9 @@ const ModulesCRUD = () => {
   const handleUpdate = async (moduleData: ModuleRequest) => {
     if (!selectedModule) return;
     try {
-      const res = await api.put(`/api/modules/${selectedModule.id}`, moduleData);
+      const updatedModule = await updateModule(selectedModule.id, moduleData);
       setModules(prev =>
-          prev.map(m => (m.id === selectedModule.id ? res.data : m))
+          prev.map(m => (m.id === selectedModule.id ? updatedModule : m))
       );
       setIsEditOpen(false);
       setSelectedModule(null);
@@ -105,7 +95,7 @@ const ModulesCRUD = () => {
   const handleDelete = async () => {
     if (!selectedModule) return;
     try {
-      await api.delete(`/api/modules/${selectedModule.id}`);
+      await deleteModule(selectedModule.id);
       setModules(modules.filter(m => m.id !== selectedModule.id));
       setIsDeleteOpen(false);
       setSelectedModule(null);
@@ -114,6 +104,7 @@ const ModulesCRUD = () => {
       toast.error('Failed to delete module', { autoClose: 1200 });
     }
   };
+
 
   return (
       <div className="p-8">

@@ -27,26 +27,23 @@ export interface ApiError {
 }
 
 
-
-export interface Language {
-    id: number;
-    name: string;
-    code: string;
-    flag: string;
-    coursesCount?: number;
-    difficulty?: 'Easy' | 'Medium' | 'Hard';
-    popularity?: 'High' | 'Medium' | 'Low';
-}
-
-
-
-
+//
+// export interface Language {
+//     id: number;
+//     name: string;
+//     code: string;
+//     flag: string;
+//     coursesCount?: number;
+//     difficulty?: 'Easy' | 'Medium' | 'Hard';
+//     popularity?: 'High' | 'Medium' | 'Low';
+// }
+//
+//
 
 
-export interface Module {
-    id: number;
-    name: string;
-}
+
+
+
 
 export interface Lesson {
     id: number;
@@ -211,3 +208,54 @@ export const QUESTION_TYPE_MAP: Record<number, string> = {
     3: 'Sắp xếp từ thành câu đúng',
     4: 'Nhập câu trả lời từ bàn phím',
 };
+
+
+//
+// ===== TOI UU
+// Ngôn ngữ
+export interface Language {
+    id: number;
+    name: string;
+}
+
+// Course
+export interface Course {
+    id: number;
+    name: string;
+    description: string;
+    language: Language;
+    level: 'Beginner' | 'Intermediate' | 'Advanced';
+    status: 'active' | 'inactive';
+    createdAt: string; // bắt buộc
+    modulesCount: number;
+    price: number;
+    thumbnail: string;
+}
+
+// Props cho CourseForm
+export interface CourseFormProps {
+    initialData?: Course;
+    onSubmit: (data: Omit<Course, 'id' | 'createdAt' | 'modulesCount' | 'duration'>) => void;
+}
+
+//Module
+
+export interface Module {
+    id: number;
+    name: string;
+    description: string;
+    courseId: number;
+    courseName: string;
+    order: number;
+    duration?: string;
+    status: 'active' | 'inactive';
+    partsCount: number;
+}
+
+export interface ModuleRequest {
+    name: string;
+    description: string;
+    courseId: number;
+    order: number;
+    status: 'active' | 'inactive';
+}

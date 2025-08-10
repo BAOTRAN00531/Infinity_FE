@@ -10,32 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/reusable-components/select';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import api from "@/api";
+import { Language, Course, CourseFormProps } from 'types';
 
-interface Language {
-  id: number;
-  name: string;
-}
 
-interface Course {
-  id: number;
-  name: string;
-  description: string;
-  language: Language;
-  level: 'Beginner' | 'Intermediate' | 'Advanced';
-  status: 'active' | 'inactive';
-  createdAt: string;
-  modulesCount: number;
-  price: number;
-  thumbnail: string;
-}
-
-interface CourseFormProps {
-  initialData?: Course;
-  onSubmit: (data: Omit<Course, 'id' | 'createdAt' | 'modulesCount' | 'duration'>) => void;
-}
 
 const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
   const [languages, setLanguages] = useState<Language[]>([]);
