@@ -30,7 +30,7 @@ const Breadcrumbs: React.FC = () => {
         const fetchCourseTitle = async () => {
             if (pathnames[0] === 'client' && pathnames[1] === 'course' && courseId) {
                 try {
-                    const { data } = await api.get<Course>(`/api/courses/${courseId}`);
+                    const { data } = await api.get<Course>(`client/api/course/${courseId}`);
                     setCourseTitle(data.title);
                 } catch (err) {
                     console.error('Lỗi khi lấy course:', err);

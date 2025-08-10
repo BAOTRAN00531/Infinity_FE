@@ -1,8 +1,7 @@
-// src/pages/student/UserDashboard.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/layout-components/PageLayout';
-import api from '@/api'; // ✅ Sử dụng API instance đã config
+import api from '@/api';
 
 export interface Course {
     courseId: number;
@@ -17,23 +16,34 @@ export interface Course {
 const UserDashboard: React.FC = () => {
     const [courses, setCourses] = useState<Course[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
         api
-            .get('/api/student/dashboard') // ✅ Không cần /api/ vì baseURL đã set trong api.ts
+            .get('api/student/dashboard')
             .then((res) => setCourses(res.data))
-            .catch((err) => console.error('Lỗi khi load dashboard:', err))
+            .catch((err) => {
+                console.error('Lỗi khi load dashboard:', err);
+                setError('Không thể tải danh sách khóa học');
+            })
             .finally(() => setLoading(false));
     }, []);
 
-    if (loading) return <div>Đang tải...</div>;
+    if (loading) return <PageLayout><div className="text-center">Đang tải...</div></PageLayout>;
+
+    if (error) {
+        return (
+            <PageLayout>
+                <div className="text-center text-red-500">{error}</div>
+            </PageLayout>
+        );
+    }
 
     return (
         <PageLayout>
             <div className="max-w-5xl mx-auto px-4 py-8">
                 <h2 className="text-2xl font-bold mb-6">Khóa học của bạn</h2>
-
                 {courses.length === 0 ? (
                     <div className="text-center text-gray-600 p-8 border rounded-xl bg-gray-50 shadow-sm">
                         <p className="text-lg font-medium mb-2">Bạn chưa mua khóa học nào.</p>

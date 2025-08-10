@@ -41,7 +41,7 @@ export default function CourseDetail() {
     useEffect(() => {
         if (id) {
             api
-                .get(`/client/api/course/${id}`)
+                .get(`/client/api/course/${id}`, { skipAuthRedirect: true })
                 .then((res) => setCourse(res.data))
                 .catch(() => setError("Không thể tải thông tin khóa học."))
                 .finally(() => setLoading(false));
