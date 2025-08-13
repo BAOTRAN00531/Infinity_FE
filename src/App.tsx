@@ -73,6 +73,7 @@ const App: React.FC = () => {
     }, [navigate, location.pathname]);
 
 
+
     return (
         <div>
         <LoadingIndicator />
@@ -163,3 +164,59 @@ const App: React.FC = () => {
 };
 
 export default App;
+
+
+
+
+
+
+// // ✅ Logic trong App.tsx (bổ sung allowedPaths)
+// const App: React.FC = () => {
+//     const navigate = useNavigate();
+//     const location = useLocation();
+//
+//     useEffect(() => {
+//         const localToken = localStorage.getItem('access_token');
+//         const sessionToken = sessionStorage.getItem('access_token');
+//         const token = localToken || sessionToken;
+//         const isSession = !!sessionToken && !localToken;
+//
+//         if (token) {
+//             try {
+//                 const decodedToken: any = jwtDecode(token);
+//                 const role = decodedToken.role;
+//
+//                 // Thông báo đăng nhập thành công
+//
+//                 // Thông báo riêng theo vai trò
+//                 if (role === 'ROLE_ADMIN') {
+//                     toast.info('🔑 Xin chào Admin!', { autoClose: 1500 });
+//                     navigate('/admin/dashboard');
+//                 } else if (role === 'ROLE_STUDENT') {
+//                     toast.info('🙋‍♂️ Xin chào Học Viên!', { autoClose: 1500 });
+//                     if (location.pathname === '/admin/dashboard') {
+//                         navigate('/');
+//                     }
+//                 } else {
+//                     toast.info(`👋 Xin chào ${role || 'khách'}`, { autoClose: 1500 });
+//                 }
+//
+//             } catch (error) {
+//                 console.error('Invalid token:', error);
+//                 localStorage.removeItem('access_token');
+//                 sessionStorage.removeItem('access_token');
+//                 navigate('/');
+//             }
+//         } else {
+//             const allowedPaths = [
+//                 '/', '/login', '/register', '/forgot-password',
+//                 '/verify-otp', '/reset-password',
+//                 '/buy', '/payment-success', '/verify-email', '/khoa-hoc'
+//             ];
+//
+//             // Nếu muốn chặn trang khi chưa login:
+//             // if (!allowedPaths.includes(location.pathname)) {
+//             //     navigate('/');
+//             // }
+//         }
+//     }, [navigate, location.pathname]);
