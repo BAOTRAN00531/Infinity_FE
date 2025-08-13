@@ -54,9 +54,6 @@ export default function LoginPage() {
                 sessionStorage.setItem("access_token", res.access_token);
             }
 
-            toast.success("Đăng nhập thành công!", {
-                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            });
 
             console.log("Token:", res.access_token);
             console.log("Decoded role:", role);

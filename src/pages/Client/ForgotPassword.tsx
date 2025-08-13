@@ -23,8 +23,10 @@ const ForgotPassword: React.FC = () => {
 
             // Nếu API trả success thì chuyển trang
             if (data?.success) {
+                localStorage.setItem('forgotEmail', email);
                 navigate("/verify-otp");
             }
+
         } catch (error: any) {
             setMessage(
                 error?.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại."

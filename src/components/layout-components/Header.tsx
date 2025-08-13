@@ -4,6 +4,9 @@ import ThemeToggle from "../ThemeToggle";
 import FancyButton from "../button/FancyButton";
 import CartButton from "@/components/button/CartButton";
 import OrderHistoryButton  from "@/components/history/OrderHistoryButton";
+import api from '@/api'; // ✅ Dùng API instance đã config
+
+
 
 
 interface HeaderProps {
@@ -48,34 +51,49 @@ export default function Header({ welcomeMessage }: HeaderProps) {
     }, [location, navigate]);
 
 
+    const handleLogout = async () => {
+        try {
+            await api.post("/logout"); // Không cần method/credentials nữa vì đã set sẵn
+        } catch (err) {
+            console.error("Logout failed", err);
+        }
 
-    const handleLogout = () => {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("user");
-        localStorage.removeItem("name");
-        localStorage.removeItem("avatar");
-        sessionStorage.removeItem("access_token");
-        sessionStorage.removeItem("user");
-        sessionStorage.removeItem("name");
-        sessionStorage.removeItem("avatar");
+        // Xóa token local/session
+        localStorage.clear();
+        sessionStorage.clear();
         document.cookie = "refresh_token=; Max-Age=0; path=/";
 
-        // gọi API logout nếu có
-        fetch("/api/logout", {
-            method: "POST",
-            credentials: "include",
-        }).catch(() => {});
-
-        const isGoogleLogin =
-            !!localStorage.getItem("name") && !!localStorage.getItem("avatar");
-        if (isGoogleLogin) {
-            window.location.href = "https://accounts.google.com/Logout";
-        } else {
-            navigate("/login");
-        }
+        navigate("/login");
     };
 
-    const cartItemCount = 2;
+
+    // const handleLogout = () => {
+    //     localStorage.removeItem("access_token");
+    //     localStorage.removeItem("user");
+    //     localStorage.removeItem("name");
+    //     localStorage.removeItem("avatar");
+    //     sessionStorage.removeItem("access_token");
+    //     sessionStorage.removeItem("user");
+    //     sessionStorage.removeItem("name");
+    //     sessionStorage.removeItem("avatar");
+    //     document.cookie = "refresh_token=; Max-Age=0; path=/";
+    //
+    //     // gọi API logout nếu có
+    //     fetch("/api/logout", {
+    //         method: "POST",
+    //         credentials: "include",
+    //     }).catch(() => {});
+    //
+    //     const isGoogleLogin =
+    //         !!localStorage.getItem("name") && !!localStorage.getItem("avatar");
+    //     if (isGoogleLogin) {
+    //         window.location.href = "https://accounts.google.com/Logout";
+    //     } else {
+    //         navigate("/login");
+    //     }
+    // };
+
+
 
     return (
         <header className="w-full p-4 bg-white dark:bg-gray-900 shadow text-xl">
