@@ -17,20 +17,18 @@ import { jwtDecode } from 'jwt-decode';
 import { toast } from 'react-toastify';
 import VerifyEmail from './pages/Client/VerifyEmail';
 import 'react-toastify/dist/ReactToastify.css';
-import LoadingIndicator from 'components/loading-page/LoadingIndicator'
+import LoadingIndicator from 'components/loading-page/LoadingIndicator';
 import OAuth2RedirectHandler from "@/components/auth/OAuth2RedirectHandler";
 import PurchasePage from "@/components/payment/PurchasePage";
 import InvoicePage from "@/components/payment/InvoicePage";
 import ClientCourseList from "@/pages/Learning/ClientCourseList";
 import CourseDetail from "@/pages/Learning/CourseDetail";
 import OrderHistoryPage from "@/components/history/OrderHistoryPage";
-import Breadcrumbs from './components/Breadcrumbs';
 import StudentCourses from "@/pages/Student/StudentCourses";
-
 import SePayPaymentPage from "@/components/payment/SePayPaymentPage";
+import NotFoundPage from "@/pages/Client/NotFoundPage";
+import LanguageSelection from "@/pages/Client/LanguageSelection";
 
-
-// ✅ Logic trong App.tsx (bổ sung allowedPaths)
 const App: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -38,185 +36,102 @@ const App: React.FC = () => {
     useEffect(() => {
         const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
         const isSession = !localStorage.getItem('access_token') && sessionStorage.getItem('access_token');
+
         if (token) {
             try {
                 const decodedToken: any = jwtDecode(token);
                 const role = decodedToken.role;
 
                 if (isSession) {
-                    toast.success('🎉 Đăng nhập thành công!', {
-                        autoClose: 1200, // 👈 1.2 giây riêng lẻ
-                    });
+                    toast.success('🎉 Đăng nhập thành công!', { autoClose: 1200 });
                 }
 
-                if (role === 'ROLE_ADMIN') {
+                if (role === 'ROLE_ADMIN' && !location.pathname.startsWith('/admin')) {
+                    // Chuyển hướng đến admin dashboard nếu là admin và chưa ở trang admin
                     navigate('/admin/dashboard');
-                } else if (role !== 'ROLE_ADMIN' && location.pathname === '/admin/dashboard') {
+                } else if (role !== 'ROLE_ADMIN' && location.pathname.startsWith('/admin')) {
+                    // Chuyển hướng về trang chủ nếu không phải admin nhưng cố truy cập trang admin
                     navigate('/');
                 }
             } catch (error) {
                 console.error('Invalid token:', error);
                 localStorage.removeItem('access_token');
-                navigate('/');
+                sessionStorage.removeItem('access_token');
+                navigate('/login'); // Chuyển hướng về trang đăng nhập
             }
-        } else {
-            const allowedPaths = [
-                '/', '/login', '/register', '/forgot-password',
-                '/verify-otp', '/reset-password',
-                '/buy', '/payment-success', '/verify-email', '/khoa-hoc'
-            ];
-
-            // if (!allowedPaths.includes(location.pathname)) {
-            //     navigate('/');
-            // }
         }
     }, [navigate, location.pathname]);
 
-
-
     return (
         <div>
-        <LoadingIndicator />
+            <LoadingIndicator />
+            <Routes>
+                {/* Routes công khai cho tất cả mọi người */}
+                <Route path="/oauth2/success" element={<OAuth2RedirectHandler />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route path="/verify-success" element={<VerifySuccess />} />
+                <Route path="/" element={<IndexClient />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/login" element={<Login />} />
 
-    <Routes>
-        <Route path="/oauth2/success" element={<OAuth2RedirectHandler />} />
+                {/* Route chính để chọn ngôn ngữ */}
+                <Route path="/client/course" element={<LanguageSelection />} />
 
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/verify-success" element={<VerifySuccess />} />
-            <Route path="/" element={<IndexClient />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
+                {/* Route cho trang danh sách khóa học theo ngôn ngữ */}
+                <Route path="/client/course/:languageName" element={<ClientCourseList />} />
 
-        {/*<Route path="/khoa-hoc" element={<ClientCourseList />} />*/}
+                {/* ✅ Thay đổi đường dẫn để nó rõ ràng là trang chi tiết */}
+                <Route path="/client/detail/:id" element={<CourseDetail />} />
+                
+                <Route path="/sepay-payment" element={<SePayPaymentPage />} />
+                <Route path="/verify-confirmation" element={<VerifyConfirmation />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/verify-otp" element={<VerifyOtp />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/purchase" element={<PurchasePage />} />
+                <Route path="/invoice" element={<InvoicePage />} />
+                <Route path="/order-history" element={<OrderHistoryPage />} />
+                <Route path="/student/course/:id" element={<StudentCourses />} />
+                <Route path="/user/dashboard" element={<UserDashboard />} />
 
-
-        <Route path="/client/course" element={<ClientCourseList />} />
-        <Route path="/client/course/:id" element={<CourseDetail />} />
-
-
-        {/*Student*/}
-        <Route path="/student/course/:id" element={<StudentCourses />} />
-
-        <Route path="/sepay-payment" element={<SePayPaymentPage  />} />
-
-        <Route path="/verify-confirmation" element={<VerifyConfirmation />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/verify-otp" element={<VerifyOtp />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/user/dashboard" element={<UserDashboard />} />
-
-        <Route path="/purchase" element={<PurchasePage />} />
-        <Route path="/invoice" element={<InvoicePage />} />
-
-        <Route path="/order-history" element={<OrderHistoryPage />} />
-
-
-            <Route
-                path="/admin/dashboard"
-                element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}
-            >
-                <Route index element={<AdminDashboard />} />
-            </Route>
-            <Route path="/languages" element={<LanguageList />} />
-            <Route
-                path="/languages/create"
-                element={
-                    <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
-                        <Route
-                            path="/languages/create"
-                            element={
-                            <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
-                                <LanguageForm
-                                    onSubmit={(formData) => {
-                                        const token = localStorage.getItem('access_token'); sessionStorage.getItem('access_token');
-                                        if (!token) {
-                                            toast.error('Missing token', {
-                                                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-                                            });
-                                            return;
-                                        }
-                                        fetch('http://localhost:8080/api/languages', {
-                                            method: 'POST',
-                                            headers: { Authorization: `Bearer ${token}` },
-                                            body: formData,
-                                        }).then(() => {
-                                            toast.success('Created!', {
-                                                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-                                            });
-                                            setTimeout(() => {
-                                                window.location.href = '/languages';
-                                            }, 1500);
-                                        });
-                                    }}
-                                    onCancel={() => window.location.href = '/languages'} // ✅ Thêm dòng này
-                                />
-                            </ProtectedRoute>
-                        }
-                            />
-                    </ProtectedRoute>
-                }
-            />
-        </Routes>
+                {/* --- Routes được bảo vệ cho Admin --- */}
+                {/* Đây là cú pháp đúng để lồng route.
+                    <ProtectedRoute> sẽ đóng vai trò là "layout" hoặc "wrapper" cho các routes bên trong nó.
+                    Nó sẽ kiểm tra quyền trước khi hiển thị component con.
+                */}
+                <Route path="/admin" element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="languages" element={<LanguageList />} />
+                    <Route path="languages/create" element={
+                        <LanguageForm
+                            onSubmit={(formData) => {
+                                const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+                                if (!token) {
+                                    toast.error('Missing token', { autoClose: 1200 });
+                                    return;
+                                }
+                                fetch('http://localhost:8080/api/languages', {
+                                    method: 'POST',
+                                    headers: { Authorization: `Bearer ${token}` },
+                                    body: formData,
+                                }).then(() => {
+                                    toast.success('Created!', { autoClose: 1200 });
+                                    setTimeout(() => {
+                                        window.location.href = '/admin/languages';
+                                    }, 1500);
+                                });
+                            }}
+                            onCancel={() => window.location.href = '/admin/languages'}
+                        />
+                    } />
+                </Route>
 
 
-            </div>
+                {/* ✅ Route 404. Phải đặt ở cuối cùng! */}
+                <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+        </div>
     );
 };
 
 export default App;
-
-
-
-
-
-
-// // ✅ Logic trong App.tsx (bổ sung allowedPaths)
-// const App: React.FC = () => {
-//     const navigate = useNavigate();
-//     const location = useLocation();
-//
-//     useEffect(() => {
-//         const localToken = localStorage.getItem('access_token');
-//         const sessionToken = sessionStorage.getItem('access_token');
-//         const token = localToken || sessionToken;
-//         const isSession = !!sessionToken && !localToken;
-//
-//         if (token) {
-//             try {
-//                 const decodedToken: any = jwtDecode(token);
-//                 const role = decodedToken.role;
-//
-//                 // Thông báo đăng nhập thành công
-//
-//                 // Thông báo riêng theo vai trò
-//                 if (role === 'ROLE_ADMIN') {
-//                     toast.info('🔑 Xin chào Admin!', { autoClose: 1500 });
-//                     navigate('/admin/dashboard');
-//                 } else if (role === 'ROLE_STUDENT') {
-//                     toast.info('🙋‍♂️ Xin chào Học Viên!', { autoClose: 1500 });
-//                     if (location.pathname === '/admin/dashboard') {
-//                         navigate('/');
-//                     }
-//                 } else {
-//                     toast.info(`👋 Xin chào ${role || 'khách'}`, { autoClose: 1500 });
-//                 }
-//
-//             } catch (error) {
-//                 console.error('Invalid token:', error);
-//                 localStorage.removeItem('access_token');
-//                 sessionStorage.removeItem('access_token');
-//                 navigate('/');
-//             }
-//         } else {
-//             const allowedPaths = [
-//                 '/', '/login', '/register', '/forgot-password',
-//                 '/verify-otp', '/reset-password',
-//                 '/buy', '/payment-success', '/verify-email', '/khoa-hoc'
-//             ];
-//
-//             // Nếu muốn chặn trang khi chưa login:
-//             // if (!allowedPaths.includes(location.pathname)) {
-//             //     navigate('/');
-//             // }
-//         }
-//     }, [navigate, location.pathname]);

@@ -107,7 +107,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
 
                 {/* Nút chi tiết */}
                 <Button
-                    onClick={() => navigate(`/client/course/${course.id}`)}
+                    onClick={() => navigate(`/client/detail/${course.id}`)} // ✅ Cập nhật đường dẫn
                     className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center gap-2 text-sm"
                 >
                     <BookOpen className="w-4 h-4" />

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import api from "@/api"; // dùng instance đã cấu hình
+import api from "@/api";
 import Header from "@/components/layout-components/Header";
 import { Progress } from "@/components/reusable-components/progress";
 import { Tab } from "@headlessui/react";
@@ -16,6 +16,7 @@ interface CourseDto {
     level: string;
     duration: string;
     status: string;
+    thumbnail: string; // ✅ Thêm trường thumbnail
 }
 
 export default function CourseDetail() {
@@ -56,16 +57,29 @@ export default function CourseDetail() {
     if (error) return <div className="p-4 text-red-600">{error}</div>;
     if (!course) return <div className="p-4 text-gray-600">Không tìm thấy khóa học.</div>;
 
+    // ✅ Cấu hình URL hình ảnh
+    const courseThumbnailUrl = course.thumbnail.startsWith('http')
+        ? course.thumbnail
+        : `http://localhost:8080${course.thumbnail}`;
+
     return (
         <PageLayout>
-            <div className="w-full h-72 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex items-center justify-center">
-                <motion.h1
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl font-bold text-center px-4"
-                >
-                    {course.name}
-                </motion.h1>
+            {/* ✅ Thêm phần hình ảnh banner */}
+            <div className="w-full h-72 relative">
+                <img
+                    src={courseThumbnailUrl}
+                    alt={course.name}
+                    className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end justify-center">
+                    <motion.h1
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-4xl font-bold text-white text-center px-4 pb-6"
+                    >
+                        {course.name}
+                    </motion.h1>
+                </div>
             </div>
 
             <div className="max-w-4xl mx-auto -mt-20 z-10 relative">

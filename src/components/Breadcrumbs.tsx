@@ -1,22 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom'; // ✅ Thêm useParams
 import { motion } from 'framer-motion';
-import api from "@/api"; // Axios instance đã cấu hình baseURL sẵn
+import api from "@/api";
 
 interface Course {
-    id: string;
-    title: string;
+    id: number;
+    name: string;
+    language: string;
 }
 
+// ✅ Cập nhật breadcrumbNameMap để hỗ trợ các đường dẫn mới
 const breadcrumbNameMap: Record<string, string> = {
     '': 'Trang chủ',
     'client': 'Khóa học',
-    'courses': 'Danh sách',
-    'course': 'Chi tiết khóa học',
+    'course': 'Danh sách',
     'login': 'Đăng nhập',
     'register': 'Đăng ký',
     'languages': 'Ngôn ngữ',
     'create': 'Tạo mới',
+    'student': 'Của tôi' // ✅ Thêm đường dẫn cho sinh viên
 };
 
 const Breadcrumbs: React.FC = () => {
@@ -24,23 +26,30 @@ const Breadcrumbs: React.FC = () => {
     const [courseTitle, setCourseTitle] = useState<string | null>(null);
 
     const pathnames = location.pathname.split('/').filter(Boolean);
-    const courseId = pathnames[2]; // /client/course/:id
 
+    // ✅ Logic để lấy tên ngôn ngữ và id khóa học
+    const languageNameInPath = pathnames[2];
+    const courseIdInPath = pathnames[3];
+
+    // ✅ useEffect mới để lấy tên khóa học
     useEffect(() => {
         const fetchCourseTitle = async () => {
-            if (pathnames[0] === 'client' && pathnames[1] === 'course' && courseId) {
+            if (pathnames[0] === 'client' && pathnames[1] === 'course' && courseIdInPath) {
                 try {
-                    const { data } = await api.get<Course>(`client/api/course/${courseId}`);
-                    setCourseTitle(data.title);
+                    // ✅ Gửi yêu cầu với ID khóa học
+                    const { data } = await api.get<Course>(`client/api/course/${courseIdInPath}`);
+                    setCourseTitle(data.name);
                 } catch (err) {
                     console.error('Lỗi khi lấy course:', err);
                     setCourseTitle(null);
                 }
+            } else {
+                setCourseTitle(null);
             }
         };
 
         fetchCourseTitle();
-    }, [courseId, location.pathname]);
+    }, [courseIdInPath, location.pathname, pathnames]);
 
     return (
         <motion.nav
@@ -69,12 +78,14 @@ const Breadcrumbs: React.FC = () => {
                         const to = '/' + pathnames.slice(0, index + 1).join('/');
 
                         let label = breadcrumbNameMap[value] || decodeURIComponent(value);
-                        if (
-                            pathnames[0] === 'client' &&
-                            pathnames[1] === 'course' &&
-                            index === 2 &&
-                            courseTitle
-                        ) {
+
+                        // ✅ Cập nhật logic để hiển thị tên ngôn ngữ
+                        if (pathnames[0] === 'client' && pathnames[1] === 'course' && index === 2) {
+                            label = decodeURIComponent(value); // Tên ngôn ngữ
+                        }
+
+                        // ✅ Cập nhật logic để hiển thị tên khóa học
+                        if (pathnames[0] === 'client' && pathnames[1] === 'course' && index === 3 && courseTitle) {
                             label = courseTitle;
                         }
 
