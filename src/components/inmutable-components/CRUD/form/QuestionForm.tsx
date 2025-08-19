@@ -5,7 +5,7 @@
     AnswerCreateDto,
     QuestionDto
   } from '@/types'; // hoặc '@/types' nếu gộp chung
-  import { Module, Lesson } from '@/types';
+  import { Lesson } from '@/types';
   import { Button_admin } from '@/components/reusable-components/button_admin';
   import { Input_admin } from '@/components/reusable-components/input_admin';
   import { Label } from '@/components/reusable-components/label';
@@ -19,7 +19,6 @@
     SelectValue,
   } from '@/components/reusable-components/select';
   import { motion } from 'framer-motion';
-  import axios from "axios";
   import {toast} from "react-toastify";
 
   import { UIQuestion } from '@/types';
@@ -28,10 +27,11 @@
   import { BookOpen } from 'lucide-react';
   import { Dialog, DialogContent } from '@/components/reusable-components/dialog';
   import api from "@/api";
+  import { fetchLanguages, fetchModulesByLanguage, Language, ModuleLite } from '@/api/adminQuestionApi';
 
   interface QuestionFormProps {
     initialData?: UIQuestion;
-    modules: Module[];
+    modules: ModuleLite[];
     lessons: Lesson[];
     onModuleChange: (moduleId: number) => void;
     onSubmit: (question: UIQuestion) => void;
@@ -67,10 +67,10 @@
 
 
   const QuestionForm: React.FC<QuestionFormProps> = ({ initialData, onSubmit }) => {
-    const [modules, setModules] = useState<{
-      name: string;
-      id: number; }[]>([]);
+    const [modules, setModules] = useState<ModuleLite[]>([]);
     const [lessons, setLessons] = useState<{ id: number; name: string }[]>([]);
+    const [languages, setLanguages] = useState<Language[]>([]);
+    const [selectedLanguage, setSelectedLanguage] = useState<string>('');
 
     const [formData, setFormData] = useState<FormState>({
       questionText: initialData?.questionText || '',
@@ -163,19 +163,42 @@
       setAnswers(updated);
     };
 
-// Lấy modules
+// Lấy languages và modules theo language
     useEffect(() => {
-      const fetchModules = async () => {
+      const loadLanguages = async () => {
         try {
-          const res = await api.get('/api/modules');
-          setModules(res.data);
+          const langs = await fetchLanguages();
+          setLanguages(langs);
+          // Set mặc định ngôn ngữ đầu tiên nếu chưa chọn
+          if (!selectedLanguage && langs.length > 0) {
+            setSelectedLanguage(langs[0].code);
+          }
         } catch (err) {
-          console.error(err);
-          toast.error('Không thể tải danh sách modules', { autoClose: 1200 });
+          toast.error('Không thể tải danh sách ngôn ngữ', { autoClose: 1200 });
         }
       };
-      fetchModules();
+      loadLanguages();
     }, []);
+
+    useEffect(() => {
+      const loadModulesByLanguage = async () => {
+        if (!selectedLanguage) return;
+        try {
+          const mods = await fetchModulesByLanguage(selectedLanguage);
+          setModules(mods);
+          // Auto-select the first module if exists
+          if (mods.length > 0) {
+            setFormData(prev => ({ ...prev, moduleId: mods[0].id, lessonId: 0 }));
+          }
+        } catch (err) {
+          toast.error('Không thể tải courses theo ngôn ngữ', { autoClose: 1200 });
+        }
+      };
+      // reset selections downstream khi đổi ngôn ngữ
+      setFormData(prev => ({ ...prev, moduleId: 0, lessonId: 0 }));
+      setLessons([]);
+      loadModulesByLanguage();
+    }, [selectedLanguage]);
 
 // Lấy lessons theo moduleId
     useEffect(() => {
@@ -185,7 +208,14 @@
           const res = await api.get('/api/lessons', {
             params: { moduleId: formData.moduleId },
           });
-          setLessons(res.data);
+          const lessonList = Array.isArray(res.data) ? res.data : [];
+          setLessons(lessonList);
+          // Auto-select first lesson if exists
+          if (lessonList.length > 0) {
+            setFormData(prev => ({ ...prev, lessonId: lessonList[0].id }));
+          } else {
+            setFormData(prev => ({ ...prev, lessonId: 0 }));
+          }
         } catch {
           toast.error('Không tải được danh sách lessons', { autoClose: 1200 });
         }
@@ -434,6 +464,24 @@
         />
       </div>
 
+      {/* Language */}
+      <div className="mb-2">
+        <Label className="text-base font-semibold mb-1 block">Language</Label>
+        <Select
+          value={selectedLanguage}
+          onValueChange={(val) => setSelectedLanguage(val)}
+        >
+          <SelectTrigger className="rounded-xl border-2 border-gray-200 h-12 text-base">
+            <SelectValue placeholder="Select a language" />
+          </SelectTrigger>
+          <SelectContent className="rounded-xl">
+            {languages.map(lg => (
+              <SelectItem key={lg.code} value={lg.code}>{lg.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Module/Lesson, Difficulty, Points */}
       <div className="grid grid-cols-3 gap-4 mb-2">
         <div>
@@ -477,6 +525,25 @@
             className="rounded-xl border-2 border-gray-200 h-12 text-base"
           />
         </div>
+      </div>
+
+      {/* Part */}
+      <div className="mb-2">
+        <Label className="text-base font-semibold mb-1 block">Part</Label>
+        <Select
+          value={formData.lessonId.toString()}
+          onValueChange={val => setFormData({ ...formData, lessonId: parseInt(val) })}
+          disabled={!formData.moduleId}
+        >
+          <SelectTrigger className="rounded-xl border-2 border-gray-200 h-12 text-base">
+            <SelectValue placeholder="Select a part" />
+          </SelectTrigger>
+          <SelectContent className="rounded-xl">
+            {lessons.map(l => (
+              <SelectItem key={l.id} value={l.id.toString()}>{l.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Answer Options hoặc Correct Answer */}
