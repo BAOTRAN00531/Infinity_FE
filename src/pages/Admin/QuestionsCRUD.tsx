@@ -9,7 +9,7 @@ import { Badge } from '@/components/reusable-components/badge';
 import QuestionForm from '@/components/inmutable-components/CRUD/form/QuestionForm';
 import QuestionDetails from '@/components/inmutable-components/CRUD/detail/QuestionDetails';
 import DeleteConfirmation from '@/components/inmutable-components/DeleteConfirmation';
-import {fetchModules, fetchLessonsByModule, fetchQuestionsByLesson, createQuestion, updateQuestion, deleteQuestion} from '@/api/adminQuestionApi';
+import {fetchModules, fetchLessonsByModule, fetchQuestionsByLesson, createQuestion, updateQuestion, deleteQuestion, fetchLanguages, fetchModulesByLanguage, ModuleLite} from '@/api/adminQuestionApi';
 import {Module, Lesson, UIQuestion, QUESTION_TYPE_MAP} from '@/types';
 import {mapUIQuestionToCreateDto, mapUIQuestionToUpdateDto, mapQuestionResponseToUIQuestion} from '@/utils';
 import QuestionsList from "@/pages/Admin/QuestionsList";
@@ -23,8 +23,10 @@ export const QUESTION_TYPE_DESCRIPTION_TO_ID: Record<string, number> = Object.en
 
 
 const QuestionsCRUD = () => {
-  const [modules, setModules] = useState<Module[]>([]);
+  const [modules, setModules] = useState<ModuleLite[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [languages, setLanguages] = useState<{ id: number; code: string; name: string }[]>([]);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('');
   const [selectedModule, setSelectedModule] = useState<number | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
   const [questions, setQuestions] = useState<UIQuestion[]>([]);
@@ -37,13 +39,31 @@ const QuestionsCRUD = () => {
   const [selectedQuestion, setSelectedQuestion] = useState<UIQuestion | null>(null);
 
   useEffect(() => {
+    // Load languages first
+    fetchLanguages()
+        .then(setLanguages)
+        .catch(() => toast.error('Không thể tải ngôn ngữ', { autoClose: 1200 }));
+    // Optionally load all modules initially
     fetchModules()
         .then(setModules)
-        .catch(() => toast.error('Không thể tải modules', {
-          autoClose: 1200, // 👈 1.2 giây riêng lẻ
-        }));
+        .catch(() => toast.error('Không thể tải courses', { autoClose: 1200 }));
   }, []);
 
+
+  const handleLanguageSelect = async (languageCode: string) => {
+    try {
+      setSelectedLanguage(languageCode);
+      const mods = await fetchModulesByLanguage(languageCode);
+      setModules(mods);
+      // Reset downstream selections
+      setSelectedModule(null);
+      setLessons([]);
+      setSelectedLesson(null);
+      setQuestions([]);
+    } catch (err) {
+      toast.error('Không thể tải courses theo ngôn ngữ', { autoClose: 1200 });
+    }
+  };
 
   const handleModuleSelect = async (moduleId: number) => {
     try {
@@ -158,14 +178,28 @@ const QuestionsCRUD = () => {
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
+          {/* Language dropdown */}
+          <select
+              value={selectedLanguage}
+              onChange={(e) => handleLanguageSelect(e.target.value)}
+              className="px-4 py-2 border rounded-lg"
+          >
+            <option value="">Chọn Ngôn ngữ</option>
+            {languages.map((lg) => <option key={lg.code} value={lg.code}>{lg.name}</option>)}
+          </select>
+
+          {/* Course (Module) dropdown filtered by language */}
           <select
               value={selectedModule ?? ''}
               onChange={(e) => handleModuleSelect(Number(e.target.value))}
               className="px-4 py-2 border rounded-lg"
+              disabled={!selectedLanguage}
           >
             <option value="" disabled>Chọn Courses</option>
             {modules.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
           </select>
+
+          {/* Part (Lesson) dropdown filtered by course */}
           <select
               value={selectedLesson ?? ''}
               onChange={(e) => handleLessonSelect(Number(e.target.value))}
