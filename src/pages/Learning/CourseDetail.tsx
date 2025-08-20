@@ -26,28 +26,57 @@ export default function CourseDetail() {
     const [error, setError] = useState("");
     const navigate = useNavigate();
     const userAvatarUrl = localStorage.getItem("avatar") || undefined;
-
+    const [progress, setProgress] = useState<number>(0); // State mới để lưu tiến độ
+    const [userRole, setUserRole] = useState<string | null>(null); // ✅ State mới để lưu vai trò
     const token = localStorage.getItem("access_token");
     let userName = "Ẩn danh";
 
-    if (token) {
-        try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            userName = payload.sub || "Ẩn danh";
-        } catch (e) {
-            console.error("Token không hợp lệ:", e);
+    useEffect(() => {
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split(".")[1]));
+                userName = payload.sub || "Ẩn danh";
+                setUserRole(payload.role); // ✅ Kiểm tra payload có role không
+                console.log("User role:", payload.role); // Thêm log
+            } catch (e) {
+                console.error("Token không hợp lệ:", e);
+            }
         }
-    }
+    }, [token]);
 
+// ...
     useEffect(() => {
         if (id) {
-            api
-                .get(`/client/api/course/${id}`, { skipAuthRedirect: true })
-                .then((res) => setCourse(res.data))
-                .catch(() => setError("Không thể tải thông tin khóa học."))
-                .finally(() => setLoading(false));
+            setLoading(true);
+
+            const courseApiCall = api.get(`/client/api/course/${id}`);
+
+            if (userRole === 'ROLE_STUDENT') {
+                const progressApiCall = api.get(`/client/api/user/progress/course/${id}`);
+
+                Promise.all([courseApiCall, progressApiCall])
+                    .then(([courseRes, progressRes]) => {
+                        setCourse(courseRes.data);
+                        setProgress(progressRes.data); // ✅ Cần kiểm tra progressRes.data
+                    })
+                    .catch((err) => {
+                        console.error("API Error:", err); // Thêm log lỗi
+                        setError("Không thể tải thông tin khóa học hoặc tiến độ.");
+                    })
+                    .finally(() => setLoading(false));
+            } else {
+                courseApiCall
+                    .then(courseRes => {
+                        setCourse(courseRes.data);
+                    })
+                    .catch((err) => {
+                        console.error("Course API Error:", err);
+                        setError("Không thể tải thông tin khóa học.");
+                    })
+                    .finally(() => setLoading(false));
+            }
         }
-    }, [id]);
+    }, [id, userRole]);
 
     const handleBuy = () => {
         navigate(`/purchase?courseId=${course?.id}`);
@@ -93,12 +122,15 @@ export default function CourseDetail() {
                         <div><strong>📌 Trạng thái:</strong> {course.status}</div>
                     </div>
 
-                    <div className="mb-6">
-                        <h3 className="font-semibold mb-2 text-gray-800 dark:text-gray-100">Tiến độ học tập</h3>
-                        <Progress value={42} className="h-3 bg-gray-200 dark:bg-gray-700" />
-                        <span className="text-xs mt-1 block text-gray-500 dark:text-gray-400">42% hoàn thành</span>
-                    </div>
-
+                    {userRole === 'ROLE_STUDENT' && ( // ✅ Chỉ hiển thị nếu là học viên
+                        <div className="mb-6">
+                            <h3 className="font-semibold mb-2 text-gray-800 dark:text-gray-100">Tiến độ học tập</h3>
+                            <Progress value={progress} className="h-3 bg-gray-200 dark:bg-gray-700" />
+                            <span className="text-xs mt-1 block text-gray-500 dark:text-gray-400">
+                            {progress.toFixed(2)}% hoàn thành
+                        </span>
+                        </div>
+                    )}
                     <button
                         onClick={handleBuy}
                         className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg shadow transition"

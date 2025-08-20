@@ -1,80 +1,167 @@
+// src/components/student/course/StudentCourses.tsx
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import api from '@/api'; // Sử dụng API instance
+import api from '@/api';
 import { StudentModules } from './StudentModules';
 import PageLayout from '@/components/layout-components/PageLayout';
+import { motion } from 'framer-motion';
+import { Progress } from "@/components/reusable-components/progress";
+import { FiArrowLeft, FiBook, FiClock, FiCheckCircle, FiBarChart2, FiPlay } from 'react-icons/fi';
 
 export interface Course {
     courseId: number;
     courseName: string;
     thumbnail: string;
     price: number;
+    progressPercentage: number;
     totalModules: number;
     completedModules: number;
-    progressPercentage: number;
 }
 
 export default function StudentCourses() {
     const { id: courseId } = useParams<{ id: string }>();
     const [course, setCourse] = useState<Course | null>(null);
+    const [progress, setProgress] = useState<number>(0);
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
         if (!courseId || isNaN(Number(courseId))) {
             setError('Khóa học không hợp lệ');
+            setLoading(false);
             return;
         }
 
-        api
-            .get(`api/student/course/${courseId}`)
-            .then((res) => setCourse(res.data))
+        const courseApiCall = api.get(`api/student/course/${courseId}`);
+        const progressApiCall = api.get(`/client/api/user/progress/course/${courseId}`);
+
+        Promise.all([courseApiCall, progressApiCall])
+            .then(([courseRes, progressRes]) => {
+                setCourse(courseRes.data);
+                setProgress(progressRes.data);
+            })
             .catch((err) => {
-                console.error('Lỗi tải khóa học:', err);
-                setError('Không thể tải thông tin khóa học');
-            });
+                console.error("API Error:", err);
+                setError("Không thể tải thông tin khóa học hoặc tiến độ.");
+            })
+            .finally(() => setLoading(false));
     }, [courseId]);
 
-    if (error) {
+    if (loading) {
         return (
             <PageLayout>
-                <div className="max-w-4xl mx-auto p-6 text-center">
-                    <p className="text-red-500">{error}</p>
-                    <button
-                        onClick={() => navigate('/student/dashboard')}
-                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
-                    >
-                        Quay lại Dashboard
-                    </button>
+                <div className="flex justify-center items-center min-h-screen">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                 </div>
             </PageLayout>
         );
     }
 
-    if (!course) return <PageLayout><p className="text-center text-gray-500">Đang tải khóa học...</p></PageLayout>;
+    if (error) {
+        return (
+            <PageLayout>
+                <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
+                    <div className="bg-red-50 p-6 rounded-lg max-w-md">
+                        <p className="text-red-500 text-lg mb-4">{error}</p>
+                        <button
+                            onClick={() => navigate('/student/dashboard')}
+                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                        >
+                            <FiArrowLeft className="mr-2" />
+                            Quay lại Dashboard
+                        </button>
+                    </div>
+                </div>
+            </PageLayout>
+        );
+    }
+
+    if (!course) return null;
 
     return (
         <PageLayout>
-            <div className="max-w-4xl mx-auto p-6">
-                <h1 className="text-3xl font-bold mb-4">{course.courseName}</h1>
-                <img
-                    src={course.thumbnail}
-                    alt={course.courseName}
-                    className="w-full h-auto rounded shadow mb-4"
-                />
-                <div className="mb-4">
-                    {/*<p><strong>Giá:</strong> {course.price.toLocaleString()} VNĐ</p>*/}
-                    <p><strong>Số module:</strong> {course.totalModules}</p>
-                    <p><strong>Hoàn thành:</strong> {course.completedModules}</p>
-                    <div className="w-full bg-gray-200 rounded h-4 mt-2">
-                        <div
-                            className="bg-green-500 h-4 rounded"
-                            style={{ width: `${course.progressPercentage}%` }}
-                        />
-                    </div>
-                    <p className="text-sm text-gray-600 mt-1">{course.progressPercentage}% hoàn thành</p>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Header với nút quay lại */}
+                <div className="mb-6">
+                    <button
+                        onClick={() => navigate('/student/dashboard')}
+                        className="flex items-center text-blue-600 hover:text-blue-800 transition-colors mb-4"
+                    >
+                        <FiArrowLeft className="mr-2" />
+                        Quay lại Dashboard
+                    </button>
                 </div>
-                <StudentModules courseId={Number(courseId)} />
+
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="bg-white rounded-xl shadow-lg overflow-hidden"
+                >
+                    <div className="md:flex">
+                        {/* Thông tin khóa học và hình ảnh */}
+                        <div className="md:w-2/5">
+                            <img
+                                src={course.thumbnail}
+                                alt={course.courseName}
+                                className="w-full h-64 md:h-full object-cover"
+                            />
+                        </div>
+
+                        {/* Thanh tiến độ và số liệu */}
+                        <div className="md:w-3/5 p-6 md:p-8">
+                            <h1 className="text-3xl font-bold text-gray-900 mb-4">{course.courseName}</h1>
+                            <p className="text-gray-600 mb-6">
+                                Chào mừng bạn đến với khóa học, hãy bắt đầu hành trình học tập của mình!
+                            </p>
+
+                            <div className="bg-gray-50 p-6 rounded-lg">
+                                <h2 className="text-xl font-semibold mb-4 flex items-center">
+                                    <FiBarChart2 className="mr-2 text-blue-500" />
+                                    Tiến độ khóa học của bạn
+                                </h2>
+
+                                <div className="mb-4">
+                                    <div className="flex justify-between text-sm text-gray-600 mb-2">
+                                        <span>Hoàn thành</span>
+                                        <span>{progress.toFixed(1)}%</span>
+                                    </div>
+                                    <Progress value={progress} className="h-3" />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 mt-6">
+                                    <div className="bg-white p-4 rounded-lg shadow-sm text-center">
+                                        <div className="flex items-center justify-center">
+                                            <FiBook className="text-blue-500 mr-2" />
+                                            <span className="text-2xl font-bold">{course.totalModules}</span>
+                                        </div>
+                                        <p className="text-sm text-gray-500 mt-1">Tổng modules</p>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-lg shadow-sm text-center">
+                                        <div className="flex items-center justify-center">
+                                            <FiCheckCircle className="text-green-500 mr-2" />
+                                            <span className="text-2xl font-bold">{course.completedModules}</span>
+                                        </div>
+                                        <p className="text-sm text-gray-500 mt-1">Modules hoàn thành</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Nội dung khóa học */}
+                    <div className="p-6 md:p-8 border-t border-gray-200">
+                        <h2 className="text-2xl font-bold mb-6 flex items-center">
+                            <FiPlay className="mr-2 text-blue-500" />
+                            Nội dung khóa học
+                        </h2>
+
+                        <StudentModules courseId={Number(courseId)} />
+                    </div>
+                </motion.div>
             </div>
         </PageLayout>
     );
