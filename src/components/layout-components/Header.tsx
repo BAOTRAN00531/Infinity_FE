@@ -112,7 +112,7 @@ export default function Header({ welcomeMessage }: HeaderProps) {
                 </Link>
 
                 <Link
-                    to="/user/dashboard"
+                    to="/student/dashboard"
                     className="text-sm font-medium text-gray-700 hover:text-primary transition"
                 >
                     Dashboard

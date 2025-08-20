@@ -1,5 +1,8 @@
+// src/components/reusable-components/progress.tsx
+
 import React from "react";
 import classNames from "classnames";
+import { motion } from "framer-motion"; // ✅ Import motion
 
 interface ProgressProps {
     value: number; // từ 0 đến 100
@@ -14,9 +17,11 @@ export const Progress: React.FC<ProgressProps> = ({ value, className }) => {
                 className
             )}
         >
-            <div
-                className="bg-blue-600 dark:bg-blue-500 h-full transition-all duration-500 ease-out"
-                style={{ width: `${Math.min(value, 100)}%` }}
+            <motion.div
+                className="bg-blue-600 dark:bg-blue-500 h-full rounded-full"
+                initial={{ width: "0%" }}
+                animate={{ width: `${Math.min(value, 100)}%` }} // ✅ Sử dụng animate để tạo hiệu ứng chuyển động
+                transition={{ duration: 0.8, ease: "easeInOut" }} // ✅ Tùy chỉnh hiệu ứng chuyển động
             />
         </div>
     );

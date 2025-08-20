@@ -92,7 +92,7 @@ const App: React.FC = () => {
                 <Route path="/invoice" element={<InvoicePage />} />
                 <Route path="/order-history" element={<OrderHistoryPage />} />
                 <Route path="/student/course/:id" element={<StudentCourses />} />
-                <Route path="/user/dashboard" element={<UserDashboard />} />
+                <Route path="/student/dashboard" element={<UserDashboard />} />
 
                 {/* --- Routes được bảo vệ cho Admin --- */}
                 {/* Đây là cú pháp đúng để lồng route.
