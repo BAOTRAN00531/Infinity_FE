@@ -8,6 +8,8 @@ import PageLayout from '@/components/layout-components/PageLayout';
 import { motion } from 'framer-motion';
 import { Progress } from "@/components/reusable-components/progress";
 import { FiArrowLeft, FiBook, FiClock, FiCheckCircle, FiBarChart2, FiPlay } from 'react-icons/fi';
+import {Button} from "@headlessui/react";
+import FancyButton from "@/components/button/FancyButton";
 
 export interface Course {
     courseId: number;
@@ -148,7 +150,24 @@ export default function StudentCourses() {
                                         <p className="text-sm text-gray-500 mt-1">Modules hoàn thành</p>
                                     </div>
                                 </div>
+
+                                {/* ✅ Thêm nút ngay dưới card tiến độ */}
+                                <div className="mt-6 flex justify-center">
+                                    <FancyButton
+                                        onClick={() => navigate(`/student/learn/${courseId}`)}
+                                        variant="primary"
+                                        size="medium"
+                                        fullWidth={false} // hoặc true nếu muốn kéo dài
+                                        text={
+                                            <>
+                                                <FiPlay className="mr-2" />
+                                                Bắt đầu học
+                                            </>
+                                        }
+                                    />
+                                </div>
                             </div>
+
                         </div>
                     </div>
 

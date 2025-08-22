@@ -1,15 +1,20 @@
 // src/components/inmutable-components/CRUD/detail/PartDetails.tsx
 import React from 'react'
 import { Badge } from '@/components/reusable-components/badge'
-import { Clock, Hash, Layers, FileText, Play } from 'lucide-react'
+// ✅ Import Description and Link from Lucide React
+import { Clock, Hash, Layers, FileText, Play, File, Link } from 'lucide-react'
 
+// ✅ Cập nhật Part interface
 interface Part {
   id: number
   name: string
-  type: 'video' | 'exercise'
+  type: 'video' | 'document' // ✅ Thay đổi 'exercise' thành 'document'
   moduleId: number
   moduleName: string
   status: 'active' | 'inactive'
+  content?: string // ✅ Thêm trường content
+  videoUrl?: string // ✅ Thêm trường videoUrl
+  duration?: string // ✅ Thêm trường duration
 }
 
 interface PartDetailsProps {
@@ -28,6 +33,22 @@ const PartDetails = ({ part }: PartDetailsProps) => {
           <h3 className="text-2xl font-black text-gray-800 mb-2">
             {part.name}
           </h3>
+
+          {/* ✅ Hiển thị nội dung hoặc URL */}
+          {part.type === 'video' && part.videoUrl && (
+              <div className="flex items-center gap-2 text-gray-600 break-all mt-4">
+                <Link className="w-4 h-4" />
+                <a href={part.videoUrl} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline">
+                  {part.videoUrl}
+                </a>
+              </div>
+          )}
+          {part.type === 'document' && part.content && (
+              <div className="text-gray-600 mt-4 text-sm">
+                <p className="text-sm font-medium text-gray-600 mb-2">Content:</p>
+                <p>{part.content}</p>
+              </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-6">
@@ -39,6 +60,16 @@ const PartDetails = ({ part }: PartDetailsProps) => {
                 <p className="font-bold text-gray-800">{part.moduleName}</p>
               </div>
             </div>
+            {/* ✅ Thêm hiển thị Duration */}
+            {part.duration && (
+                <div className="flex items-center gap-3 p-4 bg-yellow-50 rounded-2xl">
+                  <Clock className="w-5 h-5 text-yellow-600" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Duration</p>
+                    <p className="font-bold text-gray-800">{part.duration}</p>
+                  </div>
+                </div>
+            )}
           </div>
 
           <div className="space-y-4">

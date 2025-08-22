@@ -212,24 +212,40 @@ export const QUESTION_TYPE_MAP: Record<number, string> = {
 
 //
 // ===== TOI UU
+// src/types/course.types.ts
+
+// ===== TOI UU
 // Ngôn ngữ
 export interface Language {
     id: number;
     name: string;
 }
 
-// Course
+// Course Level và Status
+export type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
+export type CourseStatus = 'active' | 'inactive';
+export type ModuleStatus = 'active' | 'inactive';
+
+// Course - Phiên bản đầy đủ cho quản lý
 export interface Course {
     id: number;
     name: string;
     description: string;
     language: Language;
-    level: 'Beginner' | 'Intermediate' | 'Advanced';
-    status: 'active' | 'inactive';
-    createdAt: string; // bắt buộc
+    level: CourseLevel;
+    status: CourseStatus;
+    createdAt: string;
     modulesCount: number;
     price: number;
     thumbnail: string;
+}
+
+// Course - Phiên bản rút gọn cho học tập
+export interface LearningCourse {
+    courseId: number;
+    courseName: string;
+    thumbnail: string;
+    modules: LearningModule[];
 }
 
 // Props cho CourseForm
@@ -238,24 +254,105 @@ export interface CourseFormProps {
     onSubmit: (data: Omit<Course, 'id' | 'createdAt' | 'modulesCount' | 'duration'>) => void;
 }
 
-//Module
-
-export interface Module {
+// Module - Phiên bản cơ bản
+export interface BaseModule {
     id: number;
     name: string;
     description: string;
     courseId: number;
     courseName: string;
     order: number;
-    duration?: string;
-    status: 'active' | 'inactive';
+    status: ModuleStatus;
     partsCount: number;
 }
 
+// Module - Phiên bản đầy đủ với duration
+export interface Module extends BaseModule {
+    duration?: string;
+}
+
+// Module - Phiên bản cho học tập
+export interface LearningModule extends BaseModule {
+    duration: string | null;
+    lessons?: Lesson[];
+    completedLessons?: number;
+}
+
+// Request để tạo Module
 export interface ModuleRequest {
     name: string;
     description: string;
     courseId: number;
     order: number;
-    status: 'active' | 'inactive';
+    status: ModuleStatus;
 }
+
+// Lesson
+export interface Lesson {
+    id: number;
+    name: string;
+    type: string;
+    content: string;
+    videoUrl?: string;
+    duration: string;
+    isCompleted: boolean;
+    orderIndex: number;
+}
+
+// Course Progress
+export interface CourseProgress {
+    courseId: number;
+    progressPercentage: number;
+    totalModules: number;
+    completedModules: number;
+}
+
+// Question và Option
+export interface QuestionOption {
+    id: number;
+    optionText: string;
+    correct: boolean;
+    position: number;
+}
+
+export interface Question {
+    id: number;
+    questionText: string;
+    lessonId: number;
+    options: QuestionOption[];
+}
+
+// Props cho các component học tập
+export interface CourseHeaderProps {
+    courseName: string;
+    courseProgress: CourseProgress | null;
+    onBack: () => void;
+}
+
+export interface LessonContentAreaProps {
+    selectedLesson: Lesson | null;
+    isQuizMode: boolean;
+    questions: Question[];
+    onMarkComplete: (lessonId: number) => void;
+    onStartQuiz: (lessonId: number) => void;
+}
+
+export interface CourseSidebarProps {
+    courseName: string;
+    modules: LearningModule[];
+    selectedLesson: Lesson | null;
+    onLessonSelect: (lesson: Lesson) => void;
+    onModuleSelect: (moduleId: number) => void;
+}
+
+export interface ModuleAccordionProps {
+    module: LearningModule;
+    selectedLesson: Lesson | null;
+    onLessonSelect: (lesson: Lesson) => void;
+    onModuleSelect: (moduleId: number) => void;
+}
+
+export interface QuizComponentProps {
+    questions: Question[];
+}
+

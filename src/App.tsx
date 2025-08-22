@@ -28,6 +28,7 @@ import StudentCourses from "@/pages/Student/StudentCourses";
 import SePayPaymentPage from "@/components/payment/SePayPaymentPage";
 import NotFoundPage from "@/pages/Client/NotFoundPage";
 import LanguageSelection from "@/pages/Client/LanguageSelection";
+import LearningPage from "@/pages/Student/Learn/[courseId]";
 
 const App: React.FC = () => {
     const navigate = useNavigate();
@@ -93,6 +94,9 @@ const App: React.FC = () => {
                 <Route path="/order-history" element={<OrderHistoryPage />} />
                 <Route path="/student/course/:id" element={<StudentCourses />} />
                 <Route path="/student/dashboard" element={<UserDashboard />} />
+
+                <Route path="/student/learn/:courseId" element={<LearningPage />} />
+
 
                 {/* --- Routes được bảo vệ cho Admin --- */}
                 {/* Đây là cú pháp đúng để lồng route.
