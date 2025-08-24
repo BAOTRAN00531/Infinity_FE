@@ -118,7 +118,7 @@ const OrderCRUD = () => {
                             Tạo đơn hàng mới
                         </Button_admin>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl rounded-3xl">
+                    <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
                         <DialogHeader>
                             <DialogTitle className="text-2xl font-bold">Tạo đơn hàng</DialogTitle>
                         </DialogHeader>
@@ -330,7 +330,7 @@ const OrderCRUD = () => {
 
             {/* ✏️ Dialog chỉnh sửa đơn hàng */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent className="max-w-2xl rounded-3xl">
+                <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
                     <DialogHeader>
                         <DialogTitle className="text-2xl font-bold">Chỉnh sửa đơn hàng</DialogTitle>
                     </DialogHeader>

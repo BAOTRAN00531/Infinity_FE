@@ -1,3 +1,5 @@
+// src/components/inmutable-components/CRUD/form/CourseForm.tsx
+
 import React, { useEffect, useState } from 'react';
 import { Button_admin } from '@/components/reusable-components/button_admin';
 import { Input_admin } from '@/components/reusable-components/input_admin';
@@ -12,23 +14,29 @@ import {
 } from '@/components/reusable-components/select';
 import { toast } from 'react-toastify';
 import api from "@/api";
-import { Language, Course, CourseFormProps } from 'types';
+import { Language, Course, CourseLevel, CourseStatus } from '@/types'; // ✅ Import đầy đủ các types cần thiết
 
+interface CourseFormProps {
+  initialData?: Course;
+  // ✅ Cập nhật type của onSubmit để khớp với hàm async
+  onSubmit: (data: Omit<Course, 'id' | 'createdAt' | 'updatedAt' | 'modulesCount'>) => Promise<void>;
+}
 
-
-const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
+const CourseForm: React.FC<CourseFormProps> = ({ initialData, onSubmit }) => {
   const [languages, setLanguages] = useState<Language[]>([]);
-  const [languageId, setLanguageId] = useState<number>(initialData?.language?.id || 0);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<
+      Omit<Course, 'id' | 'createdAt' | 'updatedAt' | 'modulesCount'>
+  >({
     name: initialData?.name || '',
     description: initialData?.description || '',
-    level: initialData?.level || 'Beginner' as const,
-    status: initialData?.status || 'active' as const,
+    language: initialData?.language || {} as Language,
+    level: initialData?.level || 'Beginner',
+    duration: initialData?.duration || null, // ✅ Đảm bảo trường này tồn tại
     price: initialData?.price || 0,
-    thumbnail: initialData?.thumbnail || '', // ✅ Thêm dòng này
+    thumbnail: initialData?.thumbnail || '',
+    status: initialData?.status || 'active',
   });
 
-  // Fetch languages
   const fetchLanguages = async () => {
     try {
       const res = await api.get('/api/languages');
@@ -38,18 +46,14 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
     }
   };
 
-  // Upload thumbnail
   const handleUploadThumbnail = async (file: File) => {
     const formDataUpload = new FormData();
     formDataUpload.append('file', file);
-
     try {
       const res = await api.post('/api/uploads', formDataUpload, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-
-      const url = res.data.url;
-      setFormData(prev => ({ ...prev, thumbnail: url }));
+      setFormData(prev => ({ ...prev, thumbnail: res.data.url }));
       toast.success('Uploaded thumbnail successfully', { autoClose: 1200 });
     } catch {
       toast.error('Failed to upload thumbnail', { autoClose: 1200 });
@@ -62,21 +66,29 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const selectedLanguage = languages.find(lang => lang.id === languageId);
+    const selectedLanguage = languages.find(lang => lang.id === formData.language.id);
     if (!selectedLanguage) {
       toast.error('Please select a language', { autoClose: 1200 });
       return;
     }
     onSubmit({ ...formData, language: selectedLanguage });
+  };
 
-
+  const handleLanguageChange = (value: string) => {
+    const selectedLang = languages.find(lang => lang.id === parseInt(value));
+    if (selectedLang) {
+      setFormData(prev => ({
+        ...prev,
+        language: selectedLang,
+      }));
+    }
   };
 
   return (
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2 text-sm font-bold text-gray-700 dark:text-gray-200">
-            <Label htmlFor="name" className="text-sm font-bold text-gray-700 dark:text-gray-200">Course Name</Label>
+            <Label htmlFor="name">Course Name</Label>
             <Input_admin
                 id="name"
                 value={formData.name}
@@ -84,12 +96,11 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
                 required
             />
           </div>
-
           <div className="space-y-2 ">
-            <Label htmlFor="language" className="text-sm font-bold text-gray-700 dark:text-gray-200">Language</Label>
+            <Label htmlFor="language">Language</Label>
             <Select
-                value={languageId.toString()}
-                onValueChange={(val) => setLanguageId(parseInt(val))}
+                value={formData.language.id?.toString() || ''}
+                onValueChange={handleLanguageChange}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select language" />
@@ -97,16 +108,19 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
               <SelectContent>
                 {languages.map((lang) => (
                     <SelectItem key={lang.id} value={lang.id.toString()}>
-                      {lang.name}
+                      <div className="flex items-center gap-2">
+                        <img src={lang.flag} alt={lang.code} className="w-4 h-3 rounded-sm" />
+                        {lang.name}
+                      </div>
                     </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
         </div>
-
+        {/* ... giữ nguyên các trường khác ... */}
         <div className="space-y-2 text-sm font-bold text-gray-700 dark:text-gray-200">
-          <Label htmlFor="description" className="text-sm font-bold text-gray-700 dark:text-gray-200">Description</Label>
+          <Label htmlFor="description">Description</Label>
           <Textarea
               id="description"
               value={formData.description}
@@ -114,15 +128,12 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
               required
           />
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="level" className="text-sm font-bold text-gray-700 dark:text-gray-200">Level</Label>
+            <Label htmlFor="level">Level</Label>
             <Select
                 value={formData.level}
-                onValueChange={(val: 'Beginner' | 'Intermediate' | 'Advanced') =>
-                    setFormData({ ...formData, level: val })
-                }
+                onValueChange={(val) => setFormData({ ...formData, level: val as CourseLevel })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select level" />
@@ -134,44 +145,11 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
               </SelectContent>
             </Select>
           </div>
-
-          {/* <div className="space-y-2">
-            <Label htmlFor="duration" className="text-sm font-bold text-gray-700 dark:text-gray-200">Duration</Label>
-            <div className="flex gap-2">
-              <Input_admin
-                id="duration-value"
-                type="number"
-                min={1}
-                value={durationValue}
-                onChange={e => setDurationValue(e.target.value)}
-                placeholder="Số lượng"
-                required
-                className="w-24"
-              />
-              <Select
-                value={durationUnit}
-                onValueChange={val => setDurationUnit(val)}
-              >
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Chọn đơn vị" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ngày">Ngày</SelectItem>
-                  <SelectItem value="tuần">Tuần</SelectItem>
-                  <SelectItem value="tháng">Tháng</SelectItem>
-                  <SelectItem value="năm">Năm</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div> */}
-
           <div className="space-y-2">
-            <Label htmlFor="status" className="text-sm font-bold text-gray-700 dark:text-gray-200">Status</Label>
+            <Label htmlFor="status">Status</Label>
             <Select
                 value={formData.status}
-                onValueChange={(val: 'active' | 'inactive') =>
-                    setFormData({ ...formData, status: val })
-                }
+                onValueChange={(val) => setFormData({ ...formData, status: val as CourseStatus })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select status" />
@@ -182,9 +160,8 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
               </SelectContent>
             </Select>
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="price" className="text-sm font-bold text-gray-700 dark:text-gray-200">Price (VND)</Label>
+            <Label htmlFor="price">Price (VND)</Label>
             <Input_admin
                 id="price"
                 type="number"
@@ -195,11 +172,8 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
                 required
             />
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="thumbnail" className="text-sm font-bold text-gray-700 dark:text-gray-200">
-              Thumbnail Image
-            </Label>
+            <Label htmlFor="thumbnail">Thumbnail Image</Label>
             <input
                 type="file"
                 accept="image/*"
@@ -209,7 +183,6 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
                 }}
                 className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-2xl file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
             />
-
             {formData.thumbnail && (
                 <img
                     src={formData.thumbnail}
@@ -218,33 +191,9 @@ const CourseForm = ({ initialData, onSubmit }: CourseFormProps) => {
                 />
             )}
           </div>
-
-
-
         </div>
-
         <div className="flex justify-end">
-          <Button_admin
-              type="submit"
-              className="
-    inline-flex items-center justify-center gap-2 whitespace-nowrap
-    text-sm font-medium
-    ring-offset-background
-    transition-colors
-    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
-    disabled:pointer-events-none disabled:opacity-50
-    [&_svg]:pointer-events-none [&_svg]:h-4 [&_svg]:w-4 [&_svg]:shrink-0
-    hover:bg-primary/90
-    h-10 px-4 py-2
-    bg-gradient-to-r from-purple-500 to-pink-500
-    text-white
-    rounded-2xl
-    shadow-md hover:shadow-lg
-  "
-          >
-            {initialData ? 'Update Course' : 'Create Course'}
-          </Button_admin>
-
+          <Button_admin type="submit" className="...">{initialData ? 'Update Course' : 'Create Course'}</Button_admin>
         </div>
       </form>
   );

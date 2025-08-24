@@ -70,15 +70,15 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
                 </div>
 
                 {/* Progress */}
-                <div className="mt-1">
-                    <span className="text-xs text-gray-500 dark:text-gray-400 block">Tiến độ học:</span>
-                    <div className="w-full h-2 bg-gray-300 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-blue-500 transition-all"
-                            style={{ width: `${progress}%` }}
-                        />
-                    </div>
-                </div>
+                {/*<div className="mt-1">*/}
+                {/*    <span className="text-xs text-gray-500 dark:text-gray-400 block">Tiến độ học:</span>*/}
+                {/*    <div className="w-full h-2 bg-gray-300 dark:bg-slate-700 rounded-full overflow-hidden">*/}
+                {/*        <div*/}
+                {/*            className="h-full bg-blue-500 transition-all"*/}
+                {/*            style={{ width: `${progress}%` }}*/}
+                {/*        />*/}
+                {/*    </div>*/}
+                {/*</div>*/}
 
                 {/* Giá + Trạng thái */}
                 <div className="flex justify-between items-center mt-auto">

@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/components/reusable-components/select';
 import { Language, Course, Module, ModuleRequest } from '@/types';
-import { fetchLanguages, fetchCourses, fetchCoursesByLanguage, fetchModules } from '@/api/module.service';
+import { fetchLanguages, fetchCourses, fetchModules } from '@/api/module.service';
 
 interface ModuleFormProps {
   initialData?: Module;
@@ -28,77 +28,46 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
     name: initialData?.name || '',
     description: initialData?.description || '',
     courseId: initialData?.courseId || 0,
-    courseName: initialData?.courseName || 'Select a course',
+    courseName: initialData?.courseName || '',
     order: initialData?.order || 1,
     status: initialData?.status || 'active',
     partsCount: initialData?.partsCount || 0,
-    duration: initialData?.duration || '',
+    duration: initialData?.duration || null,
   });
 
-  // Fetch languages và courses
+  // ✅ Effect chính để fetch data
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitialData = async () => {
       try {
         const [langRes, courseRes] = await Promise.all([
           fetchLanguages(),
           fetchCourses(),
         ]);
+
         setLanguages(langRes);
         setCourses(courseRes);
-        // Nếu có initialData, tự động chọn ngôn ngữ của khóa học
+
+        // ✅ Auto-fill ngôn ngữ nếu là edit mode - SỬA LẠI LOGIC
         if (initialData?.courseId) {
-          const course = courseRes.find(c => c.id === initialData.courseId);
-          if (course?.language?.id) {
-            setSelectedLanguageId(course.language.id);
+          const selectedCourse = courseRes.find(c => c.id === initialData.courseId);
+          if (selectedCourse?.language?.id) {
+            // console.log('Auto-filling language:', selectedCourse.language); // Debug log
+            // ✅ Set với delay nhỏ để đảm bảo languages đã được set
+            setTimeout(() => {
+              setSelectedLanguageId(selectedCourse.language.id);
+            }, 100);
           }
         }
       } catch (err) {
+        console.error('Error fetching initial data:', err);
         toast.error('Không tải được dữ liệu', { autoClose: 1200 });
       }
     };
-    fetchData();
-  }, [initialData]);
 
-  // Khi chọn ngôn ngữ, gọi API lấy courses theo ngôn ngữ
-  useEffect(() => {
-    if (selectedLanguageId) {
-      const fetchCoursesByLanguageData = async () => {
-        try {
-          const res = await fetchCoursesByLanguage(selectedLanguageId);
-          setFilteredCourses(res);
-          // Nếu initialData có courseId, giữ lại courseId và courseName
-          if (!initialData?.courseId) {
-            setFormData(fd => ({ ...fd, courseId: 0, courseName: '' }));
-          }
-        } catch {
-          setFilteredCourses([]);
-          setFormData(fd => ({ ...fd, courseId: 0, courseName: '' }));
-        }
-      };
-      fetchCoursesByLanguageData();
-    } else {
-      setFilteredCourses([]);
-      setFormData(fd => ({ ...fd, courseId: 0, courseName: '' }));
-    }
-  }, [selectedLanguageId, initialData]);
+    fetchInitialData();
+  }, []); // Chỉ chạy 1 lần khi component mount
 
-  // Sau khi chọn course, tự động tăng order
-  useEffect(() => {
-    if (formData.courseId) {
-      const fetchModulesData = async () => {
-        try {
-          const res = await fetchModules(formData.courseId);
-          const maxOrder = res.reduce((max: number, m: Module) => Math.max(max, m.order), 0);
-          setFormData(fd => ({ ...fd, order: maxOrder + 1 }));
-        } catch {
-          setFormData(fd => ({ ...fd, order: 1 }));
-        }
-      };
-      fetchModulesData();
-    }
-  }, [formData.courseId]);
-
-  // Đồng bộ lại khi initialData thay đổi
+  // ✅ Effect để auto-fill form data khi có initialData
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -109,13 +78,72 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
         order: initialData.order,
         status: initialData.status,
         partsCount: initialData.partsCount,
-        duration: initialData.duration || '',
+        duration: initialData.duration,
       });
     }
   }, [initialData]);
 
+  // ✅ Effect để lọc courses khi thay đổi ngôn ngữ
+  useEffect(() => {
+    if (selectedLanguageId && courses.length > 0) {
+      const coursesByLang = courses.filter(course => course.language.id === selectedLanguageId);
+      setFilteredCourses(coursesByLang);
+
+      // Reset courseId nếu course hiện tại không thuộc ngôn ngữ đã chọn (chỉ khi không phải edit mode ban đầu)
+      const isCurrentCourseInLanguage = coursesByLang.some(c => c.id === formData.courseId);
+      if (!isCurrentCourseInLanguage && !initialData) {
+        setFormData(fd => ({ ...fd, courseId: 0, courseName: '' }));
+      }
+    } else {
+      // Nếu chưa chọn ngôn ngữ, hiển thị tất cả courses
+      setFilteredCourses(courses);
+    }
+
+    // Debug log
+    // console.log('Filter effect - selectedLanguageId:', selectedLanguageId, 'courses.length:', courses.length);
+  }, [selectedLanguageId, courses, formData.courseId, initialData]);
+
+  // ✅ Effect để auto-increment order khi chọn course
+  useEffect(() => {
+    if (formData.courseId && (!initialData || initialData.courseId !== formData.courseId)) {
+      const fetchModulesData = async () => {
+        try {
+          const res = await fetchModules(formData.courseId);
+          const maxOrder = res.reduce((max: number, m: Module) => Math.max(max, m.order), 0);
+          setFormData(fd => ({ ...fd, order: maxOrder + 1 }));
+        } catch (error) {
+          console.error('Error fetching modules:', error);
+          setFormData(fd => ({ ...fd, order: 1 }));
+        }
+      };
+      fetchModulesData();
+    }
+  }, [formData.courseId, initialData]);
+
+  const handleLanguageChange = (value: string) => {
+    const newLangId = Number(value);
+    setSelectedLanguageId(newLangId);
+
+    // Chỉ reset course selection nếu không phải edit mode
+    if (!initialData) {
+      setFormData(fd => ({ ...fd, courseId: 0, courseName: '' }));
+    }
+  };
+
+  const handleCourseChange = (value: string) => {
+    const id = Number(value);
+    const found = filteredCourses.find(c => c.id === id);
+    setFormData({ ...formData, courseId: id, courseName: found?.name || '' });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.courseId) {
+      toast.error('Vui lòng chọn khóa học', { autoClose: 1200 });
+      return;
+    }
+
     const payload: ModuleRequest = {
       name: formData.name,
       description: formData.description,
@@ -123,105 +151,130 @@ const ModuleForm: React.FC<ModuleFormProps> = ({ initialData, onSubmit }) => {
       order: formData.order,
       status: formData.status,
     };
-    await onSubmit(payload);
+
+    try {
+      await onSubmit(payload);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Chọn ngôn ngữ */}
-      <div className="space-y-2">
-        <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Language</Label>
-        <Select
-          value={selectedLanguageId?.toString() || ''}
-          onValueChange={value => setSelectedLanguageId(Number(value))}
-        >
-          <SelectTrigger className="rounded-2xl border-2 border-gray-200">
-            <SelectValue placeholder="Chọn ngôn ngữ" />
-          </SelectTrigger>
-          <SelectContent className="rounded-2xl">
-            {languages.map(lang => (
-              <SelectItem key={lang.id} value={lang.id.toString()}>{lang.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Chọn course (lọc theo ngôn ngữ) */}
-      <div className="space-y-2">
-        <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Course</Label>
-        <Select
-          value={formData.courseId ? formData.courseId.toString() : ''}
-          onValueChange={value => {
-            const id = Number(value);
-            const found = filteredCourses.find(c => c.id === id);
-            setFormData({ ...formData, courseId: id, courseName: found?.name || '' });
-          }}
-          disabled={!selectedLanguageId}
-        >
-          <SelectTrigger className="rounded-2xl border-2 border-gray-200">
-            <SelectValue placeholder="Chọn khoá học" />
-          </SelectTrigger>
-          <SelectContent className="rounded-2xl">
-            {filteredCourses.map(course => (
-              <SelectItem key={course.id} value={course.id.toString()}>{course.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Title */}
-      <div className="space-y-2">
-        <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Module Title</Label>
-        <Input_admin
-          value={formData.name}
-          onChange={e => setFormData({ ...formData, name: e.target.value })}
-          className="rounded-2xl border-2 border-gray-200 focus:border-blue-400"
-          required
-        />
-      </div>
-
-      {/* Description */}
-      <div className="space-y-2">
-        <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Description</Label>
-        <Textarea
-          value={formData.description}
-          onChange={e => setFormData({ ...formData, description: e.target.value })}
-          className="rounded-2xl border-2 border-gray-200 focus:border-blue-400"
-          required
-        />
-      </div>
-
-      {/* Order / Status */}
-      <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-        {/* Status */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Language Selection - Auto-filled trong edit mode */}
         <div className="space-y-2">
-          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Status</Label>
+          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">
+            Language {initialData && '(Auto-filled)'}
+          </Label>
           <Select
-            value={formData.status}
-            onValueChange={value => setFormData({ ...formData, status: value as 'active' | 'inactive' })}
+              value={selectedLanguageId?.toString() || ''}
+              onValueChange={handleLanguageChange}
           >
             <SelectTrigger className="rounded-2xl border-2 border-gray-200">
-              <SelectValue />
+              <SelectValue placeholder="Chọn ngôn ngữ" />
+              {/* Debug info */}
+              {/*{console.log('Render - selectedLanguageId:', selectedLanguageId, 'languages.length:', languages.length)}*/}
             </SelectTrigger>
             <SelectContent className="rounded-2xl">
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              {languages.map(lang => (
+                  <SelectItem key={lang.id} value={lang.id.toString()}>
+                    <div className="flex items-center gap-2">
+                      <img src={lang.flag} alt={lang.code} className="w-4 h-3 rounded-sm" />
+                      {lang.name}
+                    </div>
+                  </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
-      </div>
 
-      {/* Submit */}
-      <div className="flex justify-end pt-6">
-        <Button_admin
-          type="submit"
-          className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
-        >
-          {initialData ? 'Update Module' : 'Create Module'}
-        </Button_admin>
-      </div>
-    </form>
+        {/* Course Selection - Auto-filled trong edit mode */}
+        <div className="space-y-2">
+          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">
+            Course {initialData && '(Auto-filled)'}
+          </Label>
+          <Select
+              value={formData.courseId ? formData.courseId.toString() : ''}
+              onValueChange={handleCourseChange}
+              disabled={!selectedLanguageId}
+          >
+            <SelectTrigger className="rounded-2xl border-2 border-gray-200">
+              <SelectValue placeholder="Chọn khóa học" />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl">
+              {filteredCourses.map(course => (
+                  <SelectItem key={course.id} value={course.id.toString()}>
+                    {course.name}
+                  </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Module Title */}
+        <div className="space-y-2">
+          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Module Title</Label>
+          <Input_admin
+              value={formData.name}
+              onChange={e => setFormData({ ...formData, name: e.target.value })}
+              className="rounded-2xl border-2 border-gray-200 focus:border-blue-400"
+              required
+          />
+        </div>
+
+        {/* Description */}
+        <div className="space-y-2">
+          <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Description</Label>
+          <Textarea
+              value={formData.description}
+              onChange={e => setFormData({ ...formData, description: e.target.value })}
+              className="rounded-2xl border-2 border-gray-200 focus:border-blue-400"
+              required
+          />
+        </div>
+
+        {/* Order & Status */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Order</Label>
+            <Input_admin
+                type="number"
+                value={formData.order}
+                onChange={e => setFormData({ ...formData, order: Number(e.target.value) })}
+                className="rounded-2xl border-2 border-gray-200 focus:border-blue-400"
+                min="1"
+                required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-bold text-gray-700 dark:text-gray-200">Status</Label>
+            <Select
+                value={formData.status}
+                onValueChange={value => setFormData({ ...formData, status: value as 'active' | 'inactive' })}
+            >
+              <SelectTrigger className="rounded-2xl border-2 border-gray-200">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <div className="flex justify-end pt-6">
+          <Button_admin
+              type="submit"
+              className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
+          >
+            {initialData ? 'Update Module' : 'Create Module'}
+          </Button_admin>
+        </div>
+      </form>
   );
-}
+};
 
-export default ModuleForm
+export default ModuleForm;

@@ -35,3 +35,9 @@ export const updateModule = async (id: number, data: ModuleRequest): Promise<Mod
 export const deleteModule = async (id: number): Promise<void> => {
     await api.delete(`/api/modules/${id}`);
 };
+
+// Thêm hàm này vào file service của module
+export const fetchModuleById = async (id: number): Promise<Module> => {
+    const response = await api.get<Module>(`/api/modules/${id}`);
+    return response.data;
+};

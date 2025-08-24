@@ -294,25 +294,25 @@ const QuestionsCRUD = () => {
 
         {/* Edit Dialog */}
         <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-          <DialogContent className="max-w-2xl rounded-3xl">
+          <DialogContent
+              className="max-w-3xl rounded-3xl max-h-[80vh] overflow-y-auto"
+          >
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black">Edit Question</DialogTitle>
+              <DialogTitle className="text-2xl font-bold">Create New Question</DialogTitle>
             </DialogHeader>
-            {selectedQuestion && (
-                <QuestionForm
-                    initialData={selectedQuestion}
-                    modules={modules}
-                    lessons={lessons}
-                    onModuleChange={handleModuleSelect}
-                    onSubmit={handleUpdate}
-                />
-            )}
+            <QuestionForm
+                modules={modules}
+                lessons={lessons}
+                onModuleChange={handleModuleSelect}
+                onSubmit={handleCreate}
+            />
           </DialogContent>
+
         </Dialog>
 
         {/* View Dialog */}
         <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-          <DialogContent className="max-w-2xl rounded-3xl">
+          <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black">Question Details</DialogTitle>
             </DialogHeader>
