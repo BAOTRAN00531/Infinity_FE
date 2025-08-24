@@ -60,7 +60,7 @@ const CoursesCRUD = () => {
         }
       });
 
-  const handleCreate = async (courseData: Omit<Course, 'id' | 'createdAt' | 'modulesCount'>) => {
+  const handleCreate = async (courseData: Omit<Course, 'id' | 'createdAt' | 'updatedAt' | 'modulesCount'>) => {
     try {
       await createCourse(courseData);
       toast.success('Course created', { autoClose: 1200 });
@@ -71,9 +71,12 @@ const CoursesCRUD = () => {
     }
   };
 
-  const handleUpdate = async (courseData: Omit<Course, 'id' | 'createdAt' | 'modulesCount'>) => {
+  const handleUpdate = async (courseData: Omit<Course, 'id' | 'createdAt' | 'updatedAt' | 'modulesCount'>) => {
     if (!selectedCourse) return;
     try {
+      // ✅ Thêm trường 'updatedAt' vào payload nếu cần
+      // Mặc dù CourseForm không gửi updatedAt, backend có thể yêu cầu
+      // Do đó, chúng ta giữ nguyên payload được truyền từ CourseForm
       await updateCourse(selectedCourse.id, courseData);
       toast.success('Course updated', { autoClose: 1200 });
       setIsEditOpen(false);
@@ -126,7 +129,7 @@ const CoursesCRUD = () => {
                 Add Course
               </Button_admin>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl rounded-3xl">
+            <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-black text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md ">Create New Course</DialogTitle>
               </DialogHeader>
@@ -255,7 +258,7 @@ const CoursesCRUD = () => {
 
         {/* Edit Dialog */}
         <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-          <DialogContent className="max-w-2xl rounded-3xl">
+          <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
             <DialogHeader>
               <DialogTitle>Edit Course</DialogTitle>
             </DialogHeader>
@@ -267,7 +270,7 @@ const CoursesCRUD = () => {
 
         {/* View Dialog */}
         <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-          <DialogContent className="max-w-2xl rounded-3xl">
+          <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
             <DialogHeader>
               <DialogTitle>Course Details</DialogTitle>
             </DialogHeader>

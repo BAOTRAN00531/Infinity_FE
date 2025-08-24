@@ -1,4 +1,3 @@
-// src/pages/PartsCRUD.tsx
 import React, { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import { Plus, Edit, Trash2, Eye, FileText } from 'lucide-react'
@@ -6,14 +5,19 @@ import { Button_admin } from '@/components/reusable-components/button_admin'
 import { Input } from '@/components/reusable-components/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/reusable-components/dialog'
 import { Badge } from '@/components/reusable-components/badge'
-import PartForm, { Part } from '@/components/inmutable-components/CRUD/form/PartForm'
+import PartForm from '@/components/inmutable-components/CRUD/form/PartForm'
 import PartDetails from '@/components/inmutable-components/CRUD/detail/PartDetails'
 import DeleteConfirmation from '@/components/inmutable-components/DeleteConfirmation'
-import api from '@/api' // ✅ Dùng instance api có interceptor
+import {
+  fetchParts,
+  createPart,
+  updatePart,
+  deletePart,
+} from '@/api/part.service'
+import {Part} from "@/types";
 
 const PartsCRUD: React.FC = () => {
   const [parts, setParts] = useState<Part[]>([])
-  const [modules, setModules] = useState<{ id: number; name: string }[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('title-asc');
   const [selectedPart, setSelectedPart] = useState<Part | null>(null)
@@ -22,22 +26,11 @@ const PartsCRUD: React.FC = () => {
   const [isViewOpen, setIsViewOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
 
-  // Fetch modules cho form
-  const fetchModules = async () => {
-    try {
-      const res = await api.get<{ id: number; name: string }[]>('/api/modules')
-      setModules(res.data)
-    } catch (err) {
-      console.error(err)
-      toast.error('Không tải được Modules', { autoClose: 1200 })
-    }
-  }
-
   // Fetch toàn bộ parts
-  const fetchParts = async () => {
+  const loadParts = async () => {
     try {
-      const res = await api.get<Part[]>('/api/lessons')
-      setParts(res.data)
+      const allParts = await fetchParts()
+      setParts(allParts)
     } catch (err) {
       console.error(err)
       toast.error('Không tải được Parts', { autoClose: 1200 })
@@ -45,17 +38,16 @@ const PartsCRUD: React.FC = () => {
   }
 
   useEffect(() => {
-    fetchModules()
-    fetchParts()
+    loadParts()
   }, [])
 
   // Create mới
-  const handleCreate = async (data: Omit<Part, 'id'>) => {
+  const handleCreate = async (data: any) => {
     try {
-      await api.post('/api/lessons', data)
+      await createPart(data)
       toast.success('Tạo Part thành công', { autoClose: 1200 })
       setIsCreateOpen(false)
-      fetchParts()
+      loadParts()
     } catch (err) {
       console.error(err)
       toast.error('Tạo Part thất bại', { autoClose: 1200 })
@@ -63,14 +55,14 @@ const PartsCRUD: React.FC = () => {
   }
 
   // Update
-  const handleUpdate = async (data: Omit<Part, 'id'>) => {
+  const handleUpdate = async (data: any) => {
     if (!selectedPart) return
     try {
-      await api.put(`/api/lessons/${selectedPart.id}`, data)
+      await updatePart(selectedPart.id, data)
       toast.success('Cập nhật Part thành công', { autoClose: 1200 })
       setIsEditOpen(false)
       setSelectedPart(null)
-      fetchParts()
+      loadParts()
     } catch (err) {
       console.error(err)
       toast.error('Cập nhật Part thất bại', { autoClose: 1200 })
@@ -81,11 +73,11 @@ const PartsCRUD: React.FC = () => {
   const handleDelete = async () => {
     if (!selectedPart) return
     try {
-      await api.delete(`/api/lessons/${selectedPart.id}`)
+      await deletePart(selectedPart.id)
       toast.success('Xóa Part thành công', { autoClose: 1200 })
       setIsDeleteOpen(false)
       setSelectedPart(null)
-      fetchParts()
+      loadParts()
     } catch (err) {
       console.error(err)
       toast.error('Xóa Part thất bại', { autoClose: 1200 })
@@ -95,28 +87,28 @@ const PartsCRUD: React.FC = () => {
   // Filter + sort
   const normalizedTerm = searchTerm.toLowerCase();
   const filtered = parts
-    .filter(p => {
-      const name = p.name ?? '';
-      const moduleName = p.moduleName ?? '';
-      return (
-        name.toLowerCase().includes(normalizedTerm) ||
-        moduleName.toLowerCase().includes(normalizedTerm)
-      );
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'title-asc':
-          return a.name.localeCompare(b.name);
-        case 'title-desc':
-          return b.name.localeCompare(a.name);
-        case 'active':
-          return (a.status === 'active' ? -1 : 1) - (b.status === 'active' ? -1 : 1);
-        case 'inactive':
-          return (a.status === 'inactive' ? -1 : 1) - (b.status === 'inactive' ? -1 : 1);
-        default:
-          return 0;
-      }
-    });
+      .filter(p => {
+        const name = p.name ?? '';
+        const moduleName = p.moduleName ?? '';
+        return (
+            name.toLowerCase().includes(normalizedTerm) ||
+            moduleName.toLowerCase().includes(normalizedTerm)
+        );
+      })
+      .sort((a, b) => {
+        switch (sortBy) {
+          case 'title-asc':
+            return a.name.localeCompare(b.name);
+          case 'title-desc':
+            return b.name.localeCompare(a.name);
+          case 'active':
+            return (a.status === 'active' ? -1 : 1) - (b.status === 'active' ? -1 : 1);
+          case 'inactive':
+            return (a.status === 'inactive' ? -1 : 1) - (b.status === 'inactive' ? -1 : 1);
+          default:
+            return 0;
+        }
+      });
 
   return (
       <div className="p-8">
@@ -138,9 +130,9 @@ const PartsCRUD: React.FC = () => {
                 Create New Part
               </Button_admin>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl rounded-3xl">
+            <DialogContent className="max-w-3xl rounded-3xl max-h-[80vh] overflow-y-scroll">
               <DialogHeader>
-                <DialogTitle>Create New Part</DialogTitle>
+                <DialogTitle className="text-2xl font-black ">Create New Part</DialogTitle>
               </DialogHeader>
               <PartForm onSubmit={handleCreate} />
             </DialogContent>
@@ -156,9 +148,9 @@ const PartsCRUD: React.FC = () => {
               className="max-w-md rounded-2xl"
           />
           <select
-            value={sortBy}
-            onChange={e => setSortBy(e.target.value)}
-            className="rounded-2xl border-2 border-gray-200 focus:border-blue-400 px-4 py-2"
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="rounded-2xl border-2 border-gray-200 focus:border-blue-400 px-4 py-2"
           >
             <option value="title-asc">Title: A-Z</option>
             <option value="title-desc">Title: Z-A</option>
@@ -175,7 +167,6 @@ const PartsCRUD: React.FC = () => {
                   className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/50 hover:shadow-xl transition-all"
               >
                 <div className="flex items-center gap-2 mb-2">
-                  {/* Đã xoá orderIndex */}
                   <Badge className="text-xs bg-blue-100 text-blue-800">
                     {part.type}
                   </Badge>
@@ -233,9 +224,9 @@ const PartsCRUD: React.FC = () => {
 
         {/* Edit, View, Delete dialogs */}
         <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-          <DialogContent className="max-w-2xl rounded-3xl">
+          <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
             <DialogHeader>
-              <DialogTitle>Edit Part</DialogTitle>
+              <DialogTitle className="text-2xl font-black ">Edit Part</DialogTitle>
             </DialogHeader>
             {selectedPart && (
                 <PartForm initialData={selectedPart} onSubmit={handleUpdate} />
@@ -244,7 +235,7 @@ const PartsCRUD: React.FC = () => {
         </Dialog>
 
         <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-          <DialogContent className="max-w-2xl rounded-3xl">
+          <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
             <DialogHeader>
               <DialogTitle>Part Details</DialogTitle>
             </DialogHeader>

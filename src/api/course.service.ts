@@ -8,6 +8,7 @@ export const getCourses = async (): Promise<Course[]> => {
     return res.data;
 };
 
+
 export const getLanguages = async (): Promise<Language[]> => {
     const res = await api.get<Language[]>('/api/languages');
     return res.data;
@@ -25,16 +26,18 @@ export const getCoursesByLanguage = async (languageId: number): Promise<Course[]
 };
 
 // Tạo mới khóa học
+// ✅ Cập nhật Omit để khớp với payload từ CourseForm
 export const createCourse = async (
-    courseData: Omit<Course, 'id' | 'createdAt' | 'modulesCount'>
+    courseData: Omit<Course, 'id' | 'createdAt' | 'updatedAt' | 'modulesCount'>
 ): Promise<void> => {
     await api.post('/api/courses', courseData);
 };
 
 // Cập nhật khóa học
+// ✅ Cập nhật Omit để khớp với payload từ CourseForm
 export const updateCourse = async (
     id: number,
-    courseData: Omit<Course, 'id' | 'createdAt' | 'modulesCount'>
+    courseData: Omit<Course, 'id' | 'createdAt' | 'updatedAt' | 'modulesCount'>
 ): Promise<void> => {
     await api.put(`/api/courses/${id}`, courseData);
 };

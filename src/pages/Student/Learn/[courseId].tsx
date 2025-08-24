@@ -1,4 +1,3 @@
-// src/pages/student/learn/[courseId].tsx
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import api from '@/api';
@@ -8,18 +7,27 @@ import {
     LessonContentArea,
     CourseSidebar
 } from './components';
-import { LearningCourse, CourseProgress, Lesson, LearningModule, Question } from 'types'; // ✅ Sửa import
+import { LearningCourse, CourseProgress, Lesson, LearningModule, StudentQuestion  } from 'types';
+
+// Interface cho kết quả quiz
+interface QuizResult {
+    totalQuestions: number;
+    correctAnswers: number;
+    score: number;
+    results: Record<number, boolean>;
+}
 
 export default function LearningPage() {
     const { courseId } = useParams<{ courseId: string }>();
     const navigate = useNavigate();
-    const [course, setCourse] = useState<LearningCourse | null>(null); // ✅ Đổi thành LearningCourse
+    const [course, setCourse] = useState<LearningCourse | null>(null);
     const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(null);
     const [isQuizMode, setIsQuizMode] = useState(false);
-    const [questions, setQuestions] = useState<Question[]>([]);
+    const [questions, setQuestions] = useState<StudentQuestion[]>([]);
+    const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
 
     const fetchCourseData = useCallback(async () => {
         if (!courseId) return;
@@ -45,7 +53,6 @@ export default function LearningPage() {
                 const firstModule = courseData.modules[0];
                 const lessonsResponse = await api.get(`/api/student/lesson/by-module/${firstModule.id}`);
 
-                // ✅ Sửa type cho parameter m
                 const updatedModules = courseData.modules.map((m: LearningModule) =>
                     m.id === firstModule.id
                         ? { ...m, lessons: lessonsResponse.data }
@@ -72,19 +79,19 @@ export default function LearningPage() {
 
     const handleLessonSelect = (lesson: Lesson) => {
         setSelectedLesson(lesson);
+        setIsQuizMode(false);
+        setQuizResult(null);
     };
 
     const handleModuleSelect = async (moduleId: number) => {
         if (!course) return;
 
-        // ✅ Thêm type cho parameter m
         const module = course.modules.find((m: LearningModule) => m.id === moduleId);
         if (!module || module.lessons) return;
 
         try {
             const response = await api.get(`/api/student/lesson/by-module/${moduleId}`);
 
-            // ✅ Thêm type cho parameter m
             const updatedModules = course.modules.map((m: LearningModule) =>
                 m.id === moduleId ? { ...m, lessons: response.data } : m
             );
@@ -96,6 +103,8 @@ export default function LearningPage() {
 
             if (response.data.length > 0) {
                 setSelectedLesson(response.data[0]);
+                setIsQuizMode(false);
+                setQuizResult(null);
             }
         } catch (err) {
             console.error("Lỗi tải bài học:", err);
@@ -105,8 +114,21 @@ export default function LearningPage() {
     const markAsCompleted = async (lessonId: number) => {
         try {
             await api.post(`/client/api/user/progress/lesson/complete/${lessonId}`);
+
+            // Chỉ cập nhật trạng thái của bài học hiện tại trong state `selectedLesson`
             if (selectedLesson && selectedLesson.id === lessonId) {
                 setSelectedLesson({ ...selectedLesson, isCompleted: true });
+            }
+
+            // Cập nhật trạng thái `isCompleted` của bài học trong mảng `modules` để Sidebar được cập nhật
+            if (course) {
+                const updatedModules = course.modules.map((m: any) => ({
+                    ...m,
+                    lessons: m.lessons?.map((l: any) =>
+                        l.id === lessonId ? { ...l, isCompleted: true } : l
+                    ),
+                }));
+                setCourse({ ...course, modules: updatedModules });
             }
         } catch (error) {
             console.error("Lỗi khi đánh dấu hoàn thành:", error);
@@ -116,13 +138,41 @@ export default function LearningPage() {
 
     const startQuiz = async (lessonId: number) => {
         try {
-            const response = await api.get(`/api/questions?lessonId=${lessonId}`);
+            // Sửa thành API student để ẩn đáp án
+            const response = await api.get(`/api/student/quiz/lesson/${lessonId}/questions`);
             setQuestions(response.data);
             setIsQuizMode(true);
+            setQuizResult(null);
         } catch (error) {
             console.error("Lỗi khi tải câu hỏi:", error);
             alert("Không thể tải bài kiểm tra. Vui lòng thử lại.");
         }
+    };
+
+    const handleQuizSubmit = async (answers: Record<number, number>) => {
+        if (!selectedLesson) return;
+
+        try {
+            const response = await api.post(`/api/student/quiz/lesson/${selectedLesson.id}/submit`, {
+                answers: answers
+            });
+            setQuizResult(response.data);
+
+            // Tự động đánh dấu bài học là đã hoàn thành nếu đạt điểm
+            if (response.data.score >= 70) { // 70% trở lên
+                await markAsCompleted(selectedLesson.id);
+            }
+        } catch (error) {
+            console.error("Lỗi khi nộp bài:", error);
+            alert("Có lỗi xảy ra khi nộp bài. Vui lòng thử lại.");
+        }
+    };
+
+    const handleQuizComplete = () => {
+        setIsQuizMode(false);
+        setQuizResult(null);
+        // Refresh course data để cập nhật tiến độ
+        fetchCourseData();
     };
 
     const handleBackToCourse = () => {
@@ -177,7 +227,7 @@ export default function LearningPage() {
         <PageLayout>
             <div className="h-screen flex flex-col">
                 <CourseHeader
-                    courseName={course.courseName} // ✅ Giờ đúng vì LearningCourse có courseName
+                    courseName={course.courseName}
                     courseProgress={courseProgress}
                     onBack={handleBackToCourse}
                 />
@@ -188,14 +238,17 @@ export default function LearningPage() {
                             selectedLesson={selectedLesson}
                             isQuizMode={isQuizMode}
                             questions={questions}
+                            quizResult={quizResult}
                             onMarkComplete={markAsCompleted}
                             onStartQuiz={startQuiz}
+                            onQuizSubmit={handleQuizSubmit}
+                            onQuizComplete={handleQuizComplete}
                         />
                     </div>
 
                     <CourseSidebar
-                        courseName={course.courseName} // ✅ Giờ đúng
-                        modules={course.modules} // ✅ Giờ đúng vì LearningCourse có modules
+                        courseName={course.courseName}
+                        modules={course.modules}
                         selectedLesson={selectedLesson}
                         onLessonSelect={handleLessonSelect}
                         onModuleSelect={handleModuleSelect}

@@ -127,7 +127,7 @@ const ModulesCRUD = () => {
                 Add Module
               </Button_admin>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl rounded-3xl">
+            <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-black text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">Create New Module</DialogTitle>
               </DialogHeader>
@@ -244,7 +244,7 @@ const ModulesCRUD = () => {
 
         {/* Dialogs */}
         <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-          <DialogContent className="max-w-2xl rounded-3xl">
+          <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black ">Edit Module</DialogTitle>
             </DialogHeader>
@@ -258,7 +258,7 @@ const ModulesCRUD = () => {
         </Dialog>
 
         <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-          <DialogContent className="max-w-2xl rounded-3xl">
+          <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black ">Module Details</DialogTitle>
             </DialogHeader>

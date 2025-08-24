@@ -45,13 +45,6 @@ export interface ApiError {
 
 
 
-export interface Lesson {
-    id: number;
-    name: string;
-    moduleId: number;
-}
-
-
 
 export interface OptionCreateDto {
     optionText: string;
@@ -218,7 +211,11 @@ export const QUESTION_TYPE_MAP: Record<number, string> = {
 // Ngôn ngữ
 export interface Language {
     id: number;
+    code: string;      // ✅ Thêm code field
     name: string;
+    flag: string;      // ✅ Thêm flag field
+    difficulty: string; // ✅ Thêm difficulty field
+    popularity: string; // ✅ Thêm popularity field
 }
 
 // Course Level và Status
@@ -226,18 +223,20 @@ export type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 export type CourseStatus = 'active' | 'inactive';
 export type ModuleStatus = 'active' | 'inactive';
 
-// Course - Phiên bản đầy đủ cho quản lý
+// Course - Phiên bản đầy đủ cho quản lý (updated theo API response)
 export interface Course {
     id: number;
     name: string;
     description: string;
-    language: Language;
+    language: Language;    // ✅ Nested object, not just ID
     level: CourseLevel;
-    status: CourseStatus;
-    createdAt: string;
-    modulesCount: number;
+    duration: string | null; // ✅ Có thể null
     price: number;
     thumbnail: string;
+    status: CourseStatus;
+    createdAt: string;
+    updatedAt: string;     // ✅ Thêm updatedAt
+    modulesCount: number;
 }
 
 // Course - Phiên bản rút gọn cho học tập
@@ -251,10 +250,10 @@ export interface LearningCourse {
 // Props cho CourseForm
 export interface CourseFormProps {
     initialData?: Course;
-    onSubmit: (data: Omit<Course, 'id' | 'createdAt' | 'modulesCount' | 'duration'>) => void;
+    onSubmit: (data: Omit<Course, 'id' | 'createdAt' | 'updatedAt' | 'modulesCount'>) => void;
 }
 
-// Module - Phiên bản cơ bản
+// Module - Phiên bản cơ bản (updated theo API response)
 export interface BaseModule {
     id: number;
     name: string;
@@ -266,9 +265,9 @@ export interface BaseModule {
     partsCount: number;
 }
 
-// Module - Phiên bản đầy đủ với duration
+// Module - Phiên bản đầy đủ với duration (match với API response)
 export interface Module extends BaseModule {
-    duration?: string;
+    duration: string | null; // ✅ Có thể null, match với API
 }
 
 // Module - Phiên bản cho học tập
@@ -287,16 +286,24 @@ export interface ModuleRequest {
     status: ModuleStatus;
 }
 
-// Lesson
+// ✅ Thêm Lesson interface nếu chưa có
 export interface Lesson {
     id: number;
     name: string;
-    type: string;
+    description: string | null;
     content: string;
-    videoUrl?: string;
-    duration: string;
-    isCompleted: boolean;
+    type: string; // Thay đổi thành 'video' | 'document' | 'exercise' nếu có thể
+    videoUrl: string;
     orderIndex: number;
+    duration: string;
+    status: string;
+    isCompleted: boolean;
+    moduleId: number;
+    moduleName: string;
+    createdBy: number;
+    createdAt: string;
+    updatedBy: number;
+    updatedAt: string;
 }
 
 // Course Progress
@@ -306,6 +313,68 @@ export interface CourseProgress {
     totalModules: number;
     completedModules: number;
 }
+
+// PART
+
+// ✅ Thêm Part interface
+// src/types.ts
+
+// ✅ Cập nhật Part interface
+export interface Part {
+    id: number;
+    name: string;
+    description: string; // ✅ Thêm trường description
+    type: 'video' | 'document' ;
+    moduleId: number;
+    moduleName: string;
+    status: 'active' | 'inactive';
+    content?: string;
+    videoUrl?: string;
+    duration?: string;
+}
+
+// ✅ Dùng PartRequest làm kiểu payload chính
+export type PartRequest = Omit<Part, 'id' | 'moduleName'>;
+
+// Props cho component PartForm
+// ✅ Cập nhật props để sử dụng PartRequest
+export interface PartFormProps {
+    initialData?: Part;
+    onSubmit: (data: PartRequest) => Promise<void>;
+}
+
+// ✅ Thêm Module - Phiên bản rút gọn
+export interface BaseModuleWithLanguage {
+    id: number;
+    name: string;
+    description: string;
+    courseId: number;
+    courseName: string;
+    order: number;
+    status: ModuleStatus;
+    partsCount: number;
+    languageId: number;
+    languageName: string;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Question và Option
 export interface QuestionOption {
@@ -329,13 +398,46 @@ export interface CourseHeaderProps {
     onBack: () => void;
 }
 
+export interface AdminQuestionOption {
+    id: number;
+    optionText: string;
+    correct: boolean;
+    position: number;
+}
+
+export interface AdminQuestion {
+    id: number;
+    questionText: string;
+    lessonId: number;
+    options: AdminQuestionOption[];
+}
+
+export interface StudentQuestionOption {
+    id: number;
+    optionText: string;
+    position: number;
+    imageUrl?: string;
+}
+
+export interface StudentQuestion {
+    id: number;
+    questionText: string;
+    type: string; // Thêm trường type nếu API trả về
+    options: StudentQuestionOption[];
+}
+
 export interface LessonContentAreaProps {
     selectedLesson: Lesson | null;
     isQuizMode: boolean;
-    questions: Question[];
+    questions: StudentQuestion[];
     onMarkComplete: (lessonId: number) => void;
     onStartQuiz: (lessonId: number) => void;
+    // Thêm prop onSubmitQuiz
+    onSubmitQuiz: (lessonId: number, answers: Record<number, number>) => void;
 }
+
+
+// sdsdsdsdsd
 
 export interface CourseSidebarProps {
     courseName: string;
@@ -352,7 +454,16 @@ export interface ModuleAccordionProps {
     onModuleSelect: (moduleId: number) => void;
 }
 
+
+// ✅ Cập nhật lại QuizComponentProps
 export interface QuizComponentProps {
-    questions: Question[];
+    questions: StudentQuestion[];
+    lessonId: number;
+    // Thay thế onSubmitAnswers bằng onQuizComplete
+    onQuizComplete: (quizResult: any) => void;
 }
+
+// export interface QuizComponentProps {
+//     questions: Question[];
+// }
 

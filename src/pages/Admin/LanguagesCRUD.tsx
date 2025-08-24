@@ -152,7 +152,7 @@ const LanguagesCRUD = () => {
               Add Language
             </Button_admin>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl rounded-3xl">
+          <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">Create New Language</DialogTitle>
             </DialogHeader>
@@ -252,7 +252,7 @@ const LanguagesCRUD = () => {
       )}
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-2xl rounded-3xl">
+        <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black text-gray-800">Edit Language</DialogTitle>
           </DialogHeader>
@@ -271,7 +271,7 @@ const LanguagesCRUD = () => {
       </Dialog>
 
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-        <DialogContent className="max-w-2xl rounded-3xl">
+        <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black text-gray-800">Language Details</DialogTitle>
           </DialogHeader>

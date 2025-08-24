@@ -122,7 +122,7 @@ const UsersCRUD = () => {
               Add User
             </Button_admin>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl rounded-3xl">
+          <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black ">Create New User</DialogTitle>
             </DialogHeader>
@@ -228,7 +228,7 @@ const UsersCRUD = () => {
 
       {/* Dialogs */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-2xl rounded-3xl">
+        <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black ">Edit User</DialogTitle>
           </DialogHeader>
@@ -242,7 +242,7 @@ const UsersCRUD = () => {
       </Dialog>
 
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-        <DialogContent className="max-w-2xl rounded-3xl">
+        <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black ">User Details</DialogTitle>
           </DialogHeader>
