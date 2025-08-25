@@ -1,9 +1,9 @@
 // InfieFeature.tsx
 import React from "react";
-import { Button } from "../reusable-components/button";
 import { Card, CardContent } from "../reusable-components/card";
 import { motion } from "framer-motion";
 import FancyButton from "../button/FancyButton";
+import { useNavigate } from "react-router-dom";
 
 const productSections = [
     {
@@ -11,6 +11,7 @@ const productSections = [
         description:
             "Our convenient, fast, and affordable English test will accurately test their English where and when they're at their best.",
         buttonText: "Let's go!",
+        link: "/student/dashboard",
         media: (
             <img
                 src="/home/cathello.gif"
@@ -24,6 +25,7 @@ const productSections = [
         description:
             "From language to literacy! With fun phonics lessons and delightful stories, Infie's spells helps kids ages 3–8 learn to read and write — 100% free.",
         buttonText: "Learn more",
+        link: "/client/course",
         media: (
             <img
                 src="/home/cathello.gif"
@@ -31,12 +33,12 @@ const productSections = [
                 className="max-w-full max-h-full object-contain"
             />
         )
-    },
+    }
 ];
 
-
-
 export default function InfieFeature() {
+    const navigate = useNavigate();
+
     return (
         <div className="bg-white dark:bg-gray-900 py-12 space-y-12">
             {productSections.map((product, index) => (
@@ -47,22 +49,22 @@ export default function InfieFeature() {
                     transition={{ duration: 0.5, delay: index * 0.2 }}
                     viewport={{ once: true }}
                     className={`
-                    w-full max-w-[988px] 
-                    h-auto md:h-[530px] 
-                    flex flex-col md:flex-row 
-                    ${index % 2 === 0 ? "" : "md:flex-row-reverse"} 
-                    items-center justify-center 
-                    mx-auto px-4 gap-10 md:gap-24
-                  `}
+            w-full max-w-[988px] 
+            h-auto md:h-[530px] 
+            flex flex-col md:flex-row 
+            ${index % 2 === 0 ? "" : "md:flex-row-reverse"} 
+            items-center justify-center 
+            mx-auto px-4 gap-10 md:gap-24
+          `}
                 >
                     {/* Text block */}
                     <div
                         className="
-      w-full max-w-[503px]
-      space-y-4
-      flex flex-col justify-center
-      text-center md:text-left
-    "
+              w-full max-w-[503px]
+              space-y-4
+              flex flex-col justify-center
+              text-center md:text-left
+            "
                     >
                         <h2 className="text-3xl font-bold mb-2 text-cyan-600 dark:text-cyan-400">
                             {product.title}
@@ -75,9 +77,7 @@ export default function InfieFeature() {
                                 text={product.buttonText}
                                 variant="primary"
                                 fullWidth={true}
-                                onClick={() => {
-                                    console.log(`${product.buttonText} clicked`);
-                                }}
+                                onClick={() => navigate(product.link)}
                             />
                         </div>
                     </div>

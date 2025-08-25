@@ -4,49 +4,49 @@ import { motion } from "framer-motion";
 
 const features = [
     {
-        title: "free > fun > depends on you",
+        title: "Learn anytime, anywhere",
         description:
-            "Learning with Infinity is fun, and research shows that it works! With quick, bite-sized lessons, you'll earn points and unlock new levels all while gaining real-world communication skills.",
+            "Pick up new skills in just 5 minutes a day. Infinity helps you stay consistent with fun, quick lessons wherever you are.",
         media: (
             <img
                 src="/home/cathello.gif"
-                alt="GIF"
+                alt="Learn anywhere"
                 className="max-w-full max-h-full object-contain"
             />
         )
     },
     {
-        title: "Backed by Researches",
+        title: "Science meets fun",
         description:
-            "We use a combination of research-backed teaching methods and delightful content to create courses that effectively teach reading, writing, listening and speaking skills!",
+            "Our lessons are built with proven teaching methods, so you don’t just learn—you remember. Backed by research, designed for you.",
         media: (
             <img
                 src="/home/cathello.gif"
-                alt="GIF"
+                alt="Science-based learning"
                 className="max-w-full max-h-full object-contain"
             />
         )
     },
     {
-        title: "Stay motivated",
+        title: "Motivation that lasts",
         description:
-            'We make it easy to form a habit of language learning with game-like features, fun challenges, and reminders from our "friendly" mascot, Infie the cat.',
+            "Stay hooked with daily streaks, rewards, and challenges. Infinity makes language learning feel like playing a game, not a chore.",
         media: (
             <img
                 src="/home/cathello.gif"
-                alt="GIF"
+                alt="Stay motivated"
                 className="max-w-full max-h-full object-contain"
             />
         )
     },
     {
-        title: "Trusted by the Pros",
+        title: "Trusted worldwide",
         description:
-            "We offer a real world needs based teaching program to create courses that effectively improves reading, writing, listening and speaking skills for aviation pros",
+            "Millions of learners and professionals use Infinity to build real communication skills—from casual conversations to career needs.",
         media: (
             <img
                 src="/home/cathello.gif"
-                alt="GIF"
+                alt="Trusted learning"
                 className="max-w-full max-h-full object-contain"
             />
         )
