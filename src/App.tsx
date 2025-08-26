@@ -29,6 +29,7 @@ import SePayPaymentPage from "@/components/payment/SePayPaymentPage";
 import NotFoundPage from "@/pages/Client/NotFoundPage";
 import LanguageSelection from "@/pages/Client/LanguageSelection";
 import LearningPage from "@/pages/Student/Learn/[courseId]";
+import BackToTopButton from "@/components/reusable-components/BackToTopButton";
 
 const App: React.FC = () => {
     const navigate = useNavigate();
@@ -134,6 +135,8 @@ const App: React.FC = () => {
                 {/* ✅ Route 404. Phải đặt ở cuối cùng! */}
                 <Route path="*" element={<NotFoundPage />} />
             </Routes>
+            {/* ✅ Thêm nút BackToTop */}
+            <BackToTopButton />
         </div>
     );
 };
