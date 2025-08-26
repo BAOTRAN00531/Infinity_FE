@@ -1,11 +1,11 @@
 // pages/InvoicePage.tsx
 import React, { useEffect, useState } from 'react';
-import {Link, useNavigate, useSearchParams} from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import PageLayout from '@/components/layout-components/PageLayout';
 import api from '@/api';
-import {ShoppingCart} from "lucide-react"; // ✅ thay vì axios
+import { ShoppingCart } from "lucide-react"; // ✅ thay vì axios
 
 interface OrderDetailDTO {
     serviceName: string;
@@ -23,20 +23,20 @@ interface Invoice {
 }
 
 const statusBadge: Record<string, string> = {
-    PENDING:   'bg-yellow-100 text-yellow-800',
-    PROCESSING:'bg-blue-100 text-blue-800',
+    PENDING: 'bg-yellow-100 text-yellow-800',
+    PROCESSING: 'bg-blue-100 text-blue-800',
     COMPLETED: 'bg-green-100 text-green-800',
-    CANCELED:  'bg-red-100 text-red-800',
+    CANCELED: 'bg-red-100 text-red-800',
 };
 
 const InvoicePage: React.FC = () => {
     const [searchParams] = useSearchParams();
-    const [invoice, setInvoice]   = useState<Invoice | null>(null);
-    const [loading, setLoading]   = useState(true);
-    const navigate                = useNavigate();
+    const [invoice, setInvoice] = useState<Invoice | null>(null);
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     const orderCode = searchParams.get('orderId');
-    const result    = searchParams.get('result');
+    const result = searchParams.get('result');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,10 +67,8 @@ const InvoicePage: React.FC = () => {
         }
     };
 
-    if (loading)
-        return <div className="p-10 text-gray-600">Đang tải...</div>;
-    if (!invoice)
-        return <div className="p-10 text-red-500">Không tìm thấy hoá đơn.</div>;
+    if (loading) return <div className="p-10 text-gray-600">Đang tải...</div>;
+    if (!invoice) return <div className="p-10 text-red-500">Không tìm thấy hoá đơn.</div>;
 
     return (
         <PageLayout>
@@ -104,8 +102,8 @@ const InvoicePage: React.FC = () => {
                     <div className="flex flex-wrap gap-2">
                         <span className="font-semibold">Ngày tạo:</span>
                         <span>
-              {new Date(invoice.orderDate).toLocaleString('vi-VN')}
-            </span>
+                            {new Date(invoice.orderDate).toLocaleString('vi-VN')}
+                        </span>
                     </div>
 
                     <div className="flex flex-wrap gap-2">
@@ -120,30 +118,49 @@ const InvoicePage: React.FC = () => {
                                 statusBadge[invoice.status] ?? 'bg-gray-100 text-gray-800'
                             }`}
                         >
-              {invoice.status}
-            </span>
+                            {invoice.status}
+                        </span>
                     </div>
 
                     <div className="flex flex-wrap gap-2">
                         <span className="font-semibold">Tổng tiền:</span>
                         <span className="text-green-600 font-bold">
-              {invoice.totalAmount.toLocaleString()}₫
-            </span>
+                            {invoice.totalAmount.toLocaleString()}₫
+                        </span>
                     </div>
 
                     {/* Chi tiết dịch vụ */}
                     {invoice.details?.length > 0 && (
-                        <div>
-                            <h4 className="font-semibold mb-2">Chi tiết:</h4>
-                            <ul className="list-disc pl-6 space-y-1 text-sm">
-                                {invoice.details.map((d, idx) => (
-                                    <li key={idx}>
-                                        <span className="font-medium">{d.serviceName}</span>:{" "}
-                                        {d.serviceDesc} –{" "}
-                                        {d.price.toLocaleString()}₫
-                                    </li>
-                                ))}
-                            </ul>
+                        <div className="mt-4">
+                            <h4 className="font-semibold mb-3 text-lg">📋 Chi tiết đơn hàng</h4>
+
+                            <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                                <table className="w-full text-sm">
+                                    <thead className="bg-gray-100 dark:bg-gray-700">
+                                    <tr>
+                                        <th className="px-4 py-2 text-left font-medium">Dịch vụ</th>
+                                        <th className="px-4 py-2 text-left font-medium">Mô tả</th>
+                                        <th className="px-4 py-2 text-right font-medium">Giá</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {invoice.details.map((d, idx) => (
+                                        <tr
+                                            key={idx}
+                                            className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                                        >
+                                            <td className="px-4 py-2 font-medium">{d.serviceName}</td>
+                                            <td className="px-4 py-2 text-gray-600 dark:text-gray-300">
+                                                {d.serviceDesc}
+                                            </td>
+                                            <td className="px-4 py-2 text-right text-green-600 font-semibold">
+                                                {d.price.toLocaleString()}₫
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     )}
 
@@ -164,7 +181,7 @@ const InvoicePage: React.FC = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="mt-6 flex justify-center"
+                className="mt-6 mb-10 flex justify-center"
             >
                 <Link
                     to="/client/course"
@@ -174,7 +191,6 @@ const InvoicePage: React.FC = () => {
                     Tiếp tục mua hàng
                 </Link>
             </motion.div>
-
         </PageLayout>
     );
 };

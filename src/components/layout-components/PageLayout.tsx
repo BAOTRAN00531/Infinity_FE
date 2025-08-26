@@ -14,7 +14,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
             <Header />
             <Breadcrumbs />
             <main>{children}</main>
-            {/*<Footer />*/}
         </>
     );
 };

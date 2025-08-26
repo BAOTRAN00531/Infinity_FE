@@ -274,4 +274,4 @@ export const lexiconApi = {
   }
 };
 
-export default lexiconApi; 
+export default lexiconApi;

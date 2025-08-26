@@ -28,6 +28,7 @@
   import { Dialog, DialogContent } from '@/components/reusable-components/dialog';
   import api from "@/api";
   import { fetchLanguages, fetchModulesByLanguage, Language, ModuleLite } from '@/api/adminQuestionApi';
+  import { lexiconApi } from '@/api/lexiconApi'; // ✅ Thêm import lexiconApi
 
   interface QuestionFormProps {
     initialData?: UIQuestion;
@@ -71,6 +72,11 @@
     const [lessons, setLessons] = useState<{ id: number; name: string }[]>([]);
     const [languages, setLanguages] = useState<Language[]>([]);
     const [selectedLanguage, setSelectedLanguage] = useState<string>('');
+
+    // ✅ Thêm state cho WordSuggestion data
+    const [suggestionUnits, setSuggestionUnits] = useState<any[]>([]);
+    const [suggestionPhrases, setSuggestionPhrases] = useState<any[]>([]);
+    const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
     const [formData, setFormData] = useState<FormState>({
       questionText: initialData?.questionText || '',
@@ -164,21 +170,23 @@
     };
 
 // Lấy languages và modules theo language
-    useEffect(() => {
-      const loadLanguages = async () => {
-        try {
-          const langs = await fetchLanguages();
-          setLanguages(langs);
-          // Set mặc định ngôn ngữ đầu tiên nếu chưa chọn
-          if (!selectedLanguage && langs.length > 0) {
-            setSelectedLanguage(langs[0].code);
-          }
-        } catch (err) {
-          toast.error('Không thể tải danh sách ngôn ngữ', { autoClose: 1200 });
-        }
-      };
-      loadLanguages();
-    }, []);
+useEffect(() => {
+  const loadLanguages = async () => {
+    try {
+      // Sử dụng cùng lexiconApi thay vì adminQuestionApi
+      const langs = await lexiconApi.languages.getAll();
+      setLanguages(langs);
+      // Set mặc định ngôn ngữ đầu tiên nếu chưa chọn
+      if (!selectedLanguage && langs.length > 0) {
+        setSelectedLanguage(langs[0].code);
+      }
+    } catch (err) {
+      console.error('❌ Error loading languages:', err);
+      toast.error('Không thể tải danh sách ngôn ngữ', { autoClose: 1200 });
+    }
+  };
+  loadLanguages();
+}, []);
 
     useEffect(() => {
       const loadModulesByLanguage = async () => {
@@ -320,6 +328,184 @@
 
   const [suggestOpen, setSuggestOpen] = useState<{ type: 'answer' | 'option', index?: number } | null>(null);
 
+  // ✅ Thêm function để load suggestions từ API
+  const loadSuggestions = async (languageCode: string) => {
+    if (!languageCode) return;
+    
+    try {
+      setLoadingSuggestions(true);
+      console.log('🔄 Loading suggestions for language:', languageCode);
+      
+      // Load vocabulary units - sử dụng API đúng
+      console.log('📚 Calling lexiconApi.units.getByLanguage with:', languageCode);
+      let units: any[] = [];
+      
+      try {
+        const unitsResponse = await lexiconApi.units.getByLanguage(languageCode);
+        console.log('📚 Raw units response:', unitsResponse);
+        
+        if (Array.isArray(unitsResponse) && unitsResponse.length > 0) {
+          units = unitsResponse;
+          console.log('✅ getByLanguage successful, got units:', units.length);
+        } else {
+          console.log('⚠️ getByLanguage returned empty, trying getAll + filter...');
+          // Fallback: lấy tất cả rồi lọc theo ngôn ngữ
+          const allUnitsResponse = await lexiconApi.units.getAll();
+          console.log('📚 getAll response:', allUnitsResponse);
+          
+          if (allUnitsResponse && allUnitsResponse.result && Array.isArray(allUnitsResponse.result)) {
+            console.log('📚 Total units from getAll:', allUnitsResponse.result.length);
+            
+            // Lọc theo ngôn ngữ với logic cải thiện
+            units = allUnitsResponse.result.filter((unit: any) => {
+              const unitLang = unit.language;
+              let matches = false;
+              
+              if (typeof unitLang === 'string') {
+                matches = unitLang === languageCode || unitLang.startsWith(languageCode);
+              } else if (typeof unitLang === 'object' && unitLang) {
+                if (unitLang.code) {
+                  matches = unitLang.code === languageCode || unitLang.code.startsWith(languageCode);
+                } else if (unitLang.name) {
+                  matches = unitLang.name.toLowerCase().includes(languageCode.toLowerCase());
+                }
+              }
+              
+              console.log(`  Unit "${unit.text}": language=${JSON.stringify(unitLang)}, matches=${matches}`);
+              return matches;
+            });
+            
+            console.log('📚 Fallback units filtered:', units.length);
+          }
+        }
+      } catch (unitsError) {
+        console.log('⚠️ getByLanguage failed, trying getAll + filter...', unitsError);
+        // Fallback: lấy tất cả rồi lọc theo ngôn ngữ
+        try {
+          const allUnitsResponse = await lexiconApi.units.getAll();
+          if (allUnitsResponse && allUnitsResponse.result && Array.isArray(allUnitsResponse.result)) {
+            units = allUnitsResponse.result.filter((unit: any) => {
+              const unitLang = unit.language;
+              let matches = false;
+              
+              if (typeof unitLang === 'string') {
+                matches = unitLang === languageCode || unitLang.startsWith(languageCode);
+              } else if (typeof unitLang === 'object' && unitLang) {
+                if (unitLang.code) {
+                  matches = unitLang.code === languageCode || unitLang.code.startsWith(languageCode);
+                } else if (unitLang.name) {
+                  matches = unitLang.name.toLowerCase().includes(languageCode.toLowerCase());
+                }
+              }
+              
+              return matches;
+            });
+            console.log('📚 Fallback units filtered:', units.length);
+          }
+        } catch (fallbackError) {
+          console.error('❌ Both getByLanguage and getAll failed:', fallbackError);
+        }
+      }
+      
+      console.log('📚 Final processed units:', units.length, units);
+      
+      // Load phrases - sử dụng API đúng
+      console.log('💬 Calling lexiconApi.units.getPhrases');
+      const phrasesResponse = await lexiconApi.units.getPhrases();
+      console.log('💬 Raw phrases response:', phrasesResponse);
+      
+      // Lọc phrases theo ngôn ngữ được chọn
+      let phrases: any[] = [];
+      if (phrasesResponse && phrasesResponse.result && Array.isArray(phrasesResponse.result)) {
+        console.log('💬 Total phrases from getPhrases:', phrasesResponse.result.length);
+        
+        phrases = phrasesResponse.result.filter((phrase: any) => {
+          const phraseLang = phrase.language;
+          let matches = false;
+          
+          if (typeof phraseLang === 'string') {
+            matches = phraseLang === languageCode || phraseLang.startsWith(languageCode);
+          } else if (typeof phraseLang === 'object' && phraseLang) {
+            if (phraseLang.code) {
+              matches = phraseLang.code === languageCode || phraseLang.code.startsWith(languageCode);
+            } else if (phraseLang.name) {
+              matches = phraseLang.name.toLowerCase().includes(languageCode.toLowerCase());
+            }
+          }
+          
+          console.log(`  Phrase "${phrase.text}": language=${JSON.stringify(phraseLang)}, matches=${matches}`);
+          return matches;
+        });
+        
+        console.log('💬 Filtered phrases by language:', phrases.length, phrases);
+      }
+      
+      setSuggestionUnits(units);
+      setSuggestionPhrases(phrases);
+      
+      console.log('✅ Final state - Units:', units.length, 'Phrases:', phrases.length);
+      
+      // Debug: Hiển thị chi tiết về dữ liệu được lọc
+      if (units.length > 0) {
+        console.log('📚 Sample units:');
+        units.slice(0, 3).forEach((unit, index) => {
+          console.log(`  ${index + 1}. "${unit.text}" (${unit.language}) - ${unit.type}`);
+        });
+      }
+      
+      if (phrases.length > 0) {
+        console.log('💬 Sample phrases:');
+        phrases.slice(0, 3).forEach((phrase, index) => {
+          console.log(`  ${index + 1}. "${phrase.text}" (${phrase.language}) - ${phrase.type}`);
+        });
+      }
+      
+      if (units.length === 0 && phrases.length === 0) {
+        console.log('⚠️ No data found for language:', languageCode);
+        console.log('🔍 This might indicate:');
+        console.log('   - No data exists for this language');
+        console.log('   - Language code mismatch');
+        console.log('   - API endpoint issues');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error loading suggestions:', error);
+      toast.error('Không thể tải danh sách từ vựng và cụm từ', { autoClose: 1200 });
+      
+      // Fallback to empty arrays
+      setSuggestionUnits([]);
+      setSuggestionPhrases([]);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  // ✅ Load suggestions khi language thay đổi
+  useEffect(() => {
+    if (selectedLanguage) {
+      console.log('🌍 Language changed to:', selectedLanguage);
+      loadSuggestions(selectedLanguage);
+    }
+  }, [selectedLanguage]);
+
+  // ✅ Thêm useEffect để debug khi suggestions thay đổi
+  useEffect(() => {
+    console.log('📊 Suggestions state updated:', {
+      units: suggestionUnits.length,
+      phrases: suggestionPhrases.length,
+      selectedLanguage
+    });
+  }, [suggestionUnits, suggestionPhrases, selectedLanguage]);
+
+  // ✅ Thêm useEffect để tự động load suggestions khi component mount
+  useEffect(() => {
+    if (selectedLanguage && suggestionUnits.length === 0 && suggestionPhrases.length === 0) {
+      console.log('🚀 Component mounted, auto-loading suggestions for:', selectedLanguage);
+      loadSuggestions(selectedLanguage);
+    }
+  }, [selectedLanguage, suggestionUnits.length, suggestionPhrases.length]);
+
+  // ✅ Cập nhật handleWordSuggestion để sử dụng dữ liệu thực
   const handleWordSuggestion = (item: any, optionIndex?: number) => {
     if (formData.questionTypeId === 4) {
       // Fill in the blank: chỉ có 1 đáp án đúng
@@ -333,87 +519,9 @@
     setSuggestOpen(null); // Đóng modal sau khi chọn
   };
 
-  // Dữ liệu mẫu tạm thời cho WordSuggestion
-  const mockUnits = [
-    {
-      id: 1,
-      text: 'Hello',
-      ipa: '/həˈloʊ/',
-      meaning_vi: 'Xin chào',
-      meaning_en: 'A greeting',
-      type: 'vocabulary' as const,
-      language: 'en' as const,
-      difficulty: 'beginner' as const,
-      audio: '/audio/hello.mp3'
-    },
-    {
-      id: 2,
-      text: 'お茶',
-      ipa: '/oˈtʃa/',
-      meaning_vi: 'Trà',
-      meaning_en: 'Tea',
-      type: 'vocabulary' as const,
-      language: 'ja' as const,
-      difficulty: 'beginner' as const
-    },
-    {
-      id: 3,
-      text: 'Beautiful',
-      ipa: '/ˈbjuːtɪfəl/',
-      meaning_vi: 'Đẹp',
-      meaning_en: 'Having beauty',
-      type: 'vocabulary' as const,
-      language: 'en' as const,
-      difficulty: 'intermediate' as const
-    }
-  ];
-  const mockPhrases = [
-    {
-      id: 1,
-      text: 'How are you?',
-      ipa: '/haʊ ɑr ju/',
-      meaning_vi: 'Bạn có khỏe không?',
-      meaning_en: 'A common greeting question',
-      units: [
-        {
-          id: 1,
-          text: 'Hello',
-          ipa: '/həˈloʊ/',
-          meaning_vi: 'Xin chào',
-          meaning_en: 'A greeting',
-          type: 'vocabulary' as const,
-          language: 'en' as const,
-          difficulty: 'beginner' as const,
-          audio: '/audio/hello.mp3'
-        }
-      ],
-      type: 'phrase' as const,
-      language: 'en' as const,
-      difficulty: 'beginner' as const
-    },
-    {
-      id: 2,
-      text: 'お茶をください',
-      ipa: '/oˈtʃa o kuˈdasai/',
-      meaning_vi: 'Xin cho tôi trà',
-      meaning_en: 'Please give me tea',
-      units: [
-        {
-          id: 2,
-          text: 'お茶',
-          ipa: '/oˈtʃa/',
-          meaning_vi: 'Trà',
-          meaning_en: 'Tea',
-          type: 'vocabulary' as const,
-          language: 'ja' as const,
-          difficulty: 'beginner' as const
-        }
-      ],
-      type: 'phrase' as const,
-      language: 'ja' as const,
-      difficulty: 'intermediate' as const
-    }
-  ];
+  // ❌ Xóa mockUnits và mockPhrases cũ
+  // const mockUnits = [...];
+  // const mockPhrases = [...];
 
 
     return (
@@ -635,8 +743,8 @@
         <Dialog open={!!suggestOpen} onOpenChange={open => !open && setSuggestOpen(null)}>
           <DialogContent className="max-w-4xl max-h-[80vh] rounded-3xl">
             <WordSuggestion
-              units={mockUnits}
-              phrases={mockPhrases}
+              units={suggestionUnits}
+              phrases={suggestionPhrases}
               onSelect={item =>
                 suggestOpen.type === 'answer'
                   ? handleWordSuggestion(item)

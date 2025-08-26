@@ -172,9 +172,13 @@ export default function RegisterPage() {
 
                 <p className="text-center mt-10 text-black dark:text-white text-sm">
                     Đã có tài khoản?{" "}
-                    <a href="/login" className="text-blue-500 hover:underline">
+                    <button
+                        type="button"
+                        onClick={() => navigate("/login")}
+                        className="text-blue-500 hover:underline"
+                    >
                         Đăng nhập
-                    </a>
+                    </button>
                 </p>
             </motion.div>
 

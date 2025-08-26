@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 export default function HeroBanners() {
     return (
         <div className="w-full">
-            {/* Banner 1 */}
             <motion.section
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -29,26 +28,6 @@ export default function HeroBanners() {
                     <span className="text-white text-lg">↓ Scroll down</span>
                 </div>
             </motion.section>
-
-            {/* Banner 2 */}
-            <section
-                className="relative w-full min-h-[984px] bg-gray-100 dark:bg-gray-800 flex flex-col justify-center items-center px-4"
-            >
-                <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 text-center">
-                    Special Offer!
-                </h2>
-                <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 text-center max-w-2xl">
-                    Grab your premium account now and unlock all features.
-                </p>
-                <button className="mt-8 px-8 py-4 bg-cyan-600 text-white rounded-lg shadow-md hover:bg-cyan-700 text-lg">
-                    Buy Now
-                </button>
-                <img
-                    src="/home/cathello.gif"
-                    alt="Banner 2 Ad"
-                    className="w-[300px] md:w-[400px] mt-12"
-                />
-            </section>
         </div>
     );
 }

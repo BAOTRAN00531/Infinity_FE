@@ -7,7 +7,7 @@ import { Badge } from '@/components/reusable-components/badge';
 import LanguageForm from '@/pages/Admin/LanguageForm';
 import LanguageDetails from '@/components/inmutable-components/CRUD/detail/LanguageDetails';
 import DeleteConfirmation from '@/components/inmutable-components/DeleteConfirmation';
-import api from '@/api'; // ✅ Thay vì axios
+import api from '@/api';
 import { toast } from 'react-toastify';
 
 interface Language {
@@ -145,30 +145,30 @@ const LanguagesCRUD = () => {
           </div>
         </div>
 
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger asChild>
-            <Button_admin className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-              <Plus className="w-5 h-5 mr-2" />
-              Add Language
-            </Button_admin>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-black text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">Create New Language</DialogTitle>
-            </DialogHeader>
-            <LanguageForm onSubmit={handleCreate} onCancel={() => setIsCreateOpen(false)} />
-          </DialogContent>
-        </Dialog>
+        {/*<Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>*/}
+        {/*  <DialogTrigger asChild>*/}
+        {/*    <Button_admin className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">*/}
+        {/*      <Plus className="w-5 h-5 mr-2" />*/}
+        {/*      Add Language*/}
+        {/*    </Button_admin>*/}
+        {/*  </DialogTrigger>*/}
+        {/*  <DialogContent className="max-w-2xl rounded-3xl">*/}
+        {/*    <DialogHeader>*/}
+        {/*      <DialogTitle className="text-2xl font-black text-[hsl(var(--foreground))] dark:text-[hsl(var(--primary))] drop-shadow-md">Create New Language</DialogTitle>*/}
+        {/*    </DialogHeader>*/}
+        {/*    <LanguageForm onSubmit={handleCreate} onCancel={() => setIsCreateOpen(false)} />*/}
+        {/*  </DialogContent>*/}
+        {/*</Dialog>*/}
       </div>
 
-      <div className="mb-6">
-        <Input_admin
-          placeholder="Search languages..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:ring-indigo-400"
-        />
-      </div>
+      {/*<div className="mb-6">*/}
+      {/*  <Input_admin*/}
+      {/*    placeholder="Search languages..."*/}
+      {/*    value={searchTerm}*/}
+      {/*    onChange={(e) => setSearchTerm(e.target.value)}*/}
+      {/*    className="max-w-md rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:ring-indigo-400"*/}
+      {/*  />*/}
+      {/*</div>*/}
 
       {filteredLanguages.length === 0 ? (
         <div className="text-center py-12">
@@ -234,17 +234,17 @@ const LanguagesCRUD = () => {
                 >
                   <Edit className="w-4 h-4" />
                 </Button_admin>
-                <Button_admin
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-xl hover:bg-red-100 text-red-500"
-                  onClick={() => {
-                    setSelectedLanguage(language);
-                    setIsDeleteOpen(true);
-                  }}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button_admin>
+                {/*<Button_admin*/}
+                {/*  variant="ghost"*/}
+                {/*  size="sm"*/}
+                {/*  className="rounded-xl hover:bg-red-100 text-red-500"*/}
+                {/*  onClick={() => {*/}
+                {/*    setSelectedLanguage(language);*/}
+                {/*    setIsDeleteOpen(true);*/}
+                {/*  }}*/}
+                {/*>*/}
+                {/*  <Trash2 className="w-4 h-4" />*/}
+                {/*</Button_admin>*/}
               </div>
             </div>
           ))}
@@ -252,7 +252,7 @@ const LanguagesCRUD = () => {
       )}
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
+        <DialogContent className="max-w-2xl rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black text-gray-800">Edit Language</DialogTitle>
           </DialogHeader>
@@ -271,7 +271,7 @@ const LanguagesCRUD = () => {
       </Dialog>
 
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-        <DialogContent className="max-w-2xl rounded-3xl max-h-[80vh] overflow-y-scroll">
+        <DialogContent className="max-w-2xl rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black text-gray-800">Language Details</DialogTitle>
           </DialogHeader>
@@ -279,20 +279,20 @@ const LanguagesCRUD = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="max-w-md rounded-3xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-gray-800">Delete Language</DialogTitle>
-          </DialogHeader>
-          {selectedLanguage && (
-            <DeleteConfirmation
-              userName={selectedLanguage.name}
-              onConfirm={handleDelete}
-              onCancel={() => setIsDeleteOpen(false)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/*<Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>*/}
+      {/*  <DialogContent className="max-w-md rounded-3xl">*/}
+      {/*    <DialogHeader>*/}
+      {/*      <DialogTitle className="text-2xl font-black text-gray-800">Delete Language</DialogTitle>*/}
+      {/*    </DialogHeader>*/}
+      {/*    {selectedLanguage && (*/}
+      {/*      <DeleteConfirmation*/}
+      {/*        userName={selectedLanguage.name}*/}
+      {/*        onConfirm={handleDelete}*/}
+      {/*        onCancel={() => setIsDeleteOpen(false)}*/}
+      {/*      />*/}
+      {/*    )}*/}
+      {/*  </DialogContent>*/}
+      {/*</Dialog>*/}
     </div>
   );
 };

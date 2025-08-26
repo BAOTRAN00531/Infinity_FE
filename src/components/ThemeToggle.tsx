@@ -4,11 +4,25 @@ export default function ThemeToggle() {
     const [isDark, setIsDark] = useState(false);
 
     useEffect(() => {
-        const root = window.document.documentElement;
-        if (isDark) {
-            root.classList.add("dark");
+        // Lấy theme từ localStorage khi load
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "dark") {
+            setIsDark(true);
+            document.documentElement.classList.add("dark");
         } else {
-            root.classList.remove("dark");
+            setIsDark(false);
+            document.documentElement.classList.remove("dark");
+        }
+    }, []);
+
+    useEffect(() => {
+        // Áp dụng theme khi state thay đổi + lưu vào localStorage
+        if (isDark) {
+            document.documentElement.classList.add("dark");
+            localStorage.setItem("theme", "dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+            localStorage.setItem("theme", "light");
         }
     }, [isDark]);
 

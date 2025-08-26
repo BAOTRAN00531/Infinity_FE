@@ -15,17 +15,17 @@ import Header from "../../components/layout-components/Header";
 
 
 const CRUDDashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('courses');
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard, color: 'bg-gradient-to-br from-indigo-500 to-purple-500' },
+    // { id: 'overview', label: 'Overview', icon: LayoutDashboard, color: 'bg-gradient-to-br from-indigo-500 to-purple-500' },
     { id: 'courses', label: 'Courses', icon: BookOpen, color: 'bg-gradient-to-br from-purple-500 to-pink-500' },
     { id: 'modules', label: 'Modules', icon: Layers, color: 'bg-gradient-to-br from-blue-500 to-cyan-500' },
     { id: 'parts', label: 'Parts', icon: FileText, color: 'bg-gradient-to-br from-green-500 to-emerald-500' },
     { id: 'questions', label: 'Questions', icon: HelpCircle, color: 'bg-gradient-to-br from-orange-500 to-red-500' },
     { id: 'lexicon', label: 'Lexicon', icon: Book, color: 'bg-gradient-to-br from-blue-500 to-purple-500' },
     { id: 'languages', label: 'Languages', icon: Globe, color: 'bg-gradient-to-br from-indigo-500 to-purple-500' },
-    { id: 'users', label: 'Users', icon: Users, color: 'bg-gradient-to-br from-pink-500 to-rose-500' },
+    // { id: 'users', label: 'Users', icon: Users, color: 'bg-gradient-to-br from-pink-500 to-rose-500' },
     { id: 'orders', label: 'Orders', icon: ShoppingCart, color: 'bg-gradient-to-br from-yellow-500 to-orange-500' },
   ];
 
@@ -49,7 +49,7 @@ const CRUDDashboard = () => {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             {/* Tab Navigation */}
-            <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 gap-4 h-auto bg-transparent p-0">
+            <TabsList className="grid w-full grid-cols-4 md:grid-cols-7 gap-4 h-auto bg-transparent p-0">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -70,9 +70,9 @@ const CRUDDashboard = () => {
 
             {/* Tab Content */}
             <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 overflow-hidden">
-              <TabsContent value="overview" className="m-0">
-                <OverviewDashboard />
-              </TabsContent>
+              {/*<TabsContent value="overview" className="m-0">*/}
+              {/*  <OverviewDashboard />*/}
+              {/*</TabsContent>*/}
               <TabsContent value="courses" className="m-0">
                 <CoursesCRUD />
               </TabsContent>
@@ -91,9 +91,9 @@ const CRUDDashboard = () => {
               <TabsContent value="lexicon" className="m-0">
                 <LexiconCRUD />
               </TabsContent>
-              <TabsContent value="users" className="m-0">
-                <UsersCRUD />
-              </TabsContent>
+              {/*<TabsContent value="users" className="m-0">*/}
+              {/*  <UsersCRUD />*/}
+              {/*</TabsContent>*/}
               <TabsContent value="orders" className="m-0">
                 <OrderCRUD />
               </TabsContent>
