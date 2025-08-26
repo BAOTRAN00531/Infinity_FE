@@ -15,8 +15,8 @@ const languageImages: Record<string, string> = {
     'Tiếng Hàn': 'https://flagcdn.com/w80/kr.png',
     'Tiếng Nga': 'https://flagcdn.com/w80/ru.png',
     'Tiếng Trung': 'https://flagcdn.com/w80/cn.png',
-    'Japan': 'https://flagcdn.com/w80/jp.png', // ✅ Thêm ngôn ngữ động
-    'Austria': 'https://flagcdn.com/w80/at.png', // ✅ Thêm ngôn ngữ động
+    'Japan': 'https://flagcdn.com/w80/jp.png',
+    'Austria': 'https://flagcdn.com/w80/at.png',
 };
 
 interface CourseDto {
@@ -33,6 +33,8 @@ interface LanguageDto {
     id: number;
     name: string;
     courseCount: number;
+    thumbnail?: string;
+    flag?: string; // ✅ thêm cột flag cho đúng với BE
 }
 
 const LanguageSelection: React.FC = () => {
@@ -41,7 +43,6 @@ const LanguageSelection: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
-    // ✅ Định nghĩa danh sách các ngôn ngữ phổ biến
     const popularLanguages = [
         'Tiếng Đức',
         'Tiếng Ý',
@@ -65,19 +66,30 @@ const LanguageSelection: React.FC = () => {
                         (languageCountMap[course.language] || 0) + 1;
                 });
 
-                // ✅ Bước 1: Tạo danh sách các ngôn ngữ cần hiển thị, bao gồm cả ngôn ngữ động và tĩnh
                 const allLanguageNames = new Set<string>();
-                courses.forEach(course => allLanguageNames.add(course.language));
-                popularLanguages.forEach(lang => allLanguageNames.add(lang));
+                courses.forEach((course) => allLanguageNames.add(course.language));
+                popularLanguages.forEach((lang) => allLanguageNames.add(lang));
 
-                // ✅ Bước 2: Tạo danh sách cuối cùng với số lượng khóa học
-                const finalLanguages: LanguageDto[] = Array.from(allLanguageNames).map((langName, index) => ({
-                    id: index + 1,
-                    name: langName,
-                    courseCount: languageCountMap[langName] || 0, // ✅ Lấy số lượng từ map, nếu không có thì mặc định là 0
-                }));
+                // ✅ gọi thêm API languages để lấy flag từ DB
+                const langRes = await api.get('/api/languages');
+                const langFromDb: Record<string, string> = {};
+                langRes.data.forEach((lang: any) => {
+                    langFromDb[lang.name] = lang.flag;
+                });
 
-                // ✅ Bước 3: Sắp xếp theo số lượng khóa học giảm dần
+                const finalLanguages: LanguageDto[] = Array.from(allLanguageNames).map(
+                    (langName, index) => {
+                        const course = courses.find((c) => c.language === langName);
+                        return {
+                            id: index + 1,
+                            name: langName,
+                            courseCount: languageCountMap[langName] || 0,
+                            thumbnail: course?.thumbnail || '',
+                            flag: langFromDb[langName] || '', // ✅ ưu tiên flag từ DB
+                        };
+                    }
+                );
+
                 finalLanguages.sort((a, b) => b.courseCount - a.courseCount);
 
                 setLanguages(finalLanguages);
@@ -143,39 +155,46 @@ const LanguageSelection: React.FC = () => {
                                 animate={{ opacity: 1 }}
                                 transition={{ duration: 0.5 }}
                             >
-                                {languages.map((lang) => (
-                                    <motion.div
-                                        key={lang.id}
-                                        onClick={() => handleLanguageSelect(lang.name)}
-                                        whileHover={{ scale: 1.03 }}
-                                        whileTap={{ scale: 0.97 }}
-                                        className={`relative p-4 rounded-xl shadow-md cursor-pointer transition-all duration-200 border-2 ${
-                                            selectedLanguage === lang.name
-                                                ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-200 dark:ring-blue-800'
-                                                : 'border-transparent hover:border-gray-200 dark:hover:border-gray-700'
-                                        }`}
-                                    >
-                                        <div className="flex flex-col items-center">
-                                            <div className="w-20 h-20 mb-3 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-gray-800">
-                                                {languageImages[lang.name] ? (
-                                                    <img
-                                                        src={languageImages[lang.name]}
-                                                        alt={lang.name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <span className="text-2xl">🌐</span>
-                                                )}
+                                {languages.map((lang) => {
+                                    const displayFlag =
+                                        lang.flag && lang.flag.startsWith('http')
+                                            ? lang.flag
+                                            : languageImages[lang.name] || '';
+
+                                    return (
+                                        <motion.div
+                                            key={lang.id}
+                                            onClick={() => handleLanguageSelect(lang.name)}
+                                            whileHover={{ scale: 1.03 }}
+                                            whileTap={{ scale: 0.97 }}
+                                            className={`relative p-4 rounded-xl shadow-md cursor-pointer transition-all duration-200 border-2 ${
+                                                selectedLanguage === lang.name
+                                                    ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-200 dark:ring-blue-800'
+                                                    : 'border-transparent hover:border-gray-200 dark:hover:border-gray-700'
+                                            }`}
+                                        >
+                                            <div className="flex flex-col items-center">
+                                                <div className="w-20 h-20 mb-3 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-gray-800">
+                                                    {displayFlag ? (
+                                                        <img
+                                                            src={displayFlag}
+                                                            alt={lang.name}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <span className="text-2xl">🌐</span>
+                                                    )}
+                                                </div>
+                                                <h2 className="text-lg font-semibold text-center">
+                                                    {lang.name}
+                                                </h2>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          {lang.courseCount} khóa học
+                        </span>
                                             </div>
-                                            <h2 className="text-lg font-semibold text-center">
-                                                {lang.name}
-                                            </h2>
-                                            <span className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {lang.courseCount} khóa học
-                      </span>
-                                        </div>
-                                    </motion.div>
-                                ))}
+                                        </motion.div>
+                                    );
+                                })}
                             </motion.div>
 
                             <motion.div
