@@ -14,7 +14,7 @@ interface PaymentInfo {
     accountNumber?: string;
     amount?: number;
     transferContent?: string;
-    status?: string; // <- thêm trường trạng thái
+    status?: string; // <- trạng thái thanh toán
 }
 
 const SepayPaymentPage = () => {
@@ -24,12 +24,25 @@ const SepayPaymentPage = () => {
     const orderCode = query.get('orderCode');
 
     const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({});
-    const [countdown, setCountdown] = useState<number>(90); // 90 giây
+    const [countdown, setCountdown] = useState<number>(300); // 5 phút = 300 giây
     const [isChecking, setIsChecking] = useState<boolean>(true);
 
     const handleCopy = (text: string) => {
         copy(text);
         toast.success('Đã sao chép!');
+    };
+
+    const handleCancelPayment = async () => {
+        if (!orderCode) return;
+        try {
+            await api.post(`/api/sepay/cancel?orderCode=${orderCode}`);
+            toast.info("Bạn đã hủy thanh toán đơn hàng này.");
+            setIsChecking(false);
+            navigate(`/invoice?orderId=${orderCode}&result=cancel`);
+        } catch (err: any) {
+            console.error("Lỗi khi hủy thanh toán:", err);
+            toast.error("Hủy thanh toán thất bại!");
+        }
     };
 
     useEffect(() => {
@@ -47,7 +60,7 @@ const SepayPaymentPage = () => {
 
         fetchPaymentInfo();
 
-        // Bắt đầu polling trạng thái thanh toán
+        // Polling trạng thái thanh toán
         const checkPaymentStatus = async () => {
             try {
                 const res = await api.get(`/api/sepay/status?orderCode=${orderCode}`);
@@ -64,6 +77,10 @@ const SepayPaymentPage = () => {
                 } else if (status === 'FAILED') {
                     toast.error('Thanh toán thất bại.');
                     setIsChecking(false);
+                } else if (status === 'CANCELLED') {
+                    toast.info('Đơn hàng đã bị hủy.');
+                    setIsChecking(false);
+                    navigate(`/invoice?orderId=${orderCode}&result=cancel`);
                 }
             } catch (err) {
                 console.error('Lỗi kiểm tra trạng thái thanh toán:', err);
@@ -77,7 +94,9 @@ const SepayPaymentPage = () => {
                     clearInterval(pollInterval);
                     clearInterval(countdownInterval);
                     setIsChecking(false);
-                    toast.warning('⏳ Hết thời gian thanh toán!');
+
+                    // 🔥 Hết thời gian thì tự động hủy đơn
+                    handleCancelPayment();
                     return 0;
                 }
                 return prev - 1;
@@ -90,7 +109,6 @@ const SepayPaymentPage = () => {
         };
     }, [orderCode, navigate]);
 
-
     return (
         <div className="max-w-5xl mx-auto mt-10 bg-white shadow-lg rounded-md border p-8">
             <ToastContainer />
@@ -101,7 +119,7 @@ const SepayPaymentPage = () => {
 
             {isChecking && (
                 <div className="text-center text-sm text-red-600 mb-4">
-                    ⏳ Thời gian còn lại để thanh toán: {countdown}s
+                    ⏳ Thời gian còn lại để thanh toán: {Math.floor(countdown / 60)} phút {countdown % 60}s
                 </div>
             )}
 
@@ -158,8 +176,7 @@ const SepayPaymentPage = () => {
                         <div className="text-lg font-bold text-green-600">
                             {paymentInfo.amount
                                 ? Number(paymentInfo.amount).toLocaleString('vi-VN')
-                                : '0'}{' '}
-                            VND
+                                : '0'} VND
                         </div>
                     </div>
 
@@ -180,14 +197,25 @@ const SepayPaymentPage = () => {
                     <div className="flex justify-between font-semibold text-base">
                         <span>Tổng cộng</span>
                         <span>
-              {paymentInfo.amount
-                  ? Number(paymentInfo.amount).toLocaleString('vi-VN')
-                  : '0'}{' '}
-                            VND
-            </span>
+                            {paymentInfo.amount
+                                ? Number(paymentInfo.amount).toLocaleString('vi-VN')
+                                : '0'} VND
+                        </span>
                     </div>
                 </div>
             </div>
+
+            {/* Nút Hủy thanh toán */}
+            {isChecking && (
+                <div className="flex justify-center mt-6">
+                    <button
+                        onClick={handleCancelPayment}
+                        className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                    >
+                        Hủy thanh toán
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
