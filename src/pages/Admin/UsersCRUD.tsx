@@ -115,7 +115,7 @@ const UsersCRUD = () => {
           </div>
         </div>
         
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        {/* <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <Button_admin className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
               <Plus className="w-5 h-5 mr-2" />
@@ -128,7 +128,7 @@ const UsersCRUD = () => {
             </DialogHeader>
             <UserForm onSubmit={handleCreate} />
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
       </div>
 
       {/* Search */}

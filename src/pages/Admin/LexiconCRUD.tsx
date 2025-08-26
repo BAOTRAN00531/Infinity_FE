@@ -38,7 +38,7 @@ const LexiconCRUD = () => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('units');
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [selectedLanguage, setSelectedLanguage] = useState('all'); // ✅ Thay đổi default thành 'all'
   const [availableVoices, setAvailableVoices] = useState<any[]>([]);
   const [selectedVoice, setSelectedVoice] = useState('');
   const [languages, setLanguages] = useState<Language[]>([]);
@@ -49,6 +49,22 @@ const LexiconCRUD = () => {
     loadLanguages();
     loadVoices();
   }, []);
+
+  // ✅ Sửa lại useEffect để tránh conflict và đảm bảo ổn định
+  useEffect(() => {
+    if (selectedLanguage && languages.length > 0) {
+      console.log('🌍 Language changed to:', selectedLanguage);
+      console.log('📊 Current data stats:', {
+        totalUnits: units.length,
+        totalPhrases: phrases.length,
+        selectedLanguage,
+        availableLanguages: languages.map(l => l.code)
+      });
+      
+      // ✅ Không gọi loadVoices() ở đây để tránh conflict
+      // loadVoices() sẽ được gọi khi user thay đổi ngôn ngữ trong dropdown
+    }
+  }, [selectedLanguage, languages.length]); // ✅ Bỏ units.length, phrases.length để tránh re-render loop
 
   const loadData = async () => {
     try {
@@ -88,8 +104,13 @@ const LexiconCRUD = () => {
 
   const loadVoices = async () => {
     try {
-      // Lấy voices cho ngôn ngữ được chọn
-      if (selectedLanguage) {
+      // ✅ Chỉ load voices khi cần thiết, không load mỗi khi thay đổi ngôn ngữ
+      if (selectedLanguage === 'all') {
+        // Nếu chọn "All Languages", lấy voices cho tất cả ngôn ngữ
+        const voicesResponse = await lexiconApi.tts.getAvailableVoices();
+        setAvailableVoices(voicesResponse);
+      } else if (selectedLanguage && selectedLanguage !== 'all') {
+        // Nếu chọn một ngôn ngữ cụ thể, lấy voices cho ngôn ngữ đó
         const voicesResponse = await lexiconApi.tts.getAvailableVoices(selectedLanguage);
         setAvailableVoices(voicesResponse);
       }
@@ -99,11 +120,9 @@ const LexiconCRUD = () => {
       try {
         const voicesResponse = await lexiconApi.tts.getAvailableVoices('en');
         setAvailableVoices(voicesResponse);
-        setSelectedLanguage('en');
       } catch (fallbackError) {
         console.error('Fallback error loading voices:', fallbackError);
         setAvailableVoices([]);
-        setSelectedLanguage('en');
       }
     }
   };
@@ -135,17 +154,79 @@ const LexiconCRUD = () => {
     };
   };
 
-  const filteredUnits = units.filter(unit =>
-    unit.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    unit.ipa.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (unit.meaning_en && unit.meaning_en.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredUnits = React.useMemo(() => {
+    console.log('🔄 Recalculating filteredUnits...', {
+      totalUnits: units.length,
+      selectedLanguage,
+      searchTerm
+    });
+    
+    return units.filter(unit => {
+      // Lọc theo searchTerm
+      const matchesSearch = 
+        unit.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        unit.ipa.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (unit.meaning_en && unit.meaning_en.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      // Lọc theo selectedLanguage
+      const matchesLanguage = 
+        selectedLanguage === 'all' || // ✅ Hiển thị tất cả ngôn ngữ
+        unit.language === selectedLanguage || 
+        (typeof unit.language === 'string' && unit.language.startsWith(selectedLanguage)) ||
+        (typeof unit.language === 'object' && unit.language && (unit.language as any).code === selectedLanguage);
+      
+      console.log(`🔍 Unit "${unit.text}": search=${matchesSearch}, language=${matchesLanguage} (${unit.language} vs ${selectedLanguage})`);
+      
+      return matchesSearch && matchesLanguage;
+    });
+  }, [units, selectedLanguage, searchTerm]);
 
-  const filteredPhrases = phrases.filter(phrase =>
-    phrase.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    phrase.ipa.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (phrase.meaning_en && phrase.meaning_en.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredPhrases = React.useMemo(() => {
+    console.log('🔄 Recalculating filteredPhrases...', {
+      totalPhrases: phrases.length,
+      selectedLanguage,
+      searchTerm
+    });
+    
+    return phrases.filter(phrase => {
+      // Lọc theo searchTerm
+      const matchesSearch = 
+        phrase.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        phrase.ipa.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (phrase.meaning_en && phrase.meaning_en.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      // Lọc theo selectedLanguage
+      const matchesLanguage = 
+        selectedLanguage === 'all' || // ✅ Hiển thị tất cả ngôn ngữ
+        phrase.language === selectedLanguage || 
+        (typeof phrase.language === 'string' && phrase.language.startsWith(selectedLanguage)) ||
+        (typeof phrase.language === 'object' && phrase.language && (phrase.language as any).code === selectedLanguage);
+      
+      console.log(`🔍 Phrase "${phrase.text}": search=${matchesSearch}, language=${matchesLanguage} (${phrase.language} vs ${selectedLanguage})`);
+      
+      return matchesSearch && matchesLanguage;
+    });
+  }, [phrases, selectedLanguage, searchTerm]);
+
+  // ✅ Thêm logging để debug kết quả lọc
+  console.log('📊 Filtering results:', {
+    searchTerm,
+    selectedLanguage,
+    totalUnits: units.length,
+    totalPhrases: phrases.length,
+    filteredUnits: filteredUnits.length,
+    filteredPhrases: filteredPhrases.length,
+    isAllLanguages: selectedLanguage === 'all'
+  });
+
+  // ✅ Thêm thông tin hiển thị cho user
+  const getFilterInfo = () => {
+    if (selectedLanguage === 'all') {
+      return `Showing all languages (${filteredUnits.length + filteredPhrases.length} items)`;
+    }
+    const languageName = languages.find(l => l.code === selectedLanguage)?.name || selectedLanguage;
+    return `Filtered by ${languageName} (${filteredUnits.length + filteredPhrases.length} items)`;
+  };
 
   const handleCreate = async (data: Omit<LexiconUnit, 'id'>) => {
     try {
@@ -556,13 +637,19 @@ const LexiconCRUD = () => {
         
         <div className="flex gap-2">
           <Select value={selectedLanguage} onValueChange={(value) => {
+            console.log('🌍 Language selection changed from', selectedLanguage, 'to', value);
             setSelectedLanguage(value);
-            loadVoices();
+            // ✅ Chỉ load voices khi cần thiết, không load mỗi khi thay đổi ngôn ngữ
+            if (value !== selectedLanguage) {
+              // Chỉ load voices khi thực sự thay đổi ngôn ngữ
+              setTimeout(() => loadVoices(), 100); // Delay nhỏ để tránh conflict
+            }
           }}>
             <SelectTrigger className="w-32 rounded-xl">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">All Languages</SelectItem>
               {languages.map((language) => (
                 <SelectItem key={language.code} value={language.code}>
                   {language.name}
@@ -584,6 +671,11 @@ const LexiconCRUD = () => {
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      {/* ✅ Thêm thông tin filter */}
+      <div className="mb-4 text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-xl">
+        {getFilterInfo()}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
