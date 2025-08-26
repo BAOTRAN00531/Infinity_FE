@@ -4,9 +4,8 @@ import { jwtDecode } from "jwt-decode";
 import api from "@/api";
 
 import momoIcon from "@/components/payment/icons/momo-logo.png";
-import vnpayIcon from "@/components/payment/icons/vnpay-logo.png";
 import codIcon from "@/components/payment/icons/cod.png";
-import Header from "@/components/layout-components/Header";
+import sepayIcon from "@/components/payment/icons/sepay.png";
 import PageLayout from "@/components/layout-components/PageLayout";
 
 const PurchasePage: React.FC = () => {
@@ -130,19 +129,6 @@ const PurchasePage: React.FC = () => {
                         <span className="text-sm font-medium text-gray-700">MoMo</span>
                     </button>
 
-                    {/* VNPAY */}
-                    <button
-                        onClick={() => setPaymentMethod("VNPAY")}
-                        className={`flex items-center justify-center p-3 border rounded-lg transition ${
-                            paymentMethod === "VNPAY"
-                                ? "border-blue-600 bg-blue-50"
-                                : "border-gray-300 bg-white"
-                        }`}
-                    >
-                        <img src={vnpayIcon} alt="VNPay" className="h-6 mr-2" />
-                        <span className="text-sm font-medium text-gray-700">VNPay</span>
-                    </button>
-
                     {/* COD */}
                     <button
                         onClick={() => setPaymentMethod("CASH")}
@@ -166,11 +152,7 @@ const PurchasePage: React.FC = () => {
                                 : "border-gray-300 bg-white"
                         }`}
                     >
-                        <img
-                            src="https://seeklogo.com/images/S/sepay-logo-B7E6E2F342-seeklogo.com.png" // hoặc icon cục bộ của bạn
-                            alt="SePay"
-                            className="h-6 mr-2"
-                        />
+                        <img src={sepayIcon} alt="Sepay" className="h-6 mr-2" />
                         <span className="text-sm font-medium text-gray-700">SePay</span>
                     </button>
 
