@@ -69,11 +69,14 @@ export default function RegisterPage() {
                     autoClose: 1200, // 👈 1.2 giây riêng lẻ
                 });
             }
-        } catch (err: any) {
-            toast.error("Đăng ký thất bại. " + (err.response?.data?.message || "Vui lòng thử lại.", {
+        }catch (err: any) {
+            const message =
+                err.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.";
+            toast.error(message, {
                 autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            }));
-        } finally {
+            });
+        }
+        finally {
             setLoading(false);
         }
     };
