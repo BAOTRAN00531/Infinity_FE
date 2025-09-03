@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import VerifySuccess from './pages/Client/VerifySuccess';
+// import VerifySuccess from './pages/Client/VerifySuccess';
 import IndexClient from './pages/IndexClient';
 import Register from './pages/Client/Register';
 import Login from './pages/Client/Login';
@@ -71,7 +71,7 @@ const App: React.FC = () => {
                 {/* Routes công khai cho tất cả mọi người */}
                 <Route path="/oauth2/success" element={<OAuth2RedirectHandler />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
-                <Route path="/verify-success" element={<VerifySuccess />} />
+                {/*<Route path="/verify-success" element={<VerifySuccess />} />*/}
                 <Route path="/" element={<IndexClient />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/login" element={<Login />} />

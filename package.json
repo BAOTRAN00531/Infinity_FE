@@ -26,6 +26,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.126",
+    "@types/react-dom": "^19.1.6",
     "axios": "^1.9.0",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
@@ -49,6 +50,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "prebuild": "node generate-sitemap.js",
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
