@@ -2,24 +2,86 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-
 import Header from "@/components/layout-components/Header";
 import { Card, CardContent } from "@/components/reusable-components/card";
 import { Input } from "@/components/reusable-components/input";
 import FancyButton from "@/components/button/FancyButton";
 import { FaEye, FaEyeSlash } from "@/components/lib/icon";
-
 import { register } from "@/authService";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
-
     const [formData, setFormData] = useState({ email: "", username: "", password: "" });
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [passwordStrength, setPasswordStrength] = useState(0); // 0-5 scale
+    const [passwordFeedback, setPasswordFeedback] = useState<string[]>([]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+
+        if (name === "password") {
+            const { strength, feedback } = checkPasswordStrength(value);
+            setPasswordStrength(strength);
+            setPasswordFeedback(feedback);
+        }
+    };
+
+    const checkPasswordStrength = (password: string) => {
+        const feedback = [];
+        let strength = 0;
+
+        // Kiểm tra độ dài
+        if (password.length >= 8) {
+            strength += 1;
+        } else {
+            feedback.push("Tối thiểu 8 ký tự");
+        }
+
+        // Kiểm tra chữ thường
+        if (/[a-z]/.test(password)) {
+            strength += 1;
+        } else {
+            feedback.push("Thiếu chữ thường");
+        }
+
+        // Kiểm tra chữ hoa
+        if (/[A-Z]/.test(password)) {
+            strength += 1;
+        } else {
+            feedback.push("Thiếu chữ hoa");
+        }
+
+        // Kiểm tra số
+        if (/[0-9]/.test(password)) {
+            strength += 1;
+        } else {
+            feedback.push("Thiếu số");
+        }
+
+        // Kiểm tra ký tự đặc biệt
+        if (/[^A-Za-z0-9]/.test(password)) {
+            strength += 1;
+        } else {
+            feedback.push("Thiếu ký tự đặc biệt");
+        }
+
+        return { strength, feedback };
+    };
+
+    const getPasswordStrengthLabel = (strength: number) => {
+        if (strength <= 2) return "Yếu";
+        if (strength === 3) return "Trung bình";
+        if (strength === 4) return "Mạnh";
+        return "Rất mạnh";
+    };
+
+    const getPasswordStrengthColor = (strength: number) => {
+        if (strength <= 2) return "bg-red-500";
+        if (strength === 3) return "bg-yellow-500";
+        if (strength === 4) return "bg-green-500";
+        return "bg-green-600";
     };
 
     const validate = () => {
@@ -29,54 +91,48 @@ export default function RegisterPage() {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!emailRegex.test(email)) {
-            toast.error("Email không hợp lệ.", {
-                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            });
+            toast.error("Email không hợp lệ.", { autoClose: 1200 });
             return false;
         }
+
         if (username.length < 3) {
-            toast.error("Tên đăng nhập tối thiểu 3 ký tự.", {
-                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            });
+            toast.error("Tên đăng nhập tối thiểu 3 ký tự.", { autoClose: 1200 });
             return false;
         }
+
         if (password.length < 8) {
-            toast.error("Mật khẩu tối thiểu 8 ký tự.", {
-                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            });
+            toast.error("Mật khẩu tối thiểu 8 ký tự.", { autoClose: 1200 });
             return false;
         }
+
+        if (passwordStrength < 3) {
+            toast.error("Mật khẩu quá yếu. Vui lòng chọn mật khẩu mạnh hơn.", { autoClose: 1200 });
+            return false;
+        }
+
         return true;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!validate()) return;
 
         setLoading(true);
-
         try {
             const result = await register(formData);
             if (result.status === 200) {
-                toast.success("Đăng ký thành công. Vui lòng kiểm tra email để xác nhận.", {
-                    autoClose: 2200, // 👈 1.2 giây riêng lẻ
-                });
+                toast.success("Đăng ký thành công. Vui lòng kiểm tra email để xác nhận.", { autoClose: 2200 });
                 setFormData({ email: "", username: "", password: "" });
+                setPasswordStrength(0);
+                setPasswordFeedback([]);
                 setTimeout(() => navigate("/verify-confirmation"), 3000);
             } else {
-                toast.error("Đăng ký thất bại. Mã trạng thái: " + result.status, {
-                    autoClose: 1200, // 👈 1.2 giây riêng lẻ
-                });
+                toast.error("Đăng ký thất bại. Mã trạng thái: " + result.status, { autoClose: 1200 });
             }
-        }catch (err: any) {
-            const message =
-                err.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.";
-            toast.error(message, {
-                autoClose: 1200, // 👈 1.2 giây riêng lẻ
-            });
-        }
-        finally {
+        } catch (err: any) {
+            const message = err.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.";
+            toast.error(message, { autoClose: 1200 });
+        } finally {
             setLoading(false);
         }
     };
@@ -84,7 +140,6 @@ export default function RegisterPage() {
     return (
         <div className="bg-white dark:bg-gray-900 flex flex-col min-h-screen">
             <Header />
-
             <motion.div
                 className="flex-1 flex flex-col items-center justify-center px-4 py-8"
                 initial={{ opacity: 0, y: 40 }}
@@ -94,7 +149,6 @@ export default function RegisterPage() {
                 <h1 className="text-3xl sm:text-4xl font-bold text-center text-black dark:text-white mb-8 tracking-widest">
                     REGISTER
                 </h1>
-
                 <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6 mx-auto">
                     {/* Email */}
                     <Card className="bg-gray-100 dark:bg-gray-800 rounded-2xl border-none">
@@ -150,6 +204,35 @@ export default function RegisterPage() {
                                 {showPassword ? <FaEyeSlash /> : <FaEye />}
                             </button>
                         </CardContent>
+
+                        {/* Password Strength Indicator */}
+                        {formData.password && (
+                            <div className="px-4 pb-3">
+                                <div className="flex items-center justify-between mb-1">
+                                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                        Độ mạnh mật khẩu: {getPasswordStrengthLabel(passwordStrength)}
+                                    </span>
+                                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                        {passwordStrength}/5
+                                    </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
+                                    <div
+                                        className={`h-1.5 rounded-full ${getPasswordStrengthColor(passwordStrength)}`}
+                                        style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                                    ></div>
+                                </div>
+
+                                {/* Password Feedback */}
+                                {passwordFeedback.length > 0 && (
+                                    <div className="mt-2 text-xs text-red-500 dark:text-red-400">
+                                        {passwordFeedback.map((msg, index) => (
+                                            <div key={index}>• {msg}</div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </Card>
 
                     {/* Submit */}

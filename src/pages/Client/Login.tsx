@@ -71,7 +71,7 @@ export default function LoginPage() {
                 navigate("/");
             }
         } catch (err: any) {
-            toast.error("Đăng nhập thất bại. Vui lòng thử lại.", {
+            toast.error("Tên đăng nhập hoặc mật khẩu sai. Vui lòng thử lại.", {
                 autoClose: 1200, // 👈 1.2 giây riêng lẻ
             });
         } finally {
